@@ -338,12 +338,12 @@ export function PlayerPanel() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <div className="space-y-6">
                         {/* Username */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Nombre de Usuario
                           </Label>
-                          <div className="relative">
-                            <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
+                          <div className="flex-1 flex items-center">
+                            <div className="w-full bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
                               <div className="flex items-center gap-3">
                                 <div className="w-3 h-3 bg-gaming-gold rounded-full animate-pulse"></div>
                                 <p className="text-foreground font-bold text-lg">
@@ -355,12 +355,12 @@ export function PlayerPanel() {
                         </div>
 
                         {/* Role */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Rango de la Cuenta
                           </Label>
-                          <div className={`relative overflow-hidden rounded-xl border backdrop-blur-sm ${isGM(user.role) ? 'bg-gradient-to-r from-gaming-gold/20 via-gaming-gold/10 to-gaming-gold/5 border-gaming-gold/40' : 'bg-gradient-to-r from-slate-800/80 to-slate-700/40 border-slate-600/30'}`}>
-                            <div className="p-4 flex items-center gap-4">
+                          <div className={`flex-1 flex items-center relative overflow-hidden rounded-xl border backdrop-blur-sm ${isGM(user.role) ? 'bg-gradient-to-r from-gaming-gold/20 via-gaming-gold/10 to-gaming-gold/5 border-gaming-gold/40' : 'bg-gradient-to-r from-slate-800/80 to-slate-700/40 border-slate-600/30'}`}>
+                            <div className="w-full p-4 flex items-center gap-4">
                               {isGM(user.role) && (
                                 <div className="p-2 bg-gaming-gold/20 rounded-lg">
                                   <Crown className="h-6 w-6 text-gaming-gold" />
@@ -384,16 +384,18 @@ export function PlayerPanel() {
                         </div>
 
                         {/* Email */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Correo Electrónico
                           </Label>
-                          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                              <Mail className="h-5 w-5 text-blue-400" />
-                              <p className="text-foreground font-medium">
-                                {user.email}
-                              </p>
+                          <div className="flex-1 flex items-center">
+                            <div className="w-full bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
+                              <div className="flex items-center gap-3">
+                                <Mail className="h-5 w-5 text-blue-400" />
+                                <p className="text-foreground font-medium text-lg">
+                                  {user.email}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -401,66 +403,72 @@ export function PlayerPanel() {
 
                       <div className="space-y-6">
                         {/* Member Time */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Tiempo como Miembro
                           </Label>
-                          <div className="bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 p-4 rounded-xl border border-emerald-600/30 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                <Calendar className="h-5 w-5 text-emerald-400" />
-                              </div>
-                              <div>
-                                <p className="text-emerald-400 font-bold text-lg">
-                                  {user.createdAt ? `${Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días` : 'Desconocido'}
-                                </p>
-                                <p className="text-xs text-emerald-300/70">
-                                  Desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'Desconocido'}
-                                </p>
+                          <div className="flex-1 flex items-center">
+                            <div className="w-full bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 p-4 rounded-xl border border-emerald-600/30 backdrop-blur-sm">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                  <Calendar className="h-5 w-5 text-emerald-400" />
+                                </div>
+                                <div>
+                                  <p className="text-emerald-400 font-bold text-lg">
+                                    {user.createdAt ? `${Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días` : 'Desconocido'}
+                                  </p>
+                                  <p className="text-xs text-emerald-300/70">
+                                    Desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'Desconocido'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Last Activity */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Última Actividad
                           </Label>
-                          <div className="bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-4 rounded-xl border border-blue-600/30 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-500/20 rounded-lg">
-                                <TrendingUp className="h-5 w-5 text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-blue-400 font-bold text-base">
-                                  {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('es-ES') : 'Esta es tu primera sesión'}
-                                </p>
-                                <p className="text-xs text-blue-300/70">
-                                  {user.lastLogin ? `a las ${new Date(user.lastLogin).toLocaleTimeString('es-ES')}` : 'Bienvenido al servidor'}
-                                </p>
+                          <div className="flex-1 flex items-center">
+                            <div className="w-full bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-4 rounded-xl border border-blue-600/30 backdrop-blur-sm">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/20 rounded-lg">
+                                  <TrendingUp className="h-5 w-5 text-blue-400" />
+                                </div>
+                                <div>
+                                  <p className="text-blue-400 font-bold text-lg">
+                                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('es-ES') : 'Esta es tu primera sesión'}
+                                  </p>
+                                  <p className="text-xs text-blue-300/70">
+                                    {user.lastLogin ? `a las ${new Date(user.lastLogin).toLocaleTimeString('es-ES')}` : 'Bienvenido al servidor'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Coins Info */}
-                        <div className="group">
+                        <div className="group h-[120px] flex flex-col">
                           <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
                             Monedas de Donación
                           </Label>
-                          <div className="bg-gradient-to-r from-yellow-900/30 to-yellow-800/20 p-4 rounded-xl border border-yellow-600/30 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-yellow-500/20 rounded-lg">
-                                <span className="text-xl">💰</span>
-                              </div>
-                              <div>
-                                <p className="text-yellow-400 font-bold text-lg">
-                                  {user.coins || 0} monedas
-                                </p>
-                                <p className="text-xs text-yellow-300/70">
-                                  Saldo disponible para compras
-                                </p>
+                          <div className="flex-1 flex items-center">
+                            <div className="w-full bg-gradient-to-r from-yellow-900/30 to-yellow-800/20 p-4 rounded-xl border border-yellow-600/30 backdrop-blur-sm">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-yellow-500/20 rounded-lg">
+                                  <span className="text-xl">💰</span>
+                                </div>
+                                <div>
+                                  <p className="text-yellow-400 font-bold text-lg">
+                                    {user.coins || 0} monedas
+                                  </p>
+                                  <p className="text-xs text-yellow-300/70">
+                                    Saldo disponible para compras
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -572,69 +580,6 @@ export function PlayerPanel() {
                   </CardContent>
                 </Card>
 
-                {/* Change Email */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-gaming-gold" />
-                      Cambiar Email
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      Actualiza tu dirección de correo electrónico
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...emailForm}>
-                      <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
-                        <FormField
-                          control={emailForm.control}
-                          name="newEmail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-foreground">Nuevo Email</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="email"
-                                  data-testid="input-new-email"
-                                  placeholder="nuevo@email.com"
-                                  className="bg-input border-border text-foreground"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={emailForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-foreground">Confirmar con Contraseña</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="password"
-                                  data-testid="input-email-password"
-                                  className="bg-input border-border text-foreground"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button
-                          type="submit"
-                          data-testid="button-change-email"
-                          disabled={changeEmailMutation.isPending}
-                          className="bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                        >
-                          {changeEmailMutation.isPending ? "Cambiando..." : "Cambiar Email"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               {/* Admin Tab (only for GMs) */}
