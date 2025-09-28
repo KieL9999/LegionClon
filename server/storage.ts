@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, users, sessions } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, users, sessions, webFeatures } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -20,6 +20,10 @@ export interface IStorage {
   updateUserPassword(userId: string, newPassword: string): Promise<User>;
   updateUserEmail(userId: string, newEmail: string): Promise<User>;
   updateUserRole(userId: string, role: string): Promise<User>;
+  getAllWebFeatures(): Promise<WebFeature[]>;
+  createWebFeature(feature: InsertWebFeature): Promise<WebFeature>;
+  updateWebFeature(id: string, feature: UpdateWebFeature): Promise<WebFeature | undefined>;
+  deleteWebFeature(id: string): Promise<WebFeature | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -169,6 +173,49 @@ export class DatabaseStorage implements IStorage {
     }
     
     return updatedUser;
+  }
+
+  async getAllWebFeatures(): Promise<WebFeature[]> {
+    const features = await db
+      .select()
+      .from(webFeatures)
+      .where(eq(webFeatures.isActive, true))
+      .orderBy(webFeatures.displayOrder);
+    return features;
+  }
+
+  async createWebFeature(insertFeature: InsertWebFeature): Promise<WebFeature> {
+    const [feature] = await db
+      .insert(webFeatures)
+      .values({
+        ...insertFeature,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return feature;
+  }
+
+  async updateWebFeature(id: string, updateData: UpdateWebFeature): Promise<WebFeature | undefined> {
+    const [updatedFeature] = await db
+      .update(webFeatures)
+      .set({ 
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(webFeatures.id, id))
+      .returning();
+    
+    return updatedFeature || undefined;
+  }
+
+  async deleteWebFeature(id: string): Promise<WebFeature | undefined> {
+    const [deletedFeature] = await db
+      .delete(webFeatures)
+      .where(eq(webFeatures.id, id))
+      .returning();
+    
+    return deletedFeature || undefined;
   }
 }
 

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -397,6 +397,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.error('Change role error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all web features endpoint (public)
+  app.get('/api/web-features', async (req, res) => {
+    try {
+      const features = await storage.getAllWebFeatures();
+      
+      res.json({
+        success: true,
+        features
+      });
+      
+    } catch (error) {
+      console.error('Get web features error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Create web feature endpoint (admin only)
+  app.post('/api/web-features', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden crear características'
+        });
+      }
+
+      // Validate request body
+      const validatedData = insertWebFeatureSchema.parse(req.body);
+      
+      // Create web feature
+      const newFeature = await storage.createWebFeature(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Característica creada exitosamente',
+        feature: newFeature
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Create web feature error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Update web feature endpoint (admin only)
+  app.patch('/api/web-features/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden editar características'
+        });
+      }
+
+      const featureId = req.params.id;
+      
+      // Validate request body
+      const validatedData = updateWebFeatureSchema.parse(req.body);
+      
+      // Update web feature
+      const updatedFeature = await storage.updateWebFeature(featureId, validatedData);
+      
+      if (!updatedFeature) {
+        return res.status(404).json({
+          error: 'Feature not found',
+          message: 'Característica no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Característica actualizada exitosamente',
+        feature: updatedFeature
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Update web feature error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Delete web feature endpoint (admin only)
+  app.delete('/api/web-features/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden eliminar características'
+        });
+      }
+
+      const featureId = req.params.id;
+      
+      // Delete web feature
+      const deletedFeature = await storage.deleteWebFeature(featureId);
+      
+      if (!deletedFeature) {
+        return res.status(404).json({
+          error: 'Feature not found',
+          message: 'Característica no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Característica eliminada exitosamente'
+      });
+      
+    } catch (error) {
+      console.error('Delete web feature error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'
