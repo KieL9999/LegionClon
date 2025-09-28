@@ -12,9 +12,10 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: false, // Disable SSL for internal Replit connections
-  max: 20, // Maximum number of clients in the pool
+  max: 10, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection cannot be established
+  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection cannot be established
+  allowExitOnIdle: false, // Don't exit when all connections are idle
 });
 
 // Handle pool errors
