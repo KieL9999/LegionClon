@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Play, Download } from "lucide-react";
 import RealmistModal from "./RealmistModal";
+import DownloadModal from "./DownloadModal";
 import heroBackground from "@assets/generated_images/WoW_Legion_hero_background_256bfd43.png";
 
 export default function HeroSection() {
   const [realmistOpen, setRealmistOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -68,10 +70,7 @@ export default function HeroSection() {
             size="lg" 
             variant="outline" 
             className="bg-background/20 backdrop-blur-sm border-2 border-gaming-gold/30 hover:border-gaming-gold text-foreground px-8 py-3 text-lg"
-            onClick={() => {
-              // Redirect to download link
-              window.open('https://legion-gaming.com/downloads/Legion-Client.exe', '_blank', 'noopener,noreferrer');
-            }}
+            onClick={() => setDownloadOpen(true)}
             data-testid="button-download-client"
           >
             <Download className="w-5 h-5 mr-2" />
@@ -96,8 +95,9 @@ export default function HeroSection() {
         </div>
       </div>
       
-      {/* Modal */}
+      {/* Modals */}
       <RealmistModal open={realmistOpen} onOpenChange={setRealmistOpen} />
+      <DownloadModal open={downloadOpen} onOpenChange={setDownloadOpen} />
     </section>
   );
 }

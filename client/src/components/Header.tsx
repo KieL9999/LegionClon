@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, Shield, Users } from "lucide-react";
 import RealmistModal from "./RealmistModal";
 import RegistrationModal from "./RegistrationModal";
+import DownloadModal from "./DownloadModal";
 import serverLogo from "@assets/generated_images/Legion_gaming_server_logo_63d36140.png";
 
 export default function Header() {
   const [realmistOpen, setRealmistOpen] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background/80 backdrop-blur-sm fixed top-0 w-full z-50">
       <div className="container mx-auto px-4 py-4">
@@ -57,7 +59,7 @@ export default function Header() {
               variant="ghost" 
               className="text-foreground hover-elevate" 
               data-testid="link-descargar"
-              onClick={() => window.open('https://legion-gaming.com/downloads/Legion-Client.exe', '_blank', 'noopener,noreferrer')}
+              onClick={() => setDownloadOpen(true)}
             >
               Descargar
             </Button>
@@ -90,6 +92,7 @@ export default function Header() {
       {/* Modals */}
       <RealmistModal open={realmistOpen} onOpenChange={setRealmistOpen} />
       <RegistrationModal open={registrationOpen} onOpenChange={setRegistrationOpen} />
+      <DownloadModal open={downloadOpen} onOpenChange={setDownloadOpen} />
     </header>
   );
 }
