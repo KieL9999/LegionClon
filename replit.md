@@ -25,7 +25,7 @@ The API layer handles user registration, authentication, and data retrieval. Rou
 Development setup includes hot module replacement through Vite integration, allowing for rapid development cycles while maintaining production-ready build processes.
 
 ### Data Storage Solutions
-The application uses Drizzle ORM with PostgreSQL configuration for database operations. The schema defines user management with proper constraints and relationships. Database migrations are managed through Drizzle Kit with a dedicated configuration for schema changes.
+The application uses Drizzle ORM with MySQL/MariaDB configuration for database operations. The schema defines user management with proper constraints and relationships. Database migrations are managed through Drizzle Kit with a dedicated configuration for schema changes.
 
 Current implementation includes a storage abstraction layer that supports both memory-based storage for development and database persistence for production. User data includes username, email, password, and timestamp fields with proper validation.
 
@@ -40,8 +40,32 @@ The application integrates several key external libraries:
 - Styling: Tailwind CSS with custom gaming-themed color schemes
 - Forms: React Hook Form with Hookform Resolvers for validation
 - Icons: Lucide React icons with React Icons for brand symbols
-- Database: Neon serverless PostgreSQL with WebSocket support
+- Database: MySQL/MariaDB with mysql2 driver support
 - Fonts: Google Fonts integration (Inter, Orbitron) for typography
 - Build Tools: Vite with TypeScript support and development plugins
 
 The architecture supports Replit-specific plugins for development enhancement including error overlays, cartographer integration, and development banners when running in the Replit environment.
+
+## Recent Changes
+
+### 28 de septiembre de 2025 - Migración a MySQL y Modal de Descarga
+- **Migración completa de PostgreSQL a MySQL/MariaDB**
+  - Actualizado `server/db.ts` para usar mysql2/promise en lugar de Neon PostgreSQL
+  - Convertido `shared/schema.ts` a usar mysqlTable y configuración MySQL
+  - Configuración de conexión pool optimizada para mejor rendimiento
+- **Implementación de Modal de Descarga Completo**
+  - Creado `DownloadModal.tsx` con diseño siguiendo especificaciones exactas del usuario
+  - Sección "Cliente Completo" con información detallada (28.5 GB, 1247 descargas)
+  - Sección "Parches y Actualizaciones" con múltiples opciones de descarga
+  - Instrucciones de instalación paso a paso para cliente y parches
+- **Actualización de funcionalidad de botones de descarga**
+  - HeroSection y Header ahora abren modal en lugar de enlace directo
+  - Implementadas medidas de seguridad (noopener, noreferrer) en window.open
+  - Mantenidos todos los data-testid para pruebas automatizadas
+
+## Estado Actual del Proyecto
+- ✅ Aplicación funcionando correctamente en puerto 5000
+- ✅ Sistema de base de datos migrado a MySQL/MariaDB  
+- ✅ Modal de descarga implementado y funcional
+- ✅ Todos los componentes actualizados y probados
+- ✅ Progreso guardado automáticamente con sistema auto-save de Replit
