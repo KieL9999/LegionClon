@@ -2,7 +2,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Download, Lock, Calendar, HardDrive, Users, FileText } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Download, Lock, Calendar, HardDrive, Users, FileText, AlertCircle } from "lucide-react";
+import type { Download as DownloadType } from "@shared/schema";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface DownloadModalProps {
   open: boolean;
@@ -10,9 +14,51 @@ interface DownloadModalProps {
 }
 
 export default function DownloadModal({ open, onOpenChange }: DownloadModalProps) {
-  const handleDownload = (type: string, url: string) => {
-    console.log(`Downloading ${type}`);
-    window.open(url, '_blank', 'noopener,noreferrer');
+  // Fetch downloads
+  const { data: downloadsData, isLoading, error } = useQuery<{ success: boolean; downloads: DownloadType[] }>({
+    queryKey: ['/api/downloads'],
+    enabled: open, // Only fetch when modal is open
+  });
+
+  const handleDownload = (download: DownloadType) => {
+    console.log(`Downloading ${download.title}`);
+    // Increment download count could be implemented here
+    window.open(download.downloadUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // Filter downloads by type
+  const activeDownloads = downloadsData?.downloads?.filter(d => d.isActive) || [];
+  const clientDownloads = activeDownloads.filter(d => d.type === 'client');
+  const patchDownloads = activeDownloads.filter(d => d.type === 'patch');
+  const addonDownloads = activeDownloads.filter(d => d.type === 'addon');
+  const toolDownloads = activeDownloads.filter(d => d.type === 'tool');
+
+  const getBadgeColor = (type: string) => {
+    switch (type) {
+      case 'client': return 'bg-gaming-emerald text-black';
+      case 'patch': return 'border-gaming-alliance text-gaming-alliance';
+      case 'addon': return 'border-gaming-gold text-gaming-gold';
+      case 'tool': return 'border-purple-400 text-purple-400';
+      default: return 'bg-secondary';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'client': return 'Cliente';
+      case 'patch': return 'Parche';
+      case 'addon': return 'Addon';
+      case 'tool': return 'Herramienta';
+      default: return type;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "d 'de' MMMM 'de' yyyy", { locale: es });
+    } catch {
+      return 'Fecha no disponible';
+    }
   };
 
   return (
@@ -28,170 +74,289 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Cliente Completo */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-gaming-gold" />
-              <h3 className="text-xl font-bold text-gaming-gold">Cliente Completo</h3>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gaming-gold mx-auto"></div>
+              <p className="text-muted-foreground mt-2">Cargando descargas...</p>
             </div>
-            
-            <div className="bg-background/50 border border-gaming-gold/20 rounded-lg p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" className="bg-gaming-emerald text-black">
-                      Cliente
-                    </Badge>
-                    <span className="text-sm font-mono text-gaming-gold" data-testid="text-client-version">
-                      v7.3.5.26972
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-2" />
+              <p className="text-muted-foreground">Error al cargar las descargas</p>
+            </div>
+          )}
+
+          {/* No downloads available */}
+          {!isLoading && !error && activeDownloads.length === 0 && (
+            <div className="text-center py-8">
+              <Download className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No hay descargas disponibles en este momento</p>
+            </div>
+          )}
+
+          {/* Cliente Completo */}
+          {clientDownloads.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-gaming-gold" />
+                <h3 className="text-xl font-bold text-gaming-gold">Cliente Completo</h3>
+              </div>
+              
+              {clientDownloads
+                .sort((a, b) => b.displayOrder - a.displayOrder)
+                .map((download) => (
+                <div key={download.id} className="bg-background/50 border border-gaming-gold/20 rounded-lg p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className={getBadgeColor(download.type)}>
+                          {getTypeLabel(download.type)}
+                        </Badge>
+                        <span className="text-sm font-mono text-gaming-gold" data-testid={`text-client-version-${download.id}`}>
+                          {download.version}
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-semibold mb-2" data-testid={`text-client-title-${download.id}`}>
+                        {download.title}
+                      </h4>
+                      <p className="text-muted-foreground text-sm">
+                        {download.description}
+                      </p>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(download.releaseDate?.toString() || '')}
                     </span>
                   </div>
-                  <h4 className="text-lg font-semibold mb-2" data-testid="text-client-title">
-                    World of Warcraft Legion - Cliente Completo
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    Cliente completo de World of Warcraft Legion 7.3.5 optimizado para Legion Plus
-                  </p>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  27 de septiembre de 2025
-                </span>
-              </div>
 
-              <div className="flex items-center gap-6 mb-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <HardDrive className="w-4 h-4 text-muted-foreground" />
-                  <span>Tamaño:</span>
-                  <span className="font-semibold" data-testid="text-client-size">28.5 GB</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-muted-foreground" />
-                  <span>Descargas:</span>
-                  <span className="font-semibold text-gaming-gold" data-testid="text-client-downloads">1247</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span>Actualizado:</span>
-                  <span className="font-semibold" data-testid="text-client-updated">27 de septiembre de 2025</span>
-                </div>
-              </div>
+                  <div className="flex items-center gap-6 mb-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <HardDrive className="w-4 h-4 text-muted-foreground" />
+                      <span>Tamaño:</span>
+                      <span className="font-semibold" data-testid={`text-client-size-${download.id}`}>{download.fileSize}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span>Descargas:</span>
+                      <span className="font-semibold text-gaming-gold" data-testid={`text-client-downloads-${download.id}`}>{download.downloadCount}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span>Plataforma:</span>
+                      <span className="font-semibold capitalize" data-testid={`text-client-platform-${download.id}`}>{download.platform}</span>
+                    </div>
+                  </div>
 
-              <Button 
-                className="w-full bg-gradient-to-r from-gaming-gold to-yellow-500 hover:from-yellow-500 hover:to-gaming-gold text-black font-bold"
-                onClick={() => handleDownload('cliente completo', 'https://legion-gaming.com/downloads/Legion-Client-Full.exe')}
-                data-testid="button-download-full-client"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Descargar Cliente
-              </Button>
+                  <Button 
+                    className="w-full bg-gradient-to-r from-gaming-gold to-yellow-500 hover:from-yellow-500 hover:to-gaming-gold text-black font-bold"
+                    onClick={() => handleDownload(download)}
+                    data-testid={`button-download-client-${download.id}`}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Descargar Cliente
+                  </Button>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
 
-          <Separator />
+          {/* Separator if we have clients and other downloads */}
+          {clientDownloads.length > 0 && (patchDownloads.length > 0 || addonDownloads.length > 0 || toolDownloads.length > 0) && <Separator />}
 
           {/* Parches y Actualizaciones */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-gaming-alliance" />
-              <h3 className="text-xl font-bold text-gaming-alliance">Parches y Actualizaciones</h3>
-            </div>
-
-            <div className="space-y-3">
-              {/* Parche de Contenido */}
-              <div className="bg-background/50 border border-card-border rounded-lg p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="border-gaming-alliance text-gaming-alliance">
-                        Parche
-                      </Badge>
-                      <span className="text-sm font-mono text-gaming-alliance" data-testid="text-patch-version-1">
-                        v1.2.3
-                      </span>
-                    </div>
-                    <h4 className="font-semibold" data-testid="text-patch-title-1">Parche de Contenido 1.2.3</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Últimas correcciones de bugs y nuevo contenido exclusivo del servidor
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    27 de septiembre de 2025
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <HardDrive className="w-3 h-3 text-muted-foreground" />
-                      <span>Tamaño:</span>
-                      <span className="font-semibold" data-testid="text-patch-size-1">156 MB</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3 h-3 text-muted-foreground" />
-                      <span>Descargas:</span>
-                      <span className="font-semibold text-gaming-alliance" data-testid="text-patch-downloads-1">892</span>
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleDownload('parche contenido', 'https://legion-gaming.com/downloads/patches/content-1.2.3.exe')}
-                    data-testid="button-download-patch-1"
-                  >
-                    <Download className="w-3 h-3 mr-1" />
-                    Descargar
-                  </Button>
-                </div>
+          {patchDownloads.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-gaming-alliance" />
+                <h3 className="text-xl font-bold text-gaming-alliance">Parches y Actualizaciones</h3>
               </div>
 
-              {/* Parche de Balance */}
-              <div className="bg-background/50 border border-card-border rounded-lg p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="border-gaming-alliance text-gaming-alliance">
-                        Parche
-                      </Badge>
-                      <span className="text-sm font-mono text-gaming-alliance" data-testid="text-patch-version-2">
-                        v1.2.2
+              <div className="space-y-3">
+                {patchDownloads
+                  .sort((a, b) => b.displayOrder - a.displayOrder)
+                  .map((download) => (
+                  <div key={download.id} className="bg-background/50 border border-card-border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={getBadgeColor(download.type)}>
+                            {getTypeLabel(download.type)}
+                          </Badge>
+                          <span className="text-sm font-mono text-gaming-alliance" data-testid={`text-patch-version-${download.id}`}>
+                            {download.version}
+                          </span>
+                        </div>
+                        <h4 className="font-semibold" data-testid={`text-patch-title-${download.id}`}>{download.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {download.description}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(download.releaseDate?.toString() || '')}
                       </span>
                     </div>
-                    <h4 className="font-semibold" data-testid="text-patch-title-2">Parche de Balance 1.2.2</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Mejoras de balance de clases y optimizaciones de rendimiento
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    27 de septiembre de 2025
-                  </span>
-                </div>
 
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <HardDrive className="w-3 h-3 text-muted-foreground" />
-                      <span>Tamaño:</span>
-                      <span className="font-semibold" data-testid="text-patch-size-2">89 MB</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3 h-3 text-muted-foreground" />
-                      <span>Descargas:</span>
-                      <span className="font-semibold text-gaming-alliance" data-testid="text-patch-downloads-2">1534</span>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <HardDrive className="w-3 h-3 text-muted-foreground" />
+                          <span>Tamaño:</span>
+                          <span className="font-semibold" data-testid={`text-patch-size-${download.id}`}>{download.fileSize}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3 text-muted-foreground" />
+                          <span>Descargas:</span>
+                          <span className="font-semibold text-gaming-alliance" data-testid={`text-patch-downloads-${download.id}`}>{download.downloadCount}</span>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDownload(download)}
+                        data-testid={`button-download-patch-${download.id}`}
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Descargar
+                      </Button>
                     </div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleDownload('parche balance', 'https://legion-gaming.com/downloads/patches/balance-1.2.2.exe')}
-                    data-testid="button-download-patch-2"
-                  >
-                    <Download className="w-3 h-3 mr-1" />
-                    Descargar
-                  </Button>
-                </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Addons */}
+          {addonDownloads.length > 0 && (
+            <>
+              {(clientDownloads.length > 0 || patchDownloads.length > 0) && <Separator />}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Download className="w-5 h-5 text-gaming-gold" />
+                  <h3 className="text-xl font-bold text-gaming-gold">Addons</h3>
+                </div>
+
+                <div className="space-y-3">
+                  {addonDownloads
+                    .sort((a, b) => b.displayOrder - a.displayOrder)
+                    .map((download) => (
+                    <div key={download.id} className="bg-background/50 border border-card-border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className={getBadgeColor(download.type)}>
+                              {getTypeLabel(download.type)}
+                            </Badge>
+                            <span className="text-sm font-mono text-gaming-gold" data-testid={`text-addon-version-${download.id}`}>
+                              {download.version}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold" data-testid={`text-addon-title-${download.id}`}>{download.title}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {download.description}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(download.releaseDate?.toString() || '')}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <HardDrive className="w-3 h-3 text-muted-foreground" />
+                            <span>Tamaño:</span>
+                            <span className="font-semibold" data-testid={`text-addon-size-${download.id}`}>{download.fileSize}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3 text-muted-foreground" />
+                            <span>Descargas:</span>
+                            <span className="font-semibold text-gaming-gold" data-testid={`text-addon-downloads-${download.id}`}>{download.downloadCount}</span>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDownload(download)}
+                          data-testid={`button-download-addon-${download.id}`}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Descargar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Herramientas */}
+          {toolDownloads.length > 0 && (
+            <>
+              {(clientDownloads.length > 0 || patchDownloads.length > 0 || addonDownloads.length > 0) && <Separator />}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-xl font-bold text-purple-400">Herramientas</h3>
+                </div>
+
+                <div className="space-y-3">
+                  {toolDownloads
+                    .sort((a, b) => b.displayOrder - a.displayOrder)
+                    .map((download) => (
+                    <div key={download.id} className="bg-background/50 border border-card-border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className={getBadgeColor(download.type)}>
+                              {getTypeLabel(download.type)}
+                            </Badge>
+                            <span className="text-sm font-mono text-purple-400" data-testid={`text-tool-version-${download.id}`}>
+                              {download.version}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold" data-testid={`text-tool-title-${download.id}`}>{download.title}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {download.description}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(download.releaseDate?.toString() || '')}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <HardDrive className="w-3 h-3 text-muted-foreground" />
+                            <span>Tamaño:</span>
+                            <span className="font-semibold" data-testid={`text-tool-size-${download.id}`}>{download.fileSize}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3 text-muted-foreground" />
+                            <span>Descargas:</span>
+                            <span className="font-semibold text-purple-400" data-testid={`text-tool-downloads-${download.id}`}>{download.downloadCount}</span>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDownload(download)}
+                          data-testid={`button-download-tool-${download.id}`}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Descargar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
