@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,10 +31,22 @@ const getRoleDisplayName = (role: string) => {
   return ROLE_LABELS[role as keyof typeof ROLE_LABELS] || role;
 };
 
+// Helper function to filter users by search query
+const filterUsersBySearch = (users: UserType[], searchQuery: string) => {
+  if (!searchQuery.trim()) return [];
+  
+  const query = searchQuery.toLowerCase().trim();
+  return users.filter(user => 
+    user.username.toLowerCase().includes(query) || 
+    user.email.toLowerCase().includes(query)
+  );
+};
+
 export function PlayerPanel() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Change password form
   const passwordForm = useForm<ChangePasswordData>({
@@ -598,25 +610,62 @@ export function PlayerPanel() {
                           </CardContent>
                         </Card>
 
-                        {/* Jugadores */}
+                        {/* Buscar Jugador */}
                         <Card className="bg-muted border-border">
                           <CardHeader>
                             <CardTitle className="text-foreground text-lg flex items-center gap-2">
-                              <Users className="h-5 w-5 text-gaming-gold" />
-                              Jugadores Registrados
+                              <Search className="h-5 w-5 text-gaming-gold" />
+                              Buscar Jugador
                             </CardTitle>
                             <CardDescription className="text-muted-foreground">
-                              Usuarios sin permisos administrativos
+                              Busca jugadores por nombre de usuario o correo electrónico y asigna niveles GM
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
+                            {/* Campo de búsqueda */}
+                            <div className="mb-4">
+                              <Input
+                                type="text"
+                                placeholder="Buscar por nombre de usuario o correo electrónico..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-input border-border text-foreground placeholder:text-muted-foreground"
+                                data-testid="input-search-player"
+                              />
+                            </div>
+
                             {usersQuery.isLoading ? (
                               <div className="text-muted-foreground">Cargando usuarios...</div>
                             ) : usersQuery.error ? (
                               <div className="text-destructive">Error al cargar usuarios</div>
                             ) : (
                               <div className="space-y-3">
-                                {usersQuery.data?.users?.filter((userData: UserType) => !isGM(userData.role)).map((userData: UserType) => (
+                                {(() => {
+                                  if (!searchQuery.trim()) {
+                                    return (
+                                      <div className="text-center py-8">
+                                        <Search className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground">
+                                          Escribe un nombre de usuario o correo electrónico para buscar jugadores
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+
+                                  const filteredUsers = filterUsersBySearch(usersQuery.data?.users || [], searchQuery);
+                                  
+                                  if (filteredUsers.length === 0) {
+                                    return (
+                                      <div className="text-center py-8">
+                                        <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground">
+                                          No se encontraron jugadores que coincidan con "{searchQuery}"
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+
+                                  return filteredUsers.map((userData: UserType) => (
                                   <div key={userData.id} className="flex items-center justify-between p-3 bg-background rounded border">
                                     <div className="flex items-center gap-3">
                                       <User className="h-5 w-5 text-muted-foreground" />
@@ -687,10 +736,8 @@ export function PlayerPanel() {
                                       </Select>
                                     </div>
                                   </div>
-                                )) || []}
-                                {usersQuery.data?.users?.filter((userData: UserType) => !isGM(userData.role)).length === 0 && (
-                                  <p className="text-muted-foreground text-center py-4">No hay jugadores registrados</p>
-                                )}
+                                  ));
+                                })()}
                               </div>
                             )}
                           </CardContent>
