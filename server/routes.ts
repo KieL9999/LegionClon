@@ -1,5 +1,9 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
@@ -590,6 +594,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Delete web feature error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Configure multer for file uploads
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  
+  // Ensure uploads directory exists
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  const storage_multer = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+      // Generate unique filename with timestamp
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      cb(null, `image-${uniqueSuffix}${ext}`);
+    }
+  });
+
+  const upload = multer({
+    storage: storage_multer,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Only allow image files
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        const error = new Error('Solo se permiten archivos de imagen') as any;
+        error.code = 'LIMIT_FILE_TYPE';
+        cb(error);
+      }
+    }
+  });
+
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(uploadsDir));
+
+  // Authentication middleware for upload
+  const uploadAuthMiddleware = async (req: any, res: any, next: any) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden subir imágenes'
+        });
+      }
+
+      // Store user in request for later use
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error('Upload auth error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  };
+
+  // Upload image endpoint (admin only) - Authentication BEFORE multer
+  app.post('/api/upload-image', uploadAuthMiddleware, upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          error: 'No file uploaded',
+          message: 'No se subió ningún archivo'
+        });
+      }
+
+      // Return the uploaded file URL
+      const fileUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({
+        success: true,
+        message: 'Imagen subida exitosamente',
+        url: fileUrl,
+        filename: req.file.filename
+      });
+      
+    } catch (error) {
+      console.error('Upload image error:', error);
+      
+      // Clean up uploaded file if there was an error
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup uploaded file:', cleanupError);
+        }
+      }
+      
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { insertWebFeatureSchema, updateWebFeatureSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Image as ImageIcon, Upload, Link as LinkIcon } from "lucide-react";
 import type { WebFeature, InsertWebFeature, UpdateWebFeature } from "@shared/schema";
 
 const typeOptions = [
@@ -36,6 +36,10 @@ export default function WebFeaturesManager() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingFeature, setEditingFeature] = useState<WebFeature | null>(null);
+  const [imageType, setImageType] = useState<'predefined' | 'url' | 'upload'>('predefined');
+  const [editImageType, setEditImageType] = useState<'predefined' | 'url' | 'upload'>('predefined');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [editUploadingImage, setEditUploadingImage] = useState(false);
 
   // Fetch features
   const { data: featuresData, isLoading } = useQuery<{ success: boolean; features: WebFeature[] }>({
@@ -146,6 +150,17 @@ export default function WebFeaturesManager() {
 
   const handleEdit = (feature: WebFeature) => {
     setEditingFeature(feature);
+    
+    // Detect image type automatically
+    let detectedImageType: 'predefined' | 'url' | 'upload' = 'predefined';
+    if (feature.image.startsWith('http://') || feature.image.startsWith('https://')) {
+      detectedImageType = 'url';
+    } else if (feature.image.startsWith('/uploads/')) {
+      detectedImageType = 'upload';
+    }
+    
+    setEditImageType(detectedImageType);
+    
     editForm.reset({
       title: feature.title,
       description: feature.description,
@@ -230,13 +245,106 @@ export default function WebFeaturesManager() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Imagen</FormLabel>
-                      <FormControl>
-                        <Input 
-                          data-testid="input-feature-image"
-                          placeholder="Nombre de la imagen (ej: fatedRaids)" 
-                          {...field} 
-                        />
-                      </FormControl>
+                      <div className="space-y-3">
+                        <Select value={imageType} onValueChange={(value: 'predefined' | 'url' | 'upload') => setImageType(value)}>
+                          <SelectTrigger data-testid="select-image-type">
+                            <SelectValue placeholder="Selecciona el tipo de imagen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="predefined">
+                              <div className="flex items-center gap-2">
+                                <ImageIcon className="h-4 w-4" />
+                                Imagen predefinida
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="url">
+                              <div className="flex items-center gap-2">
+                                <LinkIcon className="h-4 w-4" />
+                                URL externa
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="upload">
+                              <div className="flex items-center gap-2">
+                                <Upload className="h-4 w-4" />
+                                Subir archivo
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        {imageType === 'predefined' && (
+                          <FormControl>
+                            <Input 
+                              data-testid="input-feature-image"
+                              placeholder="Nombre de la imagen (ej: fatedRaids)" 
+                              {...field} 
+                            />
+                          </FormControl>
+                        )}
+                        
+                        {imageType === 'url' && (
+                          <FormControl>
+                            <Input 
+                              data-testid="input-feature-image-url"
+                              placeholder="https://ejemplo.com/imagen.jpg" 
+                              type="url"
+                              {...field} 
+                            />
+                          </FormControl>
+                        )}
+                        
+                        {imageType === 'upload' && (
+                          <div className="space-y-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              disabled={uploadingImage}
+                              data-testid="input-feature-image-upload"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                
+                                setUploadingImage(true);
+                                try {
+                                  const formData = new FormData();
+                                  formData.append('image', file);
+                                  
+                                  const response = await fetch('/api/upload-image', {
+                                    method: 'POST',
+                                    body: formData,
+                                  });
+                                  
+                                  if (!response.ok) {
+                                    throw new Error('Error al subir la imagen');
+                                  }
+                                  
+                                  const data = await response.json();
+                                  field.onChange(data.url);
+                                  
+                                  toast({
+                                    title: "¡Imagen subida!",
+                                    description: "La imagen se ha subido exitosamente",
+                                  });
+                                } catch (error) {
+                                  toast({
+                                    title: "Error",
+                                    description: "No se pudo subir la imagen",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setUploadingImage(false);
+                                }
+                              }}
+                            />
+                            {uploadingImage && (
+                              <p className="text-sm text-muted-foreground">Subiendo imagen...</p>
+                            )}
+                            {field.value && imageType === 'upload' && (
+                              <p className="text-sm text-muted-foreground">Imagen: {field.value}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -465,13 +573,106 @@ export default function WebFeaturesManager() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Imagen</FormLabel>
-                    <FormControl>
-                      <Input 
-                        data-testid="input-edit-feature-image"
-                        placeholder="Nombre de la imagen (ej: fatedRaids)" 
-                        {...field} 
-                      />
-                    </FormControl>
+                    <div className="space-y-3">
+                      <Select value={editImageType} onValueChange={(value: 'predefined' | 'url' | 'upload') => setEditImageType(value)}>
+                        <SelectTrigger data-testid="select-edit-image-type">
+                          <SelectValue placeholder="Selecciona el tipo de imagen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="predefined">
+                            <div className="flex items-center gap-2">
+                              <ImageIcon className="h-4 w-4" />
+                              Imagen predefinida
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="url">
+                            <div className="flex items-center gap-2">
+                              <LinkIcon className="h-4 w-4" />
+                              URL externa
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="upload">
+                            <div className="flex items-center gap-2">
+                              <Upload className="h-4 w-4" />
+                              Subir archivo
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {editImageType === 'predefined' && (
+                        <FormControl>
+                          <Input 
+                            data-testid="input-edit-feature-image"
+                            placeholder="Nombre de la imagen (ej: fatedRaids)" 
+                            {...field} 
+                          />
+                        </FormControl>
+                      )}
+                      
+                      {editImageType === 'url' && (
+                        <FormControl>
+                          <Input 
+                            data-testid="input-edit-feature-image-url"
+                            placeholder="https://ejemplo.com/imagen.jpg" 
+                            type="url"
+                            {...field} 
+                          />
+                        </FormControl>
+                      )}
+                      
+                      {editImageType === 'upload' && (
+                        <div className="space-y-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            disabled={editUploadingImage}
+                            data-testid="input-edit-feature-image-upload"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              
+                              setEditUploadingImage(true);
+                              try {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                
+                                const response = await fetch('/api/upload-image', {
+                                  method: 'POST',
+                                  body: formData,
+                                });
+                                
+                                if (!response.ok) {
+                                  throw new Error('Error al subir la imagen');
+                                }
+                                
+                                const data = await response.json();
+                                field.onChange(data.url);
+                                
+                                toast({
+                                  title: "¡Imagen subida!",
+                                  description: "La imagen se ha subido exitosamente",
+                                });
+                              } catch (error) {
+                                toast({
+                                  title: "Error",
+                                  description: "No se pudo subir la imagen",
+                                  variant: "destructive",
+                                });
+                              } finally {
+                                setEditUploadingImage(false);
+                              }
+                            }}
+                          />
+                          {editUploadingImage && (
+                            <p className="text-sm text-muted-foreground">Subiendo imagen...</p>
+                          )}
+                          {field.value && editImageType === 'upload' && (
+                            <p className="text-sm text-muted-foreground">Imagen: {field.value}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

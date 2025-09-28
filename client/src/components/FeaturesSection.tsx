@@ -24,6 +24,27 @@ const imageMap: Record<string, string> = {
   donatorShop,
 };
 
+// Function to resolve image URL based on type
+function resolveImageUrl(imageValue: string): string {
+  // Check if it's a full URL (starts with http:// or https://)
+  if (imageValue.startsWith('http://') || imageValue.startsWith('https://')) {
+    return imageValue;
+  }
+  
+  // Check if it's an uploaded file (starts with /uploads/)
+  if (imageValue.startsWith('/uploads/')) {
+    return imageValue;
+  }
+  
+  // Check if it's a predefined image name
+  if (imageMap[imageValue]) {
+    return imageMap[imageValue];
+  }
+  
+  // Default fallback
+  return fatedRaids;
+}
+
 export default function FeaturesSection() {
   // Fetch features from the database
   const { data: featuresData, isLoading, error } = useQuery<{ success: boolean; features: WebFeature[] }>({
@@ -68,7 +89,7 @@ export default function FeaturesSection() {
           {features.map((feature) => (
             <FeatureCard
               key={feature.id}
-              image={imageMap[feature.image] || fatedRaids} // Fallback to default image
+              image={resolveImageUrl(feature.image)}
               title={feature.title}
               description={feature.description}
               type={feature.type as "Action" | "Event" | "Feature"}
