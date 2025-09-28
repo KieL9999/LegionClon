@@ -53,7 +53,12 @@ export default function Header() {
             <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-rankings">
               Rankings
             </Button>
-            <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-descargar">
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover-elevate" 
+              data-testid="link-descargar"
+              onClick={() => window.open('https://legion-gaming.com/downloads/Legion-Client.exe', '_blank', 'noopener,noreferrer')}
+            >
               Descargar
             </Button>
           </nav>

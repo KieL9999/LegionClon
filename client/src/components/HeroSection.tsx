@@ -69,8 +69,8 @@ export default function HeroSection() {
             variant="outline" 
             className="bg-background/20 backdrop-blur-sm border-2 border-gaming-gold/30 hover:border-gaming-gold text-foreground px-8 py-3 text-lg"
             onClick={() => {
-              // TODO: Replace with real download functionality
-              console.log('Download client clicked from hero');
+              // Redirect to download link
+              window.open('https://legion-gaming.com/downloads/Legion-Client.exe', '_blank', 'noopener,noreferrer');
             }}
             data-testid="button-download-client"
           >
