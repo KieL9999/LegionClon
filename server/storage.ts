@@ -16,6 +16,7 @@ export interface IStorage {
   getUserBySession(sessionId: string): Promise<User | undefined>;
   updateUserPassword(userId: string, newPassword: string): Promise<User>;
   updateUserEmail(userId: string, newEmail: string): Promise<User>;
+  updateUserRole(userId: string, role: string): Promise<User>;
 }
 
 export class MemStorage implements IStorage {
@@ -145,6 +146,22 @@ export class MemStorage implements IStorage {
     const updatedUser = {
       ...user,
       email: newEmail,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser = {
+      ...user,
+      role,
       updatedAt: new Date()
     };
     
