@@ -15,6 +15,10 @@ This project is a World of Warcraft Legion private server website, Legion Plus, 
 - ✅ **SEO & Meta Enhancement**: Added dynamic meta tags, Open Graph, and favicon management through admin interface
 - ✅ **Site Configuration API**: Complete CRUD API for site settings with validation and admin-only access
 - ✅ **Auto-Initialize System**: Built-in functionality to initialize default site settings with one-click admin action
+- ✅ **Enhanced Player Panel**: Complete redesign with modern UI and new player features
+- ✅ **Player Database Enhancement**: Added coins, ban status, ban reason, and last login tracking
+- ✅ **Visual Player Stats**: Beautiful gradient cards displaying player information with icons
+- ✅ **Automatic Login Tracking**: System now automatically updates last login timestamp on user authentication
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -37,12 +41,22 @@ The backend is an Express.js application written in TypeScript, featuring a modu
 The application utilizes Drizzle ORM with PostgreSQL (Neon Database). The schema includes UUID-based primary keys for user management, with Drizzle Kit managing migrations. User data includes username, email, password, role fields, and timestamps, all with validation. 
 
 **Database Tables:**
-- `users`: User management with 8-level role hierarchy
+- `users`: Enhanced user management with 8-level role hierarchy, coins system, ban management, and login tracking
 - `user_sessions`: Secure session management
 - `web_features`: Dynamic content management for website
 - `downloads`: Dynamic download management system
 - `server_news`: News and announcements system
 - `site_settings`: Site configuration management (title, favicon, SEO, etc.)
+
+**Enhanced Users Table Schema:**
+- `id`: UUID primary key
+- `username`, `email`, `password`: Basic account information
+- `role`: 8-level hierarchy from player to administrator
+- `coins`: Integer for donation coin system (default: 0)
+- `is_banned`: Boolean flag for account suspension status
+- `ban_reason`: Text field for ban justification
+- `last_login`: Timestamp tracking user's last authentication
+- `created_at`, `updated_at`: Standard timestamps
 
 The database is integrated with Replit's PostgreSQL service with automatic schema synchronization via `npm run db:push --force`.
 
@@ -51,6 +65,50 @@ The system features a secure user registration and login system with password ha
 
 ### UI/UX Decisions
 The design adopts a dark gaming aesthetic with golden accents, consistent with the Legion expansion. UI components are accessible and customizable. The player panel is integrated into the main navigation for a cohesive user experience. The admin panel features clear visual separation between GMs and players, dynamic badges, golden gradients for GMs, crown icons, and a reorganized structure into "Game Administration" and "Web Settings" sections for improved usability.
+
+### Enhanced Player Panel System
+**Complete Redesign with Modern UI (September 28, 2025):**
+The player panel has been completely redesigned with a modern, visually appealing interface featuring gradient cards and comprehensive player statistics.
+
+**Player Statistics Cards:**
+1. **💰 Donation Coins Card**: 
+   - Golden gradient design showing player's coin balance
+   - Displays total coins earned through donations
+   - Starting balance: 0 coins for new players
+
+2. **🛡️ Account Status Card**:
+   - Dynamic color coding: Green for active accounts, Red for banned accounts
+   - Clear visual indicator: "ACTIVO" or "BANEADO"
+   - Shield icon with status-appropriate coloring
+
+3. **📅 Last Login Card**:
+   - Blue gradient showing last connection timestamp
+   - Automatically updated on each login
+   - Shows "Primera vez" for first-time users
+
+4. **👤 Membership Card**:
+   - Purple gradient displaying registration date
+   - Shows account creation timestamp
+   - Member since information
+
+**Detailed Account Information:**
+- Enhanced user information section with role badges
+- Account activity tracking (days of membership)
+- Last activity with full timestamp
+- Ban information panel (visible only when banned)
+- Comprehensive statistics grid
+
+**Ban Management System:**
+- Visual ban status indicators throughout the interface
+- Dedicated ban information section with reason display
+- Admin-only ban/unban functionality
+- Automatic status updates across all components
+
+**Technical Implementation:**
+- Responsive design working on all screen sizes
+- Real-time data updates using TanStack Query
+- Proper TypeScript typing for all new fields
+- Secure backend integration with validation
 
 #### Advanced Content Management Features
 - **Triple Image Options**: Administrators can use predefined images, external URLs, or upload files from PC
@@ -64,15 +122,18 @@ The design adopts a dark gaming aesthetic with golden accents, consistent with t
 - **Cache Invalidation**: TanStack Query ensures UI stays synchronized with database changes
 
 ## Current System Status
-- **Database**: PostgreSQL with 1 administrator user (kiel), complete schema with 6 tables
+- **Database**: PostgreSQL with enhanced user schema including coins, ban system, and login tracking
 - **File System**: Upload directory configured at `/public/uploads/`
-- **Authentication**: Session-based with HTTP-only cookies
+- **Authentication**: Session-based with HTTP-only cookies and automatic last login tracking
 - **Site Configuration**: Dynamic title, favicon, and SEO management system active
-- **APIs**: Complete REST endpoints for all content management
+- **APIs**: Complete REST endpoints for all content management and user tracking
 - **Admin Interface**: Full administrative control panel with all management tools
+- **Player Panel**: Modern redesigned interface with gradient cards and comprehensive statistics
+- **User Management**: Enhanced with coins system, ban management, and activity tracking
 - **Deployment**: Configured for Replit autoscale deployment
 - **Development Server**: Running on port 5000 with hot reload
 - **Security**: Full authentication and authorization implemented
+- **Administrator**: User "kiel" configured with level 7 administrator privileges
 
 ## External Dependencies
 - **UI Frameworks**: Radix UI, shadcn/ui
