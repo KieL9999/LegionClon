@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Session } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 
 // modify the interface with any CRUD methods
@@ -14,6 +14,8 @@ export interface IStorage {
   getSession(sessionId: string): Promise<Session | undefined>;
   deleteSession(sessionId: string): Promise<void>;
   getUserBySession(sessionId: string): Promise<User | undefined>;
+  updateUserPassword(userId: string, newPassword: string): Promise<User>;
+  updateUserEmail(userId: string, newEmail: string): Promise<User>;
 }
 
 export class MemStorage implements IStorage {
@@ -60,6 +62,7 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       password: hashedPassword,
+      role: "player",
       id,
       createdAt: now,
       updatedAt: now 
@@ -114,6 +117,39 @@ export class MemStorage implements IStorage {
       return this.getUser(session.userId);
     }
     return undefined;
+  }
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const hashedPassword = this.hashPassword(newPassword);
+    const updatedUser = {
+      ...user,
+      password: hashedPassword,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserEmail(userId: string, newEmail: string): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser = {
+      ...user,
+      email: newEmail,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 

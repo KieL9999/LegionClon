@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import HomePage from "@/pages/HomePage";
 import ForoPage from "@/pages/ForoPage";
+import { PlayerPanel } from "@/pages/PlayerPanel";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -13,6 +14,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/foro" component={ForoPage} />
+      <Route path="/panel" component={PlayerPanel} />
       <Route component={NotFound} />
     </Switch>
   );

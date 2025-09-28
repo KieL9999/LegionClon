@@ -121,6 +121,13 @@ export default function Header() {
                       Conectado como {user?.username}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <Link href="/panel">
+                      <DropdownMenuItem data-testid="button-player-panel">
+                        <User className="w-4 h-4 mr-2" />
+                        Panel del Jugador
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
                       <LogOut className="w-4 h-4 mr-2" />
                       Cerrar Sesión
