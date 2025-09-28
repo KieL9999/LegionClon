@@ -48,6 +48,28 @@ The architecture supports Replit-specific plugins for development enhancement in
 
 ## Recent Changes
 
+### 28 de septiembre de 2025 - IMPLEMENTACIÓN: Sistema Completo de 7 Niveles de GM
+- **Sistema de Roles Avanzado Implementado**
+  - **7 niveles jerárquicos de GM**: Player, GM Aspirante, GM Soporte, GM Eventos, GM Superior, GM Jefe, Community Manager, Administrador
+  - **Esquema de base de datos expandido**: Campo de rol ampliado a 50 caracteres para soportar roles descriptivos
+  - **Migración exitosa**: Base de datos actualizada con nuevos roles sin pérdida de datos
+  - **Constantes y labels**: Definición completa de `USER_ROLES` y `ROLE_LABELS` para consistencia
+- **Panel de Administración Avanzado**
+  - **Gestión completa de usuarios**: Interfaz para ver todos los usuarios registrados
+  - **Selector de roles dinámico**: Dropdown con los 7 niveles disponibles para cambio de roles
+  - **Prevención de auto-modificación**: Los administradores no pueden cambiar su propio rol
+  - **Visualización jerárquica**: Badges diferenciados por colores para cada nivel de GM
+- **Backend Robusto y Seguro**
+  - **Nuevos endpoints**: `/api/users` para obtener lista de usuarios, `/api/change-role` para cambiar roles
+  - **Validación con Zod**: Schema `changeRoleSchema` con enum estricto de roles válidos
+  - **Autorización granular**: Solo usuarios GM pueden acceder a funciones administrativas
+  - **Logs de auditoría**: Registro completo de cambios de roles en el sistema
+- **Interfaz Mejorada**
+  - **Helper functions**: `isGM()` y `getRoleDisplayName()` para consistencia en toda la aplicación
+  - **Badges dinámicos**: Colores y estilos adaptados según el nivel del rol
+  - **UX optimizada**: Carga async de usuarios, estados de error y loading apropiados
+  - **Responsive design**: Adaptación completa a diferentes tamaños de pantalla
+
 ### 28 de septiembre de 2025 - ACTUALIZACIÓN: Panel del Jugador Mejorado con Navegación Integrada
 - **Migración Exitosa de Replit Agent a Entorno Replit**
   - Instalación completa de dependencias Node.js y paquetes npm
@@ -140,6 +162,10 @@ The architecture supports Replit-specific plugins for development enhancement in
 - ✅ **Panel de usuario con cambio de contraseña y email**
 - ✅ **Sistema de roles (player/GM) implementado**
 - ✅ **Panel de jugador MEJORADO con navegación integrada**
+- ✅ **Sistema completo de 7 niveles de GM implementado**
+- ✅ **Panel de administración con gestión de roles de usuarios**
+- ✅ **Endpoints seguros para cambio de roles (/api/users, /api/change-role)**
+- ✅ **Interfaz responsive con badges diferenciados por nivel de GM**
 
 ### Protección de Datos
 - ✅ **Progreso guardado automáticamente con sistema auto-save de Replit**
