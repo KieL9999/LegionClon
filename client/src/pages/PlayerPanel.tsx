@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
+import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema, VIP_LEVELS, VIP_LABELS, VIP_COLORS, VIP_ICONS } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search, Server, Calendar, FileText, Newspaper, Download } from "lucide-react";
 import WebFeaturesManager from "@/components/WebFeaturesManager";
@@ -241,18 +241,18 @@ export function PlayerPanel() {
               <TabsContent value="profile" className="space-y-6">
                 {/* Enhanced Player Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Coins Card */}
-                  <Card className="bg-gradient-to-br from-gaming-gold/20 to-gaming-gold/5 border-gaming-gold/30">
+                  {/* VIP Level Card */}
+                  <Card className={`bg-gradient-to-br ${VIP_COLORS[(user.vipLevel || 0) as keyof typeof VIP_COLORS]}`}>
                     <CardContent className="p-6 text-center">
                       <div className="flex items-center justify-center mb-2">
-                        <div className="w-12 h-12 rounded-full bg-gaming-gold/20 flex items-center justify-center">
-                          <span className="text-gaming-gold text-2xl">💰</span>
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user.vipLevel === 0 ? 'bg-gray-500/20' : user.vipLevel === 1 ? 'bg-amber-600/20' : user.vipLevel === 2 ? 'bg-gray-400/20' : user.vipLevel === 3 ? 'bg-yellow-500/20' : user.vipLevel === 4 ? 'bg-cyan-400/20' : 'bg-purple-500/20'}`}>
+                          <span className="text-2xl">{VIP_ICONS[(user.vipLevel || 0) as keyof typeof VIP_ICONS]}</span>
                         </div>
                       </div>
-                      <h3 className="text-3xl font-bold text-gaming-gold mb-1">
-                        {user.coins || 0}
+                      <h3 className={`text-lg font-bold mb-1 ${user.vipLevel === 0 ? 'text-gray-500' : user.vipLevel === 1 ? 'text-amber-600' : user.vipLevel === 2 ? 'text-gray-400' : user.vipLevel === 3 ? 'text-yellow-500' : user.vipLevel === 4 ? 'text-cyan-400' : 'text-purple-500'}`}>
+                        {VIP_LABELS[(user.vipLevel || 0) as keyof typeof VIP_LABELS]}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Monedas de Donación</p>
+                      <p className="text-sm text-muted-foreground">Nivel VIP</p>
                     </CardContent>
                   </Card>
 
@@ -318,13 +318,26 @@ export function PlayerPanel() {
                       <div className="space-y-4">
                         <div>
                           <Label className="text-foreground text-sm font-medium">Nombre de Usuario</Label>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-foreground bg-muted p-3 rounded-lg border flex-1 font-medium">
+                          <div className="mt-1">
+                            <p className="text-foreground bg-muted p-4 rounded-lg border font-medium text-lg">
                               {user.username}
                             </p>
-                            <Badge variant={isGM(user.role) ? "default" : "secondary"} className={isGM(user.role) ? "bg-gaming-gold text-white" : ""}>
-                              {getRoleDisplayName(user.role)}
-                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-foreground text-sm font-medium">Rango de la Cuenta</Label>
+                          <div className="mt-1">
+                            <div className={`p-4 rounded-lg border flex items-center gap-3 ${isGM(user.role) ? 'bg-gradient-to-r from-gaming-gold/20 to-gaming-gold/5 border-gaming-gold/30' : 'bg-muted border-border'}`}>
+                              {isGM(user.role) && <Crown className="h-6 w-6 text-gaming-gold" />}
+                              <div>
+                                <p className={`font-semibold text-lg ${isGM(user.role) ? 'text-gaming-gold' : 'text-foreground'}`}>
+                                  {getRoleDisplayName(user.role)}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {isGM(user.role) ? 'Staff del servidor' : 'Jugador estándar'}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <div>
@@ -363,25 +376,6 @@ export function PlayerPanel() {
                       </div>
                     )}
 
-                    {/* Additional Stats */}
-                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-gaming-gold">{user.coins || 0}</p>
-                        <p className="text-sm text-muted-foreground">Monedas Totales</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-foreground">
-                          {user.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0}
-                        </p>
-                        <p className="text-sm text-muted-foreground">Días de Membresía</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-foreground">
-                          {isGM(user.role) ? '🛡️' : '⚔️'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">Tipo de Cuenta</p>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

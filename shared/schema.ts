@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   role: varchar("role", { length: 50 }).notNull().default("player"),
   coins: integer("coins").notNull().default(0),
+  vipLevel: integer("vip_level").notNull().default(0),
   isBanned: boolean("is_banned").notNull().default(false),
   banReason: varchar("ban_reason", { length: 500 }),
   lastLogin: timestamp("last_login"),
@@ -126,6 +127,43 @@ export const ROLE_LABELS = {
   [USER_ROLES.GM_JEFE]: 'GM Nivel 5: GM Jefe',
   [USER_ROLES.COMMUNITY_MANAGER]: 'GM Nivel 6: Community Manager',
   [USER_ROLES.ADMINISTRADOR]: 'GM Nivel 7: Administrador'
+} as const;
+
+// VIP Levels
+export const VIP_LEVELS = {
+  NONE: 0,
+  BRONZE: 1,
+  SILVER: 2,
+  GOLD: 3,
+  PLATINUM: 4,
+  DIAMOND: 5
+} as const;
+
+export const VIP_LABELS = {
+  [VIP_LEVELS.NONE]: 'Sin VIP',
+  [VIP_LEVELS.BRONZE]: 'VIP Bronce',
+  [VIP_LEVELS.SILVER]: 'VIP Plata',
+  [VIP_LEVELS.GOLD]: 'VIP Oro',
+  [VIP_LEVELS.PLATINUM]: 'VIP Platino',
+  [VIP_LEVELS.DIAMOND]: 'VIP Diamante'
+} as const;
+
+export const VIP_COLORS = {
+  [VIP_LEVELS.NONE]: 'from-gray-500/20 to-gray-500/5 border-gray-500/30 text-gray-500',
+  [VIP_LEVELS.BRONZE]: 'from-amber-600/20 to-amber-600/5 border-amber-600/30 text-amber-600',
+  [VIP_LEVELS.SILVER]: 'from-gray-400/20 to-gray-400/5 border-gray-400/30 text-gray-400',
+  [VIP_LEVELS.GOLD]: 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30 text-yellow-500',
+  [VIP_LEVELS.PLATINUM]: 'from-cyan-400/20 to-cyan-400/5 border-cyan-400/30 text-cyan-400',
+  [VIP_LEVELS.DIAMOND]: 'from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-500'
+} as const;
+
+export const VIP_ICONS = {
+  [VIP_LEVELS.NONE]: '⚪',
+  [VIP_LEVELS.BRONZE]: '🥉',
+  [VIP_LEVELS.SILVER]: '🥈',
+  [VIP_LEVELS.GOLD]: '🥇',
+  [VIP_LEVELS.PLATINUM]: '💎',
+  [VIP_LEVELS.DIAMOND]: '💠'
 } as const;
 
 export const changeRoleSchema = z.object({
