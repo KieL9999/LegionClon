@@ -15,8 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search, Server, Calendar, FileText } from "lucide-react";
+import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search, Server, Calendar, FileText, Newspaper } from "lucide-react";
 import WebFeaturesManager from "@/components/WebFeaturesManager";
+import ServerNewsManager from "@/components/ServerNewsManager";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -797,14 +798,29 @@ export function PlayerPanel() {
                               <CardHeader>
                                 <CardTitle className="text-foreground text-lg flex items-center gap-2">
                                   <Server className="h-5 w-5 text-gaming-gold" />
-                                  Configuraciones de la Web
+                                  Gestión de Características
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground">
-                                  Editar contenido y configuraciones de la página web
+                                  Administrar las características del servidor mostradas en la página principal
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <WebFeaturesManager />
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-muted border-border">
+                              <CardHeader>
+                                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                  <Newspaper className="h-5 w-5 text-gaming-gold" />
+                                  Gestión de Noticias del Servidor
+                                </CardTitle>
+                                <CardDescription className="text-muted-foreground">
+                                  Administrar las noticias del servidor mostradas en la página principal
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ServerNewsManager />
                               </CardContent>
                             </Card>
 

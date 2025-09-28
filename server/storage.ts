@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, users, sessions, webFeatures } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, users, sessions, webFeatures, serverNews } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -24,6 +24,10 @@ export interface IStorage {
   createWebFeature(feature: InsertWebFeature): Promise<WebFeature>;
   updateWebFeature(id: string, feature: UpdateWebFeature): Promise<WebFeature | undefined>;
   deleteWebFeature(id: string): Promise<WebFeature | undefined>;
+  getAllServerNews(): Promise<ServerNews[]>;
+  createServerNews(news: InsertServerNews): Promise<ServerNews>;
+  updateServerNews(id: string, news: UpdateServerNews): Promise<ServerNews | undefined>;
+  deleteServerNews(id: string): Promise<ServerNews | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -216,6 +220,49 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return deletedFeature || undefined;
+  }
+
+  async getAllServerNews(): Promise<ServerNews[]> {
+    const news = await db
+      .select()
+      .from(serverNews)
+      .where(eq(serverNews.isActive, true))
+      .orderBy(desc(serverNews.publishedAt), serverNews.displayOrder);
+    return news;
+  }
+
+  async createServerNews(insertNews: InsertServerNews): Promise<ServerNews> {
+    const [news] = await db
+      .insert(serverNews)
+      .values({
+        ...insertNews,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return news;
+  }
+
+  async updateServerNews(id: string, updateData: UpdateServerNews): Promise<ServerNews | undefined> {
+    const [updatedNews] = await db
+      .update(serverNews)
+      .set({ 
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(serverNews.id, id))
+      .returning();
+    
+    return updatedNews || undefined;
+  }
+
+  async deleteServerNews(id: string): Promise<ServerNews | undefined> {
+    const [deletedNews] = await db
+      .delete(serverNews)
+      .where(eq(serverNews.id, id))
+      .returning();
+    
+    return deletedNews || undefined;
   }
 }
 

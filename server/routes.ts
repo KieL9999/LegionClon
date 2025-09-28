@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -594,6 +594,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Delete web feature error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all server news endpoint (public)
+  app.get('/api/server-news', async (req, res) => {
+    try {
+      const news = await storage.getAllServerNews();
+      
+      res.json({
+        success: true,
+        news
+      });
+      
+    } catch (error) {
+      console.error('Get server news error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Create server news endpoint (admin only)
+  app.post('/api/server-news', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden crear noticias'
+        });
+      }
+
+      // Validate request body
+      const validatedData = insertServerNewsSchema.parse(req.body);
+      
+      // Create server news
+      const newNews = await storage.createServerNews(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Noticia creada exitosamente',
+        news: newNews
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Create server news error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Update server news endpoint (admin only)
+  app.patch('/api/server-news/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden editar noticias'
+        });
+      }
+
+      const newsId = req.params.id;
+      
+      // Validate request body
+      const validatedData = updateServerNewsSchema.parse(req.body);
+      
+      // Update server news
+      const updatedNews = await storage.updateServerNews(newsId, validatedData);
+      
+      if (!updatedNews) {
+        return res.status(404).json({
+          error: 'News not found',
+          message: 'Noticia no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Noticia actualizada exitosamente',
+        news: updatedNews
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Update server news error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Delete server news endpoint (admin only)
+  app.delete('/api/server-news/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden eliminar noticias'
+        });
+      }
+
+      const newsId = req.params.id;
+      
+      // Delete server news
+      const deletedNews = await storage.deleteServerNews(newsId);
+      
+      if (!deletedNews) {
+        return res.status(404).json({
+          error: 'News not found',
+          message: 'Noticia no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Noticia eliminada exitosamente'
+      });
+      
+    } catch (error) {
+      console.error('Delete server news error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

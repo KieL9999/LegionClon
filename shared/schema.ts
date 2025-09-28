@@ -34,6 +34,21 @@ export const webFeatures = pgTable("web_features", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const serverNews = pgTable("server_news", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 150 }).notNull(),
+  content: text("content").notNull(),
+  summary: varchar("summary", { length: 300 }).notNull(),
+  image: varchar("image", { length: 255 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull().default("general"),
+  priority: varchar("priority", { length: 20 }).notNull().default("normal"),
+  displayOrder: integer("display_order").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  publishedAt: timestamp("published_at").default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -110,6 +125,18 @@ export const updateWebFeatureSchema = createInsertSchema(webFeatures).omit({
   updatedAt: true,
 }).partial();
 
+export const insertServerNewsSchema = createInsertSchema(serverNews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateServerNewsSchema = createInsertSchema(serverNews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
@@ -121,3 +148,6 @@ export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 export type WebFeature = typeof webFeatures.$inferSelect;
 export type InsertWebFeature = z.infer<typeof insertWebFeatureSchema>;
 export type UpdateWebFeature = z.infer<typeof updateWebFeatureSchema>;
+export type ServerNews = typeof serverNews.$inferSelect;
+export type InsertServerNews = z.infer<typeof insertServerNewsSchema>;
+export type UpdateServerNews = z.infer<typeof updateServerNewsSchema>;
