@@ -240,7 +240,22 @@ export function PlayerPanel() {
               {/* Profile Tab */}
               <TabsContent value="profile" className="space-y-6">
                 {/* Enhanced Player Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Coins Card */}
+                  <Card className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-yellow-500/30">
+                    <CardContent className="p-6 text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                          <span className="text-2xl">💰</span>
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-yellow-500 mb-1">
+                        {user.coins || 0}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Monedas</p>
+                    </CardContent>
+                  </Card>
+
                   {/* VIP Level Card */}
                   <Card className={`bg-gradient-to-br ${VIP_COLORS[(user.vipLevel || 0) as keyof typeof VIP_COLORS]}`}>
                     <CardContent className="p-6 text-center">
@@ -303,76 +318,170 @@ export function PlayerPanel() {
                 </div>
 
                 {/* Enhanced Account Information */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center gap-2">
-                      <User className="h-5 w-5 text-gaming-gold" />
-                      Información de la Cuenta
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      Detalles completos de tu perfil de jugador
-                    </CardDescription>
+                <Card className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 backdrop-blur-sm">
+                  <CardHeader className="pb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-gaming-gold/20 rounded-xl">
+                        <User className="h-6 w-6 text-gaming-gold" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-foreground text-xl font-bold">
+                          Información de la Cuenta
+                        </CardTitle>
+                        <CardDescription className="text-muted-foreground text-base">
+                          Detalles completos de tu perfil de jugador
+                        </CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-foreground text-sm font-medium">Nombre de Usuario</Label>
-                          <div className="mt-1">
-                            <p className="text-foreground bg-muted p-4 rounded-lg border font-medium text-lg">
-                              {user.username}
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-foreground text-sm font-medium">Rango de la Cuenta</Label>
-                          <div className="mt-1">
-                            <div className={`p-4 rounded-lg border flex items-center gap-3 ${isGM(user.role) ? 'bg-gradient-to-r from-gaming-gold/20 to-gaming-gold/5 border-gaming-gold/30' : 'bg-muted border-border'}`}>
-                              {isGM(user.role) && <Crown className="h-6 w-6 text-gaming-gold" />}
-                              <div>
-                                <p className={`font-semibold text-lg ${isGM(user.role) ? 'text-gaming-gold' : 'text-foreground'}`}>
-                                  {getRoleDisplayName(user.role)}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {isGM(user.role) ? 'Staff del servidor' : 'Jugador estándar'}
+                  <CardContent className="space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        {/* Username */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Nombre de Usuario
+                          </Label>
+                          <div className="relative">
+                            <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-gaming-gold rounded-full animate-pulse"></div>
+                                <p className="text-foreground font-bold text-lg">
+                                  {user.username}
                                 </p>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div>
-                          <Label className="text-foreground text-sm font-medium">Correo Electrónico</Label>
-                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
-                            {user.email}
-                          </p>
+
+                        {/* Role */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Rango de la Cuenta
+                          </Label>
+                          <div className={`relative overflow-hidden rounded-xl border backdrop-blur-sm ${isGM(user.role) ? 'bg-gradient-to-r from-gaming-gold/20 via-gaming-gold/10 to-gaming-gold/5 border-gaming-gold/40' : 'bg-gradient-to-r from-slate-800/80 to-slate-700/40 border-slate-600/30'}`}>
+                            <div className="p-4 flex items-center gap-4">
+                              {isGM(user.role) && (
+                                <div className="p-2 bg-gaming-gold/20 rounded-lg">
+                                  <Crown className="h-6 w-6 text-gaming-gold" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <p className={`font-bold text-lg ${isGM(user.role) ? 'text-gaming-gold' : 'text-foreground'}`}>
+                                  {getRoleDisplayName(user.role)}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {isGM(user.role) ? 'Personal del servidor' : 'Jugador estándar'}
+                                </p>
+                              </div>
+                              {isGM(user.role) && (
+                                <div className="text-gaming-gold">
+                                  <Shield className="h-5 w-5" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Email */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Correo Electrónico
+                          </Label>
+                          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/40 p-4 rounded-xl border border-slate-600/30 backdrop-blur-sm">
+                            <div className="flex items-center gap-3">
+                              <Mail className="h-5 w-5 text-blue-400" />
+                              <p className="text-foreground font-medium">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-foreground text-sm font-medium">Tiempo como Miembro</Label>
-                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
-                            {user.createdAt ? `${Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días` : 'Desconocido'}
-                          </p>
+
+                      <div className="space-y-6">
+                        {/* Member Time */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Tiempo como Miembro
+                          </Label>
+                          <div className="bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 p-4 rounded-xl border border-emerald-600/30 backdrop-blur-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                <Calendar className="h-5 w-5 text-emerald-400" />
+                              </div>
+                              <div>
+                                <p className="text-emerald-400 font-bold text-lg">
+                                  {user.createdAt ? `${Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días` : 'Desconocido'}
+                                </p>
+                                <p className="text-xs text-emerald-300/70">
+                                  Desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'Desconocido'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <Label className="text-foreground text-sm font-medium">Última Actividad</Label>
-                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
-                            {user.lastLogin ? `${new Date(user.lastLogin).toLocaleDateString('es-ES')} a las ${new Date(user.lastLogin).toLocaleTimeString('es-ES')}` : 'Esta es tu primera sesión'}
-                          </p>
+
+                        {/* Last Activity */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Última Actividad
+                          </Label>
+                          <div className="bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-4 rounded-xl border border-blue-600/30 backdrop-blur-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-500/20 rounded-lg">
+                                <TrendingUp className="h-5 w-5 text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-blue-400 font-bold text-base">
+                                  {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('es-ES') : 'Esta es tu primera sesión'}
+                                </p>
+                                <p className="text-xs text-blue-300/70">
+                                  {user.lastLogin ? `a las ${new Date(user.lastLogin).toLocaleTimeString('es-ES')}` : 'Bienvenido al servidor'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Coins Info */}
+                        <div className="group">
+                          <Label className="text-gaming-gold font-semibold text-sm uppercase tracking-wide mb-3 block">
+                            Monedas de Donación
+                          </Label>
+                          <div className="bg-gradient-to-r from-yellow-900/30 to-yellow-800/20 p-4 rounded-xl border border-yellow-600/30 backdrop-blur-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                                <span className="text-xl">💰</span>
+                              </div>
+                              <div>
+                                <p className="text-yellow-400 font-bold text-lg">
+                                  {user.coins || 0} monedas
+                                </p>
+                                <p className="text-xs text-yellow-300/70">
+                                  Saldo disponible para compras
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Ban Information (if banned) */}
                     {user.isBanned && (
-                      <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="w-5 h-5 text-red-500" />
-                          <h4 className="text-red-500 font-semibold">Cuenta Suspendida</h4>
+                      <div className="mt-8 p-6 bg-gradient-to-r from-red-900/40 to-red-800/20 border border-red-500/30 rounded-xl backdrop-blur-sm">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-red-500/20 rounded-lg">
+                            <Shield className="w-6 h-6 text-red-500" />
+                          </div>
+                          <h4 className="text-red-400 font-bold text-lg">Cuenta Suspendida</h4>
                         </div>
-                        <p className="text-muted-foreground">
-                          <strong>Razón:</strong> {user.banReason || 'No se especificó una razón'}
-                        </p>
+                        <div className="bg-red-950/30 p-4 rounded-lg">
+                          <p className="text-red-300 font-medium">
+                            <strong className="text-red-400">Razón del baneo:</strong> {user.banReason || 'No se especificó una razón'}
+                          </p>
+                        </div>
                       </div>
                     )}
 
