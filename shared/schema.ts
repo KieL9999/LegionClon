@@ -1,10 +1,10 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, varchar, timestamp, text } from "drizzle-orm/mysql-core";
+import { pgTable, varchar, timestamp, text, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = mysqlTable("users", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(uuid())`),
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username", { length: 16 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -13,9 +13,9 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const sessions = mysqlTable("sessions", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(uuid())`),
-  userId: varchar("user_id", { length: 36 }).notNull(),
+export const sessions = pgTable("sessions", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull(),
   sessionData: text("session_data"),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),

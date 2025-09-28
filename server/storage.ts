@@ -1,5 +1,7 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, users, sessions } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -19,13 +21,9 @@ export interface IStorage {
   updateUserRole(userId: string, role: string): Promise<User>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private sessions: Map<string, Session>;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.sessions = new Map();
+    // No initialization needed for database storage
   }
 
   private hashPassword(password: string): string {
@@ -41,34 +39,31 @@ export class MemStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const now = new Date();
     const hashedPassword = this.hashPassword(insertUser.password);
-    const user: User = { 
-      ...insertUser, 
-      password: hashedPassword,
-      role: "player",
-      id,
-      createdAt: now,
-      updatedAt: now 
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values({
+        username: insertUser.username,
+        email: insertUser.email,
+        password: hashedPassword,
+        role: "player"
+      })
+      .returning();
     return user;
   }
 
@@ -81,35 +76,33 @@ export class MemStorage implements IStorage {
   }
 
   async createSession(userId: string): Promise<Session> {
-    const sessionId = randomUUID();
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     
-    const session: Session = {
-      id: sessionId,
-      userId,
-      sessionData: JSON.stringify({ createdAt: now }),
-      expiresAt,
-      createdAt: now
-    };
+    const [session] = await db
+      .insert(sessions)
+      .values({
+        userId,
+        sessionData: JSON.stringify({ createdAt: new Date() }),
+        expiresAt
+      })
+      .returning();
     
-    this.sessions.set(sessionId, session);
     return session;
   }
 
   async getSession(sessionId: string): Promise<Session | undefined> {
-    const session = this.sessions.get(sessionId);
+    const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
     if (session && session.expiresAt > new Date()) {
       return session;
     } else if (session) {
       // Session expired, delete it
-      this.sessions.delete(sessionId);
+      await db.delete(sessions).where(eq(sessions.id, sessionId));
     }
     return undefined;
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    this.sessions.delete(sessionId);
+    await db.delete(sessions).where(eq(sessions.id, sessionId));
   }
 
   async getUserBySession(sessionId: string): Promise<User | undefined> {
@@ -121,53 +114,56 @@ export class MemStorage implements IStorage {
   }
 
   async updateUserPassword(userId: string, newPassword: string): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) {
+    const hashedPassword = this.hashPassword(newPassword);
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
       throw new Error('User not found');
     }
     
-    const hashedPassword = this.hashPassword(newPassword);
-    const updatedUser = {
-      ...user,
-      password: hashedPassword,
-      updatedAt: new Date()
-    };
-    
-    this.users.set(userId, updatedUser);
     return updatedUser;
   }
 
   async updateUserEmail(userId: string, newEmail: string): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        email: newEmail,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
       throw new Error('User not found');
     }
     
-    const updatedUser = {
-      ...user,
-      email: newEmail,
-      updatedAt: new Date()
-    };
-    
-    this.users.set(userId, updatedUser);
     return updatedUser;
   }
 
   async updateUserRole(userId: string, role: string): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        role,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
       throw new Error('User not found');
     }
     
-    const updatedUser = {
-      ...user,
-      role,
-      updatedAt: new Date()
-    };
-    
-    this.users.set(userId, updatedUser);
     return updatedUser;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
