@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import FeatureCard from "./FeatureCard";
 import fatedRaids from "@assets/generated_images/Fated_raids_screenshot_916448c2.png";
 import customBoss from "@assets/generated_images/Custom_boss_artwork_08a9df2f.png";
@@ -8,84 +9,49 @@ import reworkedAffixes from "@assets/generated_images/Reworked_dungeon_affixes_b
 import alliedRaces from "@assets/generated_images/Allied_races_characters_6cd2a18e.png";
 import timewalking from "@assets/generated_images/Timewalking_raid_features_af0f8df6.png";
 import donatorShop from "@assets/generated_images/Donator_shop_interface_53f890d2.png";
+import type { WebFeature } from "@shared/schema";
 
-// TODO: Remove mock data when implementing real features
-const features = [
-  {
-    id: 1,
-    image: fatedRaids,
-    title: "Raids Fatales",
-    description: "Hemos implementado 'raids fatales' lo que significa que hemos actualizado tanto las recompensas como la dificultad de todos los raids de Legion.",
-    type: "Action" as const,
-    category: "raids" as const
-  },
-  {
-    id: 2,
-    image: customBoss,
-    title: "Jefes Personalizados",
-    description: "Por cada jefe personalizado que tenemos, ¡obtienes recompensas únicas! incluyendo monturas, juguetes, mascotas, etc.",
-    type: "Event" as const,
-    category: "pve" as const
-  },
-  {
-    id: 3,
-    image: classRebalance,
-    title: "Rebalanceo de Clases",
-    description: "Tenemos cambios personalizados de clases, incluyendo traer talentos antiguos como Mark of Ursol para druidas guardianes, dando a guerreros furia menos daño recibido, etc.",
-    type: "Feature" as const,
-    category: "pvp" as const
-  },
-  {
-    id: 4,
-    image: hardcoreChallenge,
-    title: "Desafío Hardcore",
-    description: "Acepta el desafío hardcore, tendrás una vida, y obtendrás acceso a talentos hardcore y buffs únicos. ¿Te desmoronarás bajo el desafío?",
-    type: "Event" as const,
-    category: "pve" as const
-  },
-  {
-    id: 5,
-    image: dungeonCompanions,
-    title: "Compañeros de Mazmorra",
-    description: "Para acelerar las colas de RDF, hemos implementado compañeros de mazmorra. pueden jugar los 3 roles: sanador, tanque o dps.",
-    type: "Feature" as const,
-    category: "pve" as const
-  },
-  {
-    id: 6,
-    image: reworkedAffixes,
-    title: "Afijos Renovados",
-    description: "Hemos agregado nuevos afijos estacionales como aflicted, storming, incorporeal. Y actualizado afijos antiguos. Espera nuevos desafíos.",
-    type: "Event" as const,
-    category: "pve" as const
-  },
-  {
-    id: 7,
-    image: alliedRaces,
-    title: "Razas Aliadas",
-    description: "Juega como las nuevas razas aliadas de Battle for Azeroth y posteriores.",
-    type: "Feature" as const,
-    category: "social" as const
-  },
-  {
-    id: 8,
-    image: timewalking,
-    title: "Características Timewalking",
-    description: "Durante timewalking, tenemos raids timewalking (como Blackwing Lair, Black Temple, Ulduar, Firelands y más por venir.) Además tenemos jefes personalizados durante estos eventos.",
-    type: "Event" as const,
-    category: "raids" as const
-  },
-  {
-    id: 9,
-    image: donatorShop,
-    title: "Tienda de Donaciones",
-    description: "Tenemos una tienda de donaciones, donde puedes comprar cosméticos, mascotas, monturas, etc. Sin embargo, NUNCA venderemos el mejor equipo end-game.",
-    type: "Feature" as const,
-    category: "shop" as const
-  }
-];
+// Image mapping for the database image names
+const imageMap: Record<string, string> = {
+  fatedRaids,
+  customBoss,
+  classRebalance,
+  hardcoreChallenge,
+  dungeonCompanions,
+  reworkedAffixes,
+  alliedRaces,
+  timewalking,
+  donatorShop,
+};
 
 export default function FeaturesSection() {
+  // Fetch features from the database
+  const { data: featuresData, isLoading, error } = useQuery<{ success: boolean; features: WebFeature[] }>({
+    queryKey: ['/api/web-features'],
+  });
+
+  if (isLoading) {
+    return (
+      <section className="py-16 px-4">
+        <div className="container mx-auto text-center">
+          <div className="text-xl text-muted-foreground">Cargando características...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 px-4">
+        <div className="container mx-auto text-center">
+          <div className="text-xl text-muted-foreground">Error al cargar las características</div>
+        </div>
+      </section>
+    );
+  }
+
+  const features = featuresData?.features || [];
+
   return (
     <section className="py-16 px-4">
       <div className="container mx-auto">
@@ -102,11 +68,11 @@ export default function FeaturesSection() {
           {features.map((feature) => (
             <FeatureCard
               key={feature.id}
-              image={feature.image}
+              image={imageMap[feature.image] || fatedRaids} // Fallback to default image
               title={feature.title}
               description={feature.description}
-              type={feature.type}
-              category={feature.category}
+              type={feature.type as "Action" | "Event" | "Feature"}
+              category={feature.category as "raids" | "pvp" | "pve" | "social" | "shop"}
             />
           ))}
         </div>
