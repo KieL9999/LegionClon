@@ -252,7 +252,7 @@ export function PlayerPanel() {
                       <h3 className="text-lg font-bold text-yellow-500 mb-1">
                         {user.coins || 0}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Monedas</p>
+                      <p className="text-sm font-semibold text-cyan-400 drop-shadow-[0_0_4px_rgba(34,211,238,0.6)]">Monedas</p>
                     </CardContent>
                   </Card>
 
@@ -267,7 +267,7 @@ export function PlayerPanel() {
                       <h3 className={`text-lg font-bold mb-1 ${user.vipLevel === 0 ? 'text-gray-500' : user.vipLevel === 1 ? 'text-amber-600' : user.vipLevel === 2 ? 'text-gray-400' : user.vipLevel === 3 ? 'text-yellow-500' : user.vipLevel === 4 ? 'text-cyan-400' : 'text-purple-500'}`}>
                         {VIP_LABELS[(user.vipLevel || 0) as keyof typeof VIP_LABELS]}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Nivel VIP</p>
+                      <p className="text-sm font-semibold text-pink-400 drop-shadow-[0_0_4px_rgba(244,114,182,0.6)]">Nivel VIP</p>
                     </CardContent>
                   </Card>
 
@@ -282,7 +282,7 @@ export function PlayerPanel() {
                       <h3 className={`text-lg font-bold mb-1 ${user.isBanned ? 'text-red-500' : 'text-green-500'}`}>
                         {user.isBanned ? 'BANEADO' : 'ACTIVO'}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Estado de Cuenta</p>
+                      <p className="text-sm font-semibold text-green-400 drop-shadow-[0_0_4px_rgba(74,222,128,0.6)]">Estado de Cuenta</p>
                     </CardContent>
                   </Card>
 
@@ -297,7 +297,7 @@ export function PlayerPanel() {
                       <h3 className="text-lg font-bold text-blue-500 mb-1">
                         {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('es-ES') : 'Primera vez'}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Última Conexión</p>
+                      <p className="text-sm font-semibold text-yellow-400 drop-shadow-[0_0_4px_rgba(250,204,21,0.6)]">Última Conexión</p>
                     </CardContent>
                   </Card>
 
@@ -312,7 +312,7 @@ export function PlayerPanel() {
                       <h3 className="text-lg font-bold text-purple-500 mb-1">
                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'Desconocido'}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Miembro desde</p>
+                      <p className="text-sm font-semibold text-indigo-400 drop-shadow-[0_0_4px_rgba(129,140,248,0.6)]">Miembro desde</p>
                     </CardContent>
                   </Card>
                 </div>
