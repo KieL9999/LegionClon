@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -285,6 +285,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.error('Change email error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all users endpoint (admin only)
+  app.get('/api/users', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is GM (any level)
+      if (user.role === USER_ROLES.PLAYER) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los Game Masters pueden acceder a esta función'
+        });
+      }
+
+      const users = await storage.getAllUsers();
+      
+      // Remove passwords from response
+      const safeUsers = users.map(({ password, ...userResponse }) => userResponse);
+      
+      res.json({
+        success: true,
+        users: safeUsers
+      });
+      
+    } catch (error) {
+      console.error('Get users error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Change user role endpoint (admin only)
+  app.post('/api/change-role', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is GM (any level)
+      if (user.role === USER_ROLES.PLAYER) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los Game Masters pueden cambiar roles'
+        });
+      }
+
+      // Validate request body
+      const validatedData = changeRoleSchema.parse(req.body);
+      
+      // Prevent users from changing their own role
+      if (validatedData.userId === user.id) {
+        return res.status(400).json({
+          error: 'Cannot change own role',
+          message: 'No puedes cambiar tu propio rol'
+        });
+      }
+      
+      // Update user role
+      const updatedUser = await storage.updateUserRole(validatedData.userId, validatedData.newRole);
+      
+      const { password, ...userResponse } = updatedUser;
+      
+      res.json({
+        success: true,
+        message: 'Rol cambiado exitosamente',
+        user: userResponse
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Change role error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

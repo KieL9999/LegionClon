@@ -13,12 +13,23 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { changePasswordSchema, changeEmailSchema } from "@shared/schema";
+import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Key, Mail, ArrowLeft } from "lucide-react";
+import { User, Settings, Shield, Key, Mail, ArrowLeft, Users } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
-import type { ChangePasswordData, ChangeEmailData } from "@shared/schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ChangePasswordData, ChangeEmailData, ChangeRoleData, User as UserType } from "@shared/schema";
+
+// Helper function to check if user is GM of any level
+const isGM = (role: string) => {
+  return role !== USER_ROLES.PLAYER;
+};
+
+// Helper function to get role display name
+const getRoleDisplayName = (role: string) => {
+  return ROLE_LABELS[role as keyof typeof ROLE_LABELS] || role;
+};
 
 export function PlayerPanel() {
   const { user } = useAuth();
@@ -81,6 +92,33 @@ export function PlayerPanel() {
       toast({
         title: "Error",
         description: error.message || "No se pudo cambiar el email",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Get all users query (for admin)
+  const usersQuery = useQuery<{ users: UserType[] }>({
+    queryKey: ["/api/users"],
+    enabled: user ? isGM(user.role) : false,
+  });
+
+  // Change role mutation
+  const changeRoleMutation = useMutation({
+    mutationFn: (data: ChangeRoleData) => 
+      apiRequest("POST", "/api/change-role", data),
+    onSuccess: () => {
+      toast({
+        title: "Rol cambiado",
+        description: "El rol del usuario ha sido actualizado exitosamente",
+      });
+      // Invalidate users query to refresh user list
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo cambiar el rol",
         variant: "destructive",
       });
     },
@@ -151,12 +189,12 @@ export function PlayerPanel() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge 
-                      variant={user.role === "GM" ? "default" : "secondary"}
-                      className={user.role === "GM" ? "bg-gaming-gold text-white" : ""}
+                      variant={isGM(user.role) ? "default" : "secondary"}
+                      className={isGM(user.role) ? "bg-gaming-gold text-white" : ""}
                     >
-                      {user.role === "GM" ? "Game Master" : "Jugador"}
+                      {getRoleDisplayName(user.role)}
                     </Badge>
-                    {user.role === "GM" && (
+                    {isGM(user.role) && (
                       <Shield className="h-5 w-5 text-gaming-gold" />
                     )}
                   </div>
@@ -166,7 +204,7 @@ export function PlayerPanel() {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-muted">
+              <TabsList className={`grid w-full ${isGM(user.role) ? 'grid-cols-3' : 'grid-cols-2'} bg-muted`}>
                 <TabsTrigger value="profile" className="text-foreground data-[state=active]:bg-gaming-gold">
                   <User className="h-4 w-4 mr-2" />
                   Perfil
@@ -175,7 +213,7 @@ export function PlayerPanel() {
                   <Settings className="h-4 w-4 mr-2" />
                   Seguridad
                 </TabsTrigger>
-                {user.role === "GM" && (
+                {isGM(user.role) && (
                   <TabsTrigger value="admin" className="text-foreground data-[state=active]:bg-gaming-gold">
                     <Shield className="h-4 w-4 mr-2" />
                     Administrador
@@ -209,7 +247,7 @@ export function PlayerPanel() {
                       <div>
                         <Label className="text-foreground">Rol</Label>
                         <p className="text-foreground bg-muted p-2 rounded border">
-                          {user.role === "GM" ? "Game Master" : "Jugador"}
+                          {getRoleDisplayName(user.role)}
                         </p>
                       </div>
                       <div>
@@ -372,7 +410,7 @@ export function PlayerPanel() {
               </TabsContent>
 
               {/* Admin Tab (only for GMs) */}
-              {user.role === "GM" && (
+              {isGM(user.role) && (
                 <TabsContent value="admin">
                   <Card className="bg-card border-border">
                     <CardHeader>
@@ -381,28 +419,96 @@ export function PlayerPanel() {
                         Panel de Administrador
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
-                        Funciones exclusivas para Game Masters
+                        Funciones exclusivas para Game Masters - {getRoleDisplayName(user.role)}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-6">
+                        {/* Gestión de Usuarios */}
                         <Card className="bg-muted border-border">
                           <CardHeader>
-                            <CardTitle className="text-foreground text-lg">Gestión de Usuarios</CardTitle>
+                            <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                              <Users className="h-5 w-5 text-gaming-gold" />
+                              Gestión de Usuarios
+                            </CardTitle>
                             <CardDescription className="text-muted-foreground">
-                              Administrar cuentas de jugadores
+                              Administrar roles de jugadores y Game Masters
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <Button 
-                              data-testid="button-manage-users"
-                              className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                              disabled
-                            >
-                              Próximamente
-                            </Button>
+                            {usersQuery.isLoading ? (
+                              <div className="text-muted-foreground">Cargando usuarios...</div>
+                            ) : usersQuery.error ? (
+                              <div className="text-destructive">Error al cargar usuarios</div>
+                            ) : (
+                              <div className="space-y-4">
+                                <div className="grid gap-3">
+                                  {usersQuery.data?.users?.map((userData: UserType) => (
+                                    <div key={userData.id} className="flex items-center justify-between p-3 bg-background rounded border">
+                                      <div className="flex items-center gap-3">
+                                        <div>
+                                          <p className="font-medium text-foreground">{userData.username}</p>
+                                          <p className="text-sm text-muted-foreground">{userData.email}</p>
+                                        </div>
+                                        <Badge 
+                                          variant={isGM(userData.role) ? "default" : "secondary"}
+                                          className={isGM(userData.role) ? "bg-gaming-gold text-white" : ""}
+                                        >
+                                          {getRoleDisplayName(userData.role)}
+                                        </Badge>
+                                      </div>
+                                      {userData.id !== user.id && (
+                                        <Select
+                                          value={userData.role}
+                                          onValueChange={(newRole) => {
+                                            changeRoleMutation.mutate({
+                                              userId: userData.id,
+                                              newRole: newRole as any
+                                            });
+                                          }}
+                                          disabled={changeRoleMutation.isPending}
+                                        >
+                                          <SelectTrigger className="w-48 bg-input border-border text-foreground" data-testid={`select-role-${userData.id}`}>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value={USER_ROLES.PLAYER}>
+                                              {ROLE_LABELS[USER_ROLES.PLAYER]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.GM_ASPIRANTE}>
+                                              {ROLE_LABELS[USER_ROLES.GM_ASPIRANTE]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.GM_SOPORTE}>
+                                              {ROLE_LABELS[USER_ROLES.GM_SOPORTE]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.GM_EVENTOS}>
+                                              {ROLE_LABELS[USER_ROLES.GM_EVENTOS]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.GM_SUPERIOR}>
+                                              {ROLE_LABELS[USER_ROLES.GM_SUPERIOR]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.GM_JEFE}>
+                                              {ROLE_LABELS[USER_ROLES.GM_JEFE]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.COMMUNITY_MANAGER}>
+                                              {ROLE_LABELS[USER_ROLES.COMMUNITY_MANAGER]}
+                                            </SelectItem>
+                                            <SelectItem value={USER_ROLES.ADMINISTRADOR}>
+                                              {ROLE_LABELS[USER_ROLES.ADMINISTRADOR]}
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    </div>
+                                  )) || []}
+                                </div>
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
+
+                        {/* Otras funciones de administrador */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         <Card className="bg-muted border-border">
                           <CardHeader>
@@ -458,6 +564,7 @@ export function PlayerPanel() {
                           </CardContent>
                         </Card>
                       </div>
+                    </div>
                     </CardContent>
                   </Card>
                 </TabsContent>

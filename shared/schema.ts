@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   username: varchar("username", { length: 16 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  role: varchar("role", { length: 20 }).notNull().default("player"),
+  role: varchar("role", { length: 50 }).notNull().default("player"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
@@ -46,9 +46,50 @@ export const changeEmailSchema = z.object({
   password: z.string().min(1, "La contraseña es requerida para confirmar"),
 });
 
+// Roles del sistema
+export const USER_ROLES = {
+  PLAYER: 'player',
+  GM_ASPIRANTE: 'gm_aspirante',
+  GM_SOPORTE: 'gm_soporte', 
+  GM_EVENTOS: 'gm_eventos',
+  GM_SUPERIOR: 'gm_superior',
+  GM_JEFE: 'gm_jefe',
+  COMMUNITY_MANAGER: 'community_manager',
+  ADMINISTRADOR: 'administrador'
+} as const;
+
+export const ROLE_LABELS = {
+  [USER_ROLES.PLAYER]: 'Jugador',
+  [USER_ROLES.GM_ASPIRANTE]: 'GM Nivel 1: GM Aspirante',
+  [USER_ROLES.GM_SOPORTE]: 'GM Nivel 2: GM Soporte',
+  [USER_ROLES.GM_EVENTOS]: 'GM Nivel 3: GM Eventos',
+  [USER_ROLES.GM_SUPERIOR]: 'GM Nivel 4: GM Superior',
+  [USER_ROLES.GM_JEFE]: 'GM Nivel 5: GM Jefe',
+  [USER_ROLES.COMMUNITY_MANAGER]: 'GM Nivel 6: Community Manager',
+  [USER_ROLES.ADMINISTRADOR]: 'GM Nivel 7: Administrador'
+} as const;
+
+export const changeRoleSchema = z.object({
+  userId: z.string().uuid("ID de usuario inválido"),
+  newRole: z.enum([
+    USER_ROLES.PLAYER,
+    USER_ROLES.GM_ASPIRANTE,
+    USER_ROLES.GM_SOPORTE,
+    USER_ROLES.GM_EVENTOS,
+    USER_ROLES.GM_SUPERIOR,
+    USER_ROLES.GM_JEFE,
+    USER_ROLES.COMMUNITY_MANAGER,
+    USER_ROLES.ADMINISTRADOR
+  ], {
+    errorMap: () => ({ message: "Rol no válido" })
+  })
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export type ChangeEmailData = z.infer<typeof changeEmailSchema>;
+export type ChangeRoleData = z.infer<typeof changeRoleSchema>;
+export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
