@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Play, Download } from "lucide-react";
+import RealmistModal from "./RealmistModal";
 import heroBackground from "@assets/generated_images/WoW_Legion_hero_background_256bfd43.png";
 
 export default function HeroSection() {
+  const [realmistOpen, setRealmistOpen] = useState(false);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -55,6 +58,7 @@ export default function HeroSection() {
           <Button 
             size="lg" 
             className="bg-gradient-to-r from-gaming-gold to-yellow-500 hover:from-yellow-500 hover:to-gaming-gold text-black font-bold px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            onClick={() => setRealmistOpen(true)}
             data-testid="button-start-play"
           >
             <Play className="w-5 h-5 mr-2" />
@@ -64,6 +68,10 @@ export default function HeroSection() {
             size="lg" 
             variant="outline" 
             className="bg-background/20 backdrop-blur-sm border-2 border-gaming-gold/30 hover:border-gaming-gold text-foreground px-8 py-3 text-lg"
+            onClick={() => {
+              // TODO: Replace with real download functionality
+              console.log('Download client clicked from hero');
+            }}
             data-testid="button-download-client"
           >
             <Download className="w-5 h-5 mr-2" />
@@ -87,6 +95,9 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+      
+      {/* Modal */}
+      <RealmistModal open={realmistOpen} onOpenChange={setRealmistOpen} />
     </section>
   );
 }

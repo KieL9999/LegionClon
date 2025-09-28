@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Shield, Users } from "lucide-react";
+import RealmistModal from "./RealmistModal";
+import RegistrationModal from "./RegistrationModal";
 import serverLogo from "@assets/generated_images/Legion_gaming_server_logo_63d36140.png";
 
 export default function Header() {
+  const [realmistOpen, setRealmistOpen] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background/80 backdrop-blur-sm fixed top-0 w-full z-50">
       <div className="container mx-auto px-4 py-4">
@@ -55,17 +60,31 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden sm:flex" data-testid="button-registro">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="hidden sm:flex" 
+              onClick={() => setRegistrationOpen(true)}
+              data-testid="button-registro"
+            >
               <Shield className="w-4 h-4 mr-2" />
               Registro
             </Button>
-            <Button size="sm" data-testid="button-play">
+            <Button 
+              size="sm" 
+              onClick={() => setRealmistOpen(true)}
+              data-testid="button-play"
+            >
               <Gamepad2 className="w-4 h-4 mr-2" />
               ¡Jugar!
             </Button>
           </div>
         </div>
       </div>
+      
+      {/* Modals */}
+      <RealmistModal open={realmistOpen} onOpenChange={setRealmistOpen} />
+      <RegistrationModal open={registrationOpen} onOpenChange={setRegistrationOpen} />
     </header>
   );
 }
