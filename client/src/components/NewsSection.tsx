@@ -91,7 +91,7 @@ export default function NewsSection() {
 
   return (
     <>
-      <section className="py-16 px-4 bg-card/30">
+      <section id="noticias" className="py-16 px-4 bg-card/30">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
             <div>

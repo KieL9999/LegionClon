@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Shield, Users, LogIn, LogOut, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import RealmistModal from "./RealmistModal";
@@ -18,6 +18,7 @@ export default function Header() {
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
+  const [location] = useLocation();
   
   const handleLoginSuccess = () => {
     // The user data is now available through context
@@ -36,6 +37,19 @@ export default function Header() {
         description: "Error al cerrar sesión",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleNoticiasClick = () => {
+    if (location === '/') {
+      // Si estamos en la página principal, hacer scroll suave a la sección
+      const noticiasSection = document.getElementById('noticias');
+      if (noticiasSection) {
+        noticiasSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Si estamos en otra página, navegar a la página principal con hash
+      window.location.href = '/#noticias';
     }
   };
   return (
@@ -74,10 +88,17 @@ export default function Header() {
 
           {/* Navigation */}
           <nav className="hidden lg:flex items-center gap-4">
-            <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-inicio">
-              Inicio
-            </Button>
-            <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-noticias">
+            <Link href="/">
+              <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-inicio">
+                Inicio
+              </Button>
+            </Link>
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover-elevate" 
+              data-testid="link-noticias"
+              onClick={handleNoticiasClick}
+            >
               Noticias
             </Button>
             <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-rankings">
