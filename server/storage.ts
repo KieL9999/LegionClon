@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, users, sessions, webFeatures, serverNews, downloads } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, type SiteSetting, type InsertSiteSetting, type UpdateSiteSetting, users, sessions, webFeatures, serverNews, downloads, siteSettings } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -33,6 +33,11 @@ export interface IStorage {
   updateDownload(id: string, download: UpdateDownload): Promise<Download | undefined>;
   deleteDownload(id: string): Promise<Download | undefined>;
   incrementDownloadCount(id: string): Promise<Download | undefined>;
+  getAllSiteSettings(): Promise<SiteSetting[]>;
+  getSiteSettingByKey(key: string): Promise<SiteSetting | undefined>;
+  createSiteSetting(setting: InsertSiteSetting): Promise<SiteSetting>;
+  updateSiteSetting(key: string, setting: UpdateSiteSetting): Promise<SiteSetting | undefined>;
+  deleteSiteSetting(key: string): Promise<SiteSetting | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -324,6 +329,50 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedDownload || undefined;
+  }
+  async getAllSiteSettings(): Promise<SiteSetting[]> {
+    const allSettings = await db.select().from(siteSettings);
+    return allSettings;
+  }
+
+  async getSiteSettingByKey(key: string): Promise<SiteSetting | undefined> {
+    const [setting] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    return setting || undefined;
+  }
+
+  async createSiteSetting(insertSetting: InsertSiteSetting): Promise<SiteSetting> {
+    const [newSetting] = await db
+      .insert(siteSettings)
+      .values({
+        ...insertSetting,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return newSetting;
+  }
+
+  async updateSiteSetting(key: string, updateSetting: UpdateSiteSetting): Promise<SiteSetting | undefined> {
+    const [updatedSetting] = await db
+      .update(siteSettings)
+      .set({
+        ...updateSetting,
+        updatedAt: new Date()
+      })
+      .where(eq(siteSettings.key, key))
+      .returning();
+      
+    return updatedSetting || undefined;
+  }
+
+  async deleteSiteSetting(key: string): Promise<SiteSetting | undefined> {
+    const [deletedSetting] = await db
+      .delete(siteSettings)
+      .where(eq(siteSettings.key, key))
+      .returning();
+      
+    return deletedSetting || undefined;
   }
 }
 

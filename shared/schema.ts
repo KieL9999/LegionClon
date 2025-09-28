@@ -66,6 +66,16 @@ export const downloads = pgTable("downloads", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const siteSettings = pgTable("site_settings", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  description: varchar("description", { length: 255 }),
+  type: varchar("type", { length: 50 }).notNull().default("text"), // text, image, url, boolean
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -168,6 +178,17 @@ export const updateDownloadSchema = createInsertSchema(downloads).omit({
   downloadCount: true,
 }).partial();
 
+export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateSiteSettingSchema = z.object({
+  value: z.string().min(1, "El valor es requerido"),
+  description: z.string().optional(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
@@ -185,3 +206,6 @@ export type UpdateServerNews = z.infer<typeof updateServerNewsSchema>;
 export type Download = typeof downloads.$inferSelect;
 export type InsertDownload = z.infer<typeof insertDownloadSchema>;
 export type UpdateDownload = z.infer<typeof updateDownloadSchema>;
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type InsertSiteSetting = z.infer<typeof insertSiteSettingSchema>;
+export type UpdateSiteSetting = z.infer<typeof updateSiteSettingSchema>;

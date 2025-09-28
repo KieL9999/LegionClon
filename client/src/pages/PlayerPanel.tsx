@@ -19,6 +19,7 @@ import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp,
 import WebFeaturesManager from "@/components/WebFeaturesManager";
 import ServerNewsManager from "@/components/ServerNewsManager";
 import DownloadsManager from "@/components/DownloadsManager";
+import SiteSettingsManager from "@/components/SiteSettingsManager";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -795,6 +796,8 @@ export function PlayerPanel() {
                         {/* Configuraciones Web Tab */}
                         <TabsContent value="web-config" className="mt-6">
                           <div className="space-y-6">
+                            <SiteSettingsManager />
+
                             <Card className="bg-muted border-border">
                               <CardHeader>
                                 <CardTitle className="text-foreground text-lg flex items-center gap-2">

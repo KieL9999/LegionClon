@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1128,6 +1128,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all site settings endpoint (public)
+  app.get('/api/site-settings', async (req, res) => {
+    try {
+      const settings = await storage.getAllSiteSettings();
+      
+      res.status(200).json({
+        success: true,
+        settings: settings
+      });
+      
+    } catch (error) {
+      console.error('Get site settings error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error al obtener configuraciones del sitio'
+      });
+    }
+  });
+
+  // Create site setting endpoint (admin only)
+  app.post('/api/site-settings', async (req, res) => {
+    try {
+      // Check authentication and admin role
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Check if user is admin
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'No tienes permisos para realizar esta acción'
+        });
+      }
+
+      // Validate request body
+      const validatedData = insertSiteSettingSchema.parse(req.body);
+      
+      // Create site setting
+      const newSetting = await storage.createSiteSetting(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Configuración creada exitosamente',
+        setting: newSetting
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Create site setting error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Update site setting endpoint (admin only)
+  app.patch('/api/site-settings/:key', async (req, res) => {
+    try {
+      // Check authentication and admin role
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Check if user is admin
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'No tienes permisos para realizar esta acción'
+        });
+      }
+
+      const { key } = req.params;
+      
+      // Validate request body
+      const validatedData = updateSiteSettingSchema.parse(req.body);
+      
+      // Update site setting
+      const updatedSetting = await storage.updateSiteSetting(key, validatedData);
+      
+      if (!updatedSetting) {
+        return res.status(404).json({
+          error: 'Setting not found',
+          message: 'Configuración no encontrada'
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Configuración actualizada exitosamente',
+        setting: updatedSetting
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Update site setting error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'
