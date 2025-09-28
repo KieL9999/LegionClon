@@ -1,15 +1,43 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Shield, Users } from "lucide-react";
+import { Gamepad2, Shield, Users, LogIn, LogOut, User } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import RealmistModal from "./RealmistModal";
 import RegistrationModal from "./RegistrationModal";
 import DownloadModal from "./DownloadModal";
+import LoginModal from "./LoginModal";
 import serverLogo from "@assets/generated_images/Legion_gaming_server_logo_63d36140.png";
 
 export default function Header() {
   const [realmistOpen, setRealmistOpen] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
+  
+  const handleLoginSuccess = () => {
+    // The user data is now available through context
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Error al cerrar sesión",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <header className="border-b border-border bg-background/80 backdrop-blur-sm fixed top-0 w-full z-50">
       <div className="container mx-auto px-4 py-4">
@@ -55,6 +83,11 @@ export default function Header() {
             <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-rankings">
               Rankings
             </Button>
+            <Link href="/foro">
+              <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-foro">
+                Foro
+              </Button>
+            </Link>
             <Button 
               variant="ghost" 
               className="text-foreground hover-elevate" 
@@ -67,24 +100,74 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="hidden sm:flex" 
-              onClick={() => setRegistrationOpen(true)}
-              data-testid="button-registro"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              Registro
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => setRealmistOpen(true)}
-              data-testid="button-play"
-            >
-              <Gamepad2 className="w-4 h-4 mr-2" />
-              ¡Jugar!
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hidden sm:flex gap-2" 
+                      data-testid="button-user-menu"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="text-gaming-gold font-medium">
+                        {user?.username}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem disabled className="text-muted-foreground">
+                      Conectado como {user?.username}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Cerrar Sesión
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button 
+                  size="sm" 
+                  onClick={() => setRealmistOpen(true)}
+                  data-testid="button-play"
+                >
+                  <Gamepad2 className="w-4 h-4 mr-2" />
+                  ¡Jugar!
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="hidden sm:flex" 
+                  onClick={() => setLoginOpen(true)}
+                  data-testid="button-login"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Iniciar Sesión
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hidden sm:flex" 
+                  onClick={() => setRegistrationOpen(true)}
+                  data-testid="button-registro"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Registro
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => setRealmistOpen(true)}
+                  data-testid="button-play"
+                >
+                  <Gamepad2 className="w-4 h-4 mr-2" />
+                  ¡Jugar!
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -93,6 +176,7 @@ export default function Header() {
       <RealmistModal open={realmistOpen} onOpenChange={setRealmistOpen} />
       <RegistrationModal open={registrationOpen} onOpenChange={setRegistrationOpen} />
       <DownloadModal open={downloadOpen} onOpenChange={setDownloadOpen} />
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} onLoginSuccess={handleLoginSuccess} />
     </header>
   );
 }
