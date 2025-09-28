@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -787,6 +787,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Delete server news error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all downloads endpoint (public)
+  app.get('/api/downloads', async (req, res) => {
+    try {
+      const downloads = await storage.getAllDownloads();
+      
+      res.json({
+        success: true,
+        downloads
+      });
+      
+    } catch (error) {
+      console.error('Get downloads error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Create download endpoint (admin only)
+  app.post('/api/downloads', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden crear descargas'
+        });
+      }
+
+      // Validate request body
+      const validatedData = insertDownloadSchema.parse(req.body);
+      
+      // Create download
+      const newDownload = await storage.createDownload(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Descarga creada exitosamente',
+        download: newDownload
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Create download error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Update download endpoint (admin only)
+  app.patch('/api/downloads/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden actualizar descargas'
+        });
+      }
+
+      const downloadId = req.params.id;
+      
+      // Validate request body
+      const validatedData = updateDownloadSchema.parse(req.body);
+      
+      // Update download
+      const updatedDownload = await storage.updateDownload(downloadId, validatedData);
+      
+      if (!updatedDownload) {
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Descarga actualizada exitosamente',
+        download: updatedDownload
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Update download error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Delete download endpoint (admin only)
+  app.delete('/api/downloads/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden eliminar descargas'
+        });
+      }
+
+      const downloadId = req.params.id;
+      
+      // Delete download
+      const deletedDownload = await storage.deleteDownload(downloadId);
+      
+      if (!deletedDownload) {
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Descarga eliminada exitosamente'
+      });
+      
+    } catch (error) {
+      console.error('Delete download error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Increment download count endpoint (public)
+  app.post('/api/downloads/:id/download', async (req, res) => {
+    try {
+      const downloadId = req.params.id;
+      
+      // Increment download count
+      const updatedDownload = await storage.incrementDownloadCount(downloadId);
+      
+      if (!updatedDownload) {
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Descarga contabilizada exitosamente',
+        downloadCount: updatedDownload.downloadCount
+      });
+      
+    } catch (error) {
+      console.error('Increment download count error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, users, sessions, webFeatures, serverNews } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, users, sessions, webFeatures, serverNews, downloads } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -28,6 +28,11 @@ export interface IStorage {
   createServerNews(news: InsertServerNews): Promise<ServerNews>;
   updateServerNews(id: string, news: UpdateServerNews): Promise<ServerNews | undefined>;
   deleteServerNews(id: string): Promise<ServerNews | undefined>;
+  getAllDownloads(): Promise<Download[]>;
+  createDownload(download: InsertDownload): Promise<Download>;
+  updateDownload(id: string, download: UpdateDownload): Promise<Download | undefined>;
+  deleteDownload(id: string): Promise<Download | undefined>;
+  incrementDownloadCount(id: string): Promise<Download | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -263,6 +268,62 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return deletedNews || undefined;
+  }
+
+  async getAllDownloads(): Promise<Download[]> {
+    const allDownloads = await db
+      .select()
+      .from(downloads)
+      .where(eq(downloads.isActive, true))
+      .orderBy(downloads.displayOrder, desc(downloads.releaseDate));
+    return allDownloads;
+  }
+
+  async createDownload(insertDownload: InsertDownload): Promise<Download> {
+    const [download] = await db
+      .insert(downloads)
+      .values({
+        ...insertDownload,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return download;
+  }
+
+  async updateDownload(id: string, updateData: UpdateDownload): Promise<Download | undefined> {
+    const [updatedDownload] = await db
+      .update(downloads)
+      .set({ 
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(downloads.id, id))
+      .returning();
+    
+    return updatedDownload || undefined;
+  }
+
+  async deleteDownload(id: string): Promise<Download | undefined> {
+    const [deletedDownload] = await db
+      .delete(downloads)
+      .where(eq(downloads.id, id))
+      .returning();
+    
+    return deletedDownload || undefined;
+  }
+
+  async incrementDownloadCount(id: string): Promise<Download | undefined> {
+    const [updatedDownload] = await db
+      .update(downloads)
+      .set({ 
+        downloadCount: sql`${downloads.downloadCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(downloads.id, id))
+      .returning();
+    
+    return updatedDownload || undefined;
   }
 }
 

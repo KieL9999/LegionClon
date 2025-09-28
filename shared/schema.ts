@@ -49,6 +49,23 @@ export const serverNews = pgTable("server_news", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const downloads = pgTable("downloads", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 150 }).notNull(),
+  description: text("description").notNull(),
+  version: varchar("version", { length: 50 }).notNull(),
+  downloadUrl: varchar("download_url", { length: 500 }).notNull(),
+  fileSize: varchar("file_size", { length: 50 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull().default("client"), // client, patch, addon
+  platform: varchar("platform", { length: 50 }).notNull().default("windows"), // windows, mac, linux
+  releaseDate: timestamp("release_date").default(sql`CURRENT_TIMESTAMP`),
+  isActive: boolean("is_active").notNull().default(true),
+  displayOrder: integer("display_order").notNull().default(0),
+  downloadCount: integer("download_count").notNull().default(0),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -137,6 +154,20 @@ export const updateServerNewsSchema = createInsertSchema(serverNews).omit({
   updatedAt: true,
 }).partial();
 
+export const insertDownloadSchema = createInsertSchema(downloads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloadCount: true,
+});
+
+export const updateDownloadSchema = createInsertSchema(downloads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloadCount: true,
+}).partial();
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
@@ -151,3 +182,6 @@ export type UpdateWebFeature = z.infer<typeof updateWebFeatureSchema>;
 export type ServerNews = typeof serverNews.$inferSelect;
 export type InsertServerNews = z.infer<typeof insertServerNewsSchema>;
 export type UpdateServerNews = z.infer<typeof updateServerNewsSchema>;
+export type Download = typeof downloads.$inferSelect;
+export type InsertDownload = z.infer<typeof insertDownloadSchema>;
+export type UpdateDownload = z.infer<typeof updateDownloadSchema>;
