@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Shield, Users, LogIn, LogOut, User } from "lucide-react";
+import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -134,6 +134,22 @@ export default function Header() {
               onClick={() => setDownloadOpen(true)}
             >
               Descargar
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover-elevate" 
+              data-testid="link-donacion"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Donación
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover-elevate" 
+              data-testid="link-tienda"
+            >
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Tienda
             </Button>
           </nav>
 
