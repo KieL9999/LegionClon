@@ -158,12 +158,12 @@ export const VIP_COLORS = {
 } as const;
 
 export const VIP_ICONS = {
-  [VIP_LEVELS.NONE]: '⚪',
-  [VIP_LEVELS.BRONZE]: '🥉',
-  [VIP_LEVELS.SILVER]: '🥈',
-  [VIP_LEVELS.GOLD]: '🥇',
-  [VIP_LEVELS.PLATINUM]: '💎',
-  [VIP_LEVELS.DIAMOND]: '💠'
+  [VIP_LEVELS.NONE]: '🔒',
+  [VIP_LEVELS.BRONZE]: '•',
+  [VIP_LEVELS.SILVER]: '•',
+  [VIP_LEVELS.GOLD]: '•',
+  [VIP_LEVELS.PLATINUM]: '•',
+  [VIP_LEVELS.DIAMOND]: '💎'
 } as const;
 
 export const changeRoleSchema = z.object({
