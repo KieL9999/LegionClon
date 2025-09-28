@@ -796,10 +796,10 @@ export function PlayerPanel() {
                               <CardHeader>
                                 <CardTitle className="text-foreground text-lg flex items-center gap-2">
                                   <Server className="h-5 w-5 text-gaming-gold" />
-                                  Configuración del Servidor
+                                  Configuraciones de la Web
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground">
-                                  Ajustes generales del servidor web
+                                  Editar contenido y configuraciones de la página web
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
