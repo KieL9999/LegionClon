@@ -55,20 +55,15 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = this.hashPassword(insertUser.password);
-    const userId = randomUUID();
-    await db
+    const [user] = await db
       .insert(users)
       .values({
-        id: userId,
         username: insertUser.username,
         email: insertUser.email,
         password: hashedPassword,
         role: "player"
-      });
-    const user = await this.getUser(userId);
-    if (!user) {
-      throw new Error('Failed to create user');
-    }
+      })
+      .returning();
     return user;
   }
 
@@ -82,21 +77,16 @@ export class DatabaseStorage implements IStorage {
 
   async createSession(userId: string): Promise<Session> {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    const sessionId = randomUUID();
     
-    await db
+    const [session] = await db
       .insert(sessions)
       .values({
-        id: sessionId,
         userId,
         sessionData: JSON.stringify({ createdAt: new Date() }),
         expiresAt
-      });
+      })
+      .returning();
     
-    const session = await this.getSession(sessionId);
-    if (!session) {
-      throw new Error('Failed to create session');
-    }
     return session;
   }
 
@@ -125,15 +115,15 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserPassword(userId: string, newPassword: string): Promise<User> {
     const hashedPassword = this.hashPassword(newPassword);
-    await db
+    const [updatedUser] = await db
       .update(users)
       .set({ 
         password: hashedPassword,
         updatedAt: new Date()
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
     
-    const updatedUser = await this.getUser(userId);
     if (!updatedUser) {
       throw new Error('User not found');
     }
@@ -142,15 +132,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserEmail(userId: string, newEmail: string): Promise<User> {
-    await db
+    const [updatedUser] = await db
       .update(users)
       .set({ 
         email: newEmail,
         updatedAt: new Date()
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
     
-    const updatedUser = await this.getUser(userId);
     if (!updatedUser) {
       throw new Error('User not found');
     }
@@ -159,15 +149,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserRole(userId: string, role: string): Promise<User> {
-    await db
+    const [updatedUser] = await db
       .update(users)
       .set({ 
         role,
         updatedAt: new Date()
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
     
-    const updatedUser = await this.getUser(userId);
     if (!updatedUser) {
       throw new Error('User not found');
     }
