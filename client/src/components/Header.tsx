@@ -52,6 +52,19 @@ export default function Header() {
       window.location.href = '/#noticias';
     }
   };
+
+  const handleRankingsClick = () => {
+    if (location === '/') {
+      // Si estamos en la página principal, hacer scroll suave a la sección
+      const rankingsSection = document.getElementById('rankings');
+      if (rankingsSection) {
+        rankingsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Si estamos en otra página, navegar a la página principal con hash
+      window.location.href = '/#rankings';
+    }
+  };
   return (
     <header className="border-b border-border bg-background/80 backdrop-blur-sm fixed top-0 w-full z-50">
       <div className="container mx-auto px-4 py-4">
@@ -101,7 +114,12 @@ export default function Header() {
             >
               Noticias
             </Button>
-            <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-rankings">
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover-elevate" 
+              data-testid="link-rankings"
+              onClick={handleRankingsClick}
+            >
               Rankings
             </Button>
             <Link href="/foro">
