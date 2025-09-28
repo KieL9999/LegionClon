@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search, Server, Calendar, FileText } from "lucide-react";
+import WebFeaturesManager from "@/components/WebFeaturesManager";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -803,13 +804,7 @@ export function PlayerPanel() {
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <Button 
-                                  data-testid="button-server-config"
-                                  className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                                  disabled
-                                >
-                                  Próximamente
-                                </Button>
+                                <WebFeaturesManager />
                               </CardContent>
                             </Card>
 
