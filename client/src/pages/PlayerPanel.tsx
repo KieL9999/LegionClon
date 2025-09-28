@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search } from "lucide-react";
+import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3, Search, Server, Calendar, FileText } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -435,7 +435,29 @@ export function PlayerPanel() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-6">
+                      <Tabs defaultValue="game-admin" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 bg-muted">
+                          <TabsTrigger 
+                            value="game-admin" 
+                            className="data-[state=active]:bg-gaming-gold data-[state=active]:text-white"
+                            data-testid="tab-game-admin"
+                          >
+                            <Crown className="h-4 w-4 mr-2" />
+                            Administración del Juego
+                          </TabsTrigger>
+                          <TabsTrigger 
+                            value="web-config" 
+                            className="data-[state=active]:bg-gaming-gold data-[state=active]:text-white"
+                            data-testid="tab-web-config"
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Configuraciones Web
+                          </TabsTrigger>
+                        </TabsList>
+
+                        {/* Administración del Juego Tab */}
+                        <TabsContent value="game-admin" className="mt-6">
+                          <div className="space-y-6">
                         {/* Estadísticas de la Jerarquía GM */}
                         {usersQuery.data?.users && (
                           <Card className="bg-muted border-border">
@@ -743,64 +765,77 @@ export function PlayerPanel() {
                           </CardContent>
                         </Card>
 
-                        {/* Otras funciones de administrador */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Eventos del Juego */}
+                            <Card className="bg-muted border-border">
+                              <CardHeader>
+                                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                  <Calendar className="h-5 w-5 text-gaming-gold" />
+                                  Eventos del Juego
+                                </CardTitle>
+                                <CardDescription className="text-muted-foreground">
+                                  Crear y gestionar eventos del servidor
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <Button 
+                                  data-testid="button-manage-events"
+                                  className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
+                                  disabled
+                                >
+                                  Próximamente
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </TabsContent>
 
-                        <Card className="bg-muted border-border">
-                          <CardHeader>
-                            <CardTitle className="text-foreground text-lg">Configuración del Servidor</CardTitle>
-                            <CardDescription className="text-muted-foreground">
-                              Ajustes del servidor de juego
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <Button 
-                              data-testid="button-server-config"
-                              className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                              disabled
-                            >
-                              Próximamente
-                            </Button>
-                          </CardContent>
-                        </Card>
+                        {/* Configuraciones Web Tab */}
+                        <TabsContent value="web-config" className="mt-6">
+                          <div className="space-y-6">
+                            <Card className="bg-muted border-border">
+                              <CardHeader>
+                                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                  <Server className="h-5 w-5 text-gaming-gold" />
+                                  Configuración del Servidor
+                                </CardTitle>
+                                <CardDescription className="text-muted-foreground">
+                                  Ajustes generales del servidor web
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <Button 
+                                  data-testid="button-server-config"
+                                  className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
+                                  disabled
+                                >
+                                  Próximamente
+                                </Button>
+                              </CardContent>
+                            </Card>
 
-                        <Card className="bg-muted border-border">
-                          <CardHeader>
-                            <CardTitle className="text-foreground text-lg">Eventos</CardTitle>
-                            <CardDescription className="text-muted-foreground">
-                              Crear y gestionar eventos del servidor
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <Button 
-                              data-testid="button-manage-events"
-                              className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                              disabled
-                            >
-                              Próximamente
-                            </Button>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="bg-muted border-border">
-                          <CardHeader>
-                            <CardTitle className="text-foreground text-lg">Logs del Sistema</CardTitle>
-                            <CardDescription className="text-muted-foreground">
-                              Revisar actividad del servidor
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <Button 
-                              data-testid="button-system-logs"
-                              className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
-                              disabled
-                            >
-                              Próximamente
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
+                            <Card className="bg-muted border-border">
+                              <CardHeader>
+                                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                  <FileText className="h-5 w-5 text-gaming-gold" />
+                                  Logs del Sistema
+                                </CardTitle>
+                                <CardDescription className="text-muted-foreground">
+                                  Revisar actividad y logs del servidor web
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <Button 
+                                  data-testid="button-system-logs"
+                                  className="w-full bg-gaming-gold hover:bg-gaming-gold/90 text-white"
+                                  disabled
+                                >
+                                  Próximamente
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
                     </CardContent>
                   </Card>
                 </TabsContent>

@@ -55,8 +55,7 @@ export const USER_ROLES = {
   GM_SUPERIOR: 'gm_superior',
   GM_JEFE: 'gm_jefe',
   COMMUNITY_MANAGER: 'community_manager',
-  ADMIN_WEB: 'admin_web',
-  ADMIN_JUEGO: 'admin_juego'
+  ADMINISTRADOR: 'administrador'
 } as const;
 
 export const ROLE_LABELS = {
@@ -67,8 +66,7 @@ export const ROLE_LABELS = {
   [USER_ROLES.GM_SUPERIOR]: 'GM Nivel 4: GM Superior',
   [USER_ROLES.GM_JEFE]: 'GM Nivel 5: GM Jefe',
   [USER_ROLES.COMMUNITY_MANAGER]: 'GM Nivel 6: Community Manager',
-  [USER_ROLES.ADMIN_WEB]: 'Administrador Web',
-  [USER_ROLES.ADMIN_JUEGO]: 'Administrador del Juego'
+  [USER_ROLES.ADMINISTRADOR]: 'GM Nivel 7: Administrador'
 } as const;
 
 export const changeRoleSchema = z.object({
@@ -81,8 +79,7 @@ export const changeRoleSchema = z.object({
     USER_ROLES.GM_SUPERIOR,
     USER_ROLES.GM_JEFE,
     USER_ROLES.COMMUNITY_MANAGER,
-    USER_ROLES.ADMIN_WEB,
-    USER_ROLES.ADMIN_JUEGO
+    USER_ROLES.ADMINISTRADOR
   ], {
     errorMap: () => ({ message: "Rol no válido" })
   })
