@@ -48,6 +48,30 @@ The architecture supports Replit-specific plugins for development enhancement in
 
 ## Recent Changes
 
+### 28 de septiembre de 2025 - Panel del Jugador y Sistema de Roles
+- **Panel del Jugador Completo Implementado**
+  - Página dedicada del panel del jugador en `/panel` con interfaz moderna
+  - Opciones para cambiar contraseña con validación de contraseña actual
+  - Funcionalidad para cambiar email con confirmación de contraseña
+  - Información detallada del perfil del usuario
+  - Navegación integrada desde el dropdown del usuario autenticado
+- **Sistema de Roles y Administración**
+  - Agregado campo 'role' al esquema de usuario (player/GM)
+  - Apartado especial "Administrador" visible solo para usuarios con role "GM"
+  - Sección de administración con placeholders para funciones futuras
+  - Badges visuales para identificar Game Masters
+- **Seguridad y Backend Robusto**
+  - Endpoints seguros `/api/change-password` y `/api/change-email`
+  - Validación de contraseña actual antes de cambios
+  - Verificación de unicidad de email en cambios
+  - Hashing seguro con PBKDF2 y sal única por usuario
+  - Validación completa con Zod en frontend y backend
+- **Interfaz de Usuario Mejorada**
+  - Diseño cohesivo con la temática Legion gaming
+  - Formularios con manejo de estados de carga
+  - Notificaciones toast para feedback del usuario
+  - Validación en tiempo real con React Hook Form
+
 ### 28 de septiembre de 2025 - Implementación de Foro y Sistema de Login Completo
 - **Agregado apartado "Foro" en la navegación**
   - Añadido enlace "Foro" en el header entre "Rankings" y "Descargar"
