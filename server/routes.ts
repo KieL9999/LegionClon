@@ -77,6 +77,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Update last login timestamp
+      const updatedUser = await storage.updateUserLastLogin(user.id);
+      
       // Create session
       const session = await storage.createSession(user.id);
       
@@ -89,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Return user without password
-      const { password, ...userResponse } = user;
+      const { password, ...userResponse } = updatedUser;
       
       res.status(200).json({
         success: true,

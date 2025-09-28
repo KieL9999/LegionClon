@@ -9,6 +9,10 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   role: varchar("role", { length: 50 }).notNull().default("player"),
+  coins: integer("coins").notNull().default(0),
+  isBanned: boolean("is_banned").notNull().default(false),
+  banReason: varchar("ban_reason", { length: 500 }),
+  lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });

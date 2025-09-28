@@ -238,39 +238,148 @@ export function PlayerPanel() {
               </TabsList>
 
               {/* Profile Tab */}
-              <TabsContent value="profile">
+              <TabsContent value="profile" className="space-y-6">
+                {/* Enhanced Player Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Coins Card */}
+                  <Card className="bg-gradient-to-br from-gaming-gold/20 to-gaming-gold/5 border-gaming-gold/30">
+                    <CardContent className="p-6 text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-12 h-12 rounded-full bg-gaming-gold/20 flex items-center justify-center">
+                          <span className="text-gaming-gold text-2xl">💰</span>
+                        </div>
+                      </div>
+                      <h3 className="text-3xl font-bold text-gaming-gold mb-1">
+                        {user.coins || 0}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Monedas de Donación</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Status Card */}
+                  <Card className={`bg-gradient-to-br ${user.isBanned ? 'from-red-500/20 to-red-500/5 border-red-500/30' : 'from-green-500/20 to-green-500/5 border-green-500/30'}`}>
+                    <CardContent className="p-6 text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user.isBanned ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
+                          <Shield className={`w-6 h-6 ${user.isBanned ? 'text-red-500' : 'text-green-500'}`} />
+                        </div>
+                      </div>
+                      <h3 className={`text-lg font-bold mb-1 ${user.isBanned ? 'text-red-500' : 'text-green-500'}`}>
+                        {user.isBanned ? 'BANEADO' : 'ACTIVO'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Estado de Cuenta</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Last Login Card */}
+                  <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30">
+                    <CardContent className="p-6 text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <Calendar className="w-6 h-6 text-blue-500" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-blue-500 mb-1">
+                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('es-ES') : 'Primera vez'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Última Conexión</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Member Since Card */}
+                  <Card className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border-purple-500/30">
+                    <CardContent className="p-6 text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                          <User className="w-6 h-6 text-purple-500" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-purple-500 mb-1">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'Desconocido'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Miembro desde</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Enhanced Account Information */}
                 <Card className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="text-foreground">Información del Perfil</CardTitle>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <User className="h-5 w-5 text-gaming-gold" />
+                      Información de la Cuenta
+                    </CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Información básica de tu cuenta
+                      Detalles completos de tu perfil de jugador
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-foreground">Nombre de Usuario</Label>
-                        <p className="text-foreground bg-muted p-2 rounded border">
-                          {user.username}
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-foreground text-sm font-medium">Nombre de Usuario</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-foreground bg-muted p-3 rounded-lg border flex-1 font-medium">
+                              {user.username}
+                            </p>
+                            <Badge variant={isGM(user.role) ? "default" : "secondary"} className={isGM(user.role) ? "bg-gaming-gold text-white" : ""}>
+                              {getRoleDisplayName(user.role)}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-foreground text-sm font-medium">Correo Electrónico</Label>
+                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-foreground text-sm font-medium">Tiempo como Miembro</Label>
+                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
+                            {user.createdAt ? `${Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días` : 'Desconocido'}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-foreground text-sm font-medium">Última Actividad</Label>
+                          <p className="text-foreground bg-muted p-3 rounded-lg border mt-1">
+                            {user.lastLogin ? `${new Date(user.lastLogin).toLocaleDateString('es-ES')} a las ${new Date(user.lastLogin).toLocaleTimeString('es-ES')}` : 'Esta es tu primera sesión'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ban Information (if banned) */}
+                    {user.isBanned && (
+                      <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Shield className="w-5 h-5 text-red-500" />
+                          <h4 className="text-red-500 font-semibold">Cuenta Suspendida</h4>
+                        </div>
+                        <p className="text-muted-foreground">
+                          <strong>Razón:</strong> {user.banReason || 'No se especificó una razón'}
                         </p>
                       </div>
-                      <div>
-                        <Label className="text-foreground">Email</Label>
-                        <p className="text-foreground bg-muted p-2 rounded border">
-                          {user.email}
-                        </p>
+                    )}
+
+                    {/* Additional Stats */}
+                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-gaming-gold">{user.coins || 0}</p>
+                        <p className="text-sm text-muted-foreground">Monedas Totales</p>
                       </div>
-                      <div>
-                        <Label className="text-foreground">Rol</Label>
-                        <p className="text-foreground bg-muted p-2 rounded border">
-                          {getRoleDisplayName(user.role)}
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-foreground">
+                          {user.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0}
                         </p>
+                        <p className="text-sm text-muted-foreground">Días de Membresía</p>
                       </div>
-                      <div>
-                        <Label className="text-foreground">Miembro desde</Label>
-                        <p className="text-foreground bg-muted p-2 rounded border">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "No disponible"}
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-foreground">
+                          {isGM(user.role) ? '🛡️' : '⚔️'}
                         </p>
+                        <p className="text-sm text-muted-foreground">Tipo de Cuenta</p>
                       </div>
                     </div>
                   </CardContent>

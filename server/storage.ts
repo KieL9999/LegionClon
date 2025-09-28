@@ -20,6 +20,7 @@ export interface IStorage {
   updateUserPassword(userId: string, newPassword: string): Promise<User>;
   updateUserEmail(userId: string, newEmail: string): Promise<User>;
   updateUserRole(userId: string, role: string): Promise<User>;
+  updateUserLastLogin(userId: string): Promise<User>;
   getAllWebFeatures(): Promise<WebFeature[]>;
   createWebFeature(feature: InsertWebFeature): Promise<WebFeature>;
   updateWebFeature(id: string, feature: UpdateWebFeature): Promise<WebFeature | undefined>;
@@ -177,6 +178,23 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ 
         role,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error('User not found');
+    }
+    
+    return updatedUser;
+  }
+
+  async updateUserLastLogin(userId: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        lastLogin: new Date(),
         updatedAt: new Date()
       })
       .where(eq(users.id, userId))
