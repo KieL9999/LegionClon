@@ -59,6 +59,21 @@ The design emphasizes a dark gaming aesthetic with golden accents, consistent wi
   - **Iconografía consistente**: Crown para GMs, User para jugadores, Shield para admin
   - **Acciones contextuales**: Botones específicos según el rol del usuario
 
+### 28 de septiembre de 2025 - FUNCIONALIDAD BUSCAR JUGADOR IMPLEMENTADA
+- **Nueva Funcionalidad "Buscar Jugador" Completada**
+  - Reemplazó la sección estática "Jugadores Registrados" con funcionalidad de búsqueda avanzada
+  - **Búsqueda en tiempo real**: Por nombre de usuario o correo electrónico
+  - **Interfaz intuitiva**: Campo de búsqueda con placeholders descriptivos
+  - **Resultados dinámicos**: Filtrado instantáneo mientras el usuario escribe
+  - **Estados visuales mejorados**: Mensajes cuando no hay búsqueda, sin resultados, o cargando
+  - **Gestión de roles completa**: Promover a GM y cambiar niveles desde resultados de búsqueda
+  - **UX optimizada**: Iconos distintivos (Search, Users) y feedback visual claro
+- **Configuración de Base de Datos Optimizada**
+  - Migrado de Neon WebSocket a PostgreSQL cliente nativo para mayor estabilidad
+  - Conexión directa sin SSL para entorno interno de Replit
+  - Eliminados errores de certificados auto-firmados
+  - Rendimiento mejorado en consultas de base de datos
+
 ### 28 de septiembre de 2025 - MIGRACIÓN EXITOSA COMPLETADA
 - **Migración de Replit Agent a Entorno Replit Completada**
   - Instalación completa de dependencias Node.js y paquetes npm
@@ -97,7 +112,10 @@ The design emphasizes a dark gaming aesthetic with golden accents, consistent wi
 - ✅ **Botones de promoción/degradación de usuarios**
 - ✅ **Endpoints seguros para cambio de roles**
 - ✅ **Interfaz responsive con badges diferenciados por nivel de GM**
-- ✅ **6 usuarios de prueba: 1 Admin, 1 CM, 2 GMs, 2 jugadores**
+- ✅ **Funcionalidad "Buscar Jugador" con filtrado en tiempo real**
+- ✅ **Búsqueda por usuario y correo electrónico**
+- ✅ **Gestión de roles desde resultados de búsqueda**
+- ✅ **Cuenta administrativa principal creada y funcionando**
 
 ### Protección de Datos
 - ✅ **Progreso guardado automáticamente con sistema auto-save de Replit**
@@ -114,9 +132,23 @@ The design emphasizes a dark gaming aesthetic with golden accents, consistent wi
 - Todos los datos protegidos y persistentes con múltiples capas de seguridad
 - **Guardado automático activo**: Sin riesgo de pérdida de datos
 
-## Credenciales de Prueba
-- **Administrador**: `admin_demo` / `admin123`
+## Credenciales de Acceso Activas
+
+### Cuenta Administrativa Principal
+- **Usuario Administrador**: `admin_usuario`
+- **Contraseña**: `Admin2024!`
+- **Rol**: Administrador (Nivel 7 - Acceso completo)
+- **Permisos**: Panel administrativo completo, gestión de usuarios, estadísticas GM
+
+### Cuentas de Prueba Adicionales
+- **Administrador Demo**: `admin_demo` / `admin123`
 - **Community Manager**: `community_mgr` / `test123`
 - **GM Eventos**: `gm_eventos` / `test123`
 - **GM Soporte**: `gm_soporte` / `test123`
 - **Jugadores**: `jugador1` / `test123`, `jugador2` / `test123`
+
+### Configuración de Base de Datos
+- **Base de datos**: PostgreSQL nativo de Replit
+- **Cliente**: Cliente PostgreSQL directo (pg)
+- **Conexión**: Sin SSL para entorno interno
+- **Estado**: Completamente funcional y optimizada
