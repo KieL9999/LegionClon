@@ -19,6 +19,10 @@ This project is a World of Warcraft Legion private server website, Legion Plus, 
 - ✅ **Player Database Enhancement**: Added coins, ban status, ban reason, and last login tracking
 - ✅ **Visual Player Stats**: Beautiful gradient cards displaying player information with icons
 - ✅ **Automatic Login Tracking**: System now automatically updates last login timestamp on user authentication
+- ✅ **Coins Display Enhancement**: Added golden "Monedas" card with 💰 emoji to player stats section
+- ✅ **Account Information Redesign**: Completely renovated with modern glassmorphism design, perfect symmetry, and consistent heights
+- ✅ **Security Streamlining**: Removed "Cambiar Email" functionality as requested for security compliance
+- ✅ **Rankings Navigation Fix**: Fixed "Rankings" button in header to properly navigate to rankings section on homepage
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
