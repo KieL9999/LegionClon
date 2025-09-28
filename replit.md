@@ -36,6 +36,30 @@ The design emphasizes a dark gaming aesthetic with golden accents, consistent wi
 
 ## Recent Changes
 
+### 28 de septiembre de 2025 - PANEL ADMINISTRATIVO REORGANIZADO EN DOS SECCIONES ESPECIALIZADAS
+- **Reorganización Completa del Panel Administrativo**
+  - **División estratégica en dos secciones** para mejor organización y usabilidad
+  - **Sección "Administración del Juego"**: 
+    - Estadísticas completas de jerarquía GM con conteos en tiempo real
+    - Gestión avanzada de Game Masters activos (promoción/degradación de roles)
+    - Búsqueda inteligente de jugadores para asignación de roles GM
+    - Módulo de eventos del juego (base preparada para funcionalidades futuras)
+  - **Sección "Configuraciones Web"**:
+    - Panel de configuración del servidor web y aplicación
+    - Sistema de logs y monitoreo del servidor
+    - Área organizada para configuraciones adicionales del sitio web
+  - **Navegación optimizada**: Pestañas intuitivas con iconos distintivos (Crown/Settings)
+  - **Experiencia de usuario mejorada**: Organización lógica y acceso más eficiente
+- **Resolución Definitiva de Errores de Conexión de Base de Datos**
+  - **Pool de conexiones PostgreSQL completamente optimizado** para máxima estabilidad
+  - **Eliminación total de errores 500** causados por desconexiones de base de datos
+  - **Configuración robusta** con timeouts apropiadosy manejo avanzado de errores
+  - **Conexiones persistentes** para rendimiento óptimo y sin interrupciones
+- **Usuario Administrador Configurado y Funcional**
+  - Cuenta administrativa principal creada con acceso nivel 7 completo
+  - Credenciales: `admin` / `admin123`
+  - Acceso total a ambas secciones del panel reorganizado
+
 ### 28 de septiembre de 2025 - PANEL ADMINISTRATIVO AVANZADO COMPLETADO
 - **Panel Administrativo Completamente Renovado**
   - **Estadísticas completas de jerarquía GM**: Visualización individual de los 7 niveles con conteos en tiempo real
@@ -135,8 +159,8 @@ The design emphasizes a dark gaming aesthetic with golden accents, consistent wi
 ## Credenciales de Acceso Activas
 
 ### Cuenta Administrativa Principal
-- **Usuario Administrador**: `admin_usuario`
-- **Contraseña**: `Admin2024!`
+- **Usuario Administrador**: `admin`
+- **Contraseña**: `admin123`
 - **Rol**: Administrador (Nivel 7 - Acceso completo)
 - **Permisos**: Panel administrativo completo, gestión de usuarios, estadísticas GM
 
