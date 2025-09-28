@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { changePasswordSchema, changeEmailSchema, USER_ROLES, ROLE_LABELS, changeRoleSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Key, Mail, ArrowLeft, Users } from "lucide-react";
+import { User, Settings, Shield, Key, Mail, ArrowLeft, Users, Crown, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -424,15 +424,88 @@ export function PlayerPanel() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-6">
-                        {/* Gestión de Usuarios */}
+                        {/* Estadísticas de la Jerarquía GM */}
+                        {usersQuery.data?.users && (
+                          <Card className="bg-muted border-border">
+                            <CardHeader>
+                              <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                <BarChart3 className="h-5 w-5 text-gaming-gold" />
+                                Estadísticas de la Jerarquía
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {(() => {
+                                const roleStats = usersQuery.data.users.reduce((stats: any, userData: UserType) => {
+                                  stats[userData.role] = (stats[userData.role] || 0) + 1;
+                                  return stats;
+                                }, {});
+                                
+                                const gmCount = usersQuery.data.users.filter((userData: UserType) => isGM(userData.role)).length;
+                                const playerCount = usersQuery.data.users.filter((userData: UserType) => !isGM(userData.role)).length;
+                                
+                                // Definir todos los niveles GM en orden jerárquico
+                                const gmRoles = [
+                                  { role: USER_ROLES.ADMINISTRADOR, label: "Nivel 7", name: "Administradores" },
+                                  { role: USER_ROLES.COMMUNITY_MANAGER, label: "Nivel 6", name: "Community Managers" },
+                                  { role: USER_ROLES.GM_JEFE, label: "Nivel 5", name: "GM Jefe" },
+                                  { role: USER_ROLES.GM_SUPERIOR, label: "Nivel 4", name: "GM Superior" },
+                                  { role: USER_ROLES.GM_EVENTOS, label: "Nivel 3", name: "GM Eventos" },
+                                  { role: USER_ROLES.GM_SOPORTE, label: "Nivel 2", name: "GM Soporte" },
+                                  { role: USER_ROLES.GM_ASPIRANTE, label: "Nivel 1", name: "GM Aspirante" }
+                                ];
+                                
+                                return (
+                                  <div className="space-y-4">
+                                    {/* Estadísticas Generales */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="text-center p-3 bg-gradient-to-r from-gaming-gold/20 to-gaming-gold/10 rounded border border-gaming-gold/30">
+                                        <p className="text-3xl font-bold text-gaming-gold">{gmCount}</p>
+                                        <p className="text-sm text-muted-foreground">Total Game Masters</p>
+                                      </div>
+                                      <div className="text-center p-3 bg-background rounded border">
+                                        <p className="text-3xl font-bold text-foreground">{playerCount}</p>
+                                        <p className="text-sm text-muted-foreground">Jugadores</p>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Jerarquía GM Completa */}
+                                    <div>
+                                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Distribución por Nivel GM</h4>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                        {gmRoles.map((gmRole) => (
+                                          <div key={gmRole.role} className="flex items-center justify-between p-2 bg-background rounded border">
+                                            <div className="flex items-center gap-2">
+                                              <Crown className="h-4 w-4 text-gaming-gold" />
+                                              <div>
+                                                <p className="text-xs font-medium text-foreground">{gmRole.label}</p>
+                                                <p className="text-xs text-muted-foreground">{gmRole.name}</p>
+                                              </div>
+                                            </div>
+                                            <Badge 
+                                              className={`text-xs ${(roleStats[gmRole.role] || 0) > 0 ? 'bg-gaming-gold text-white' : 'bg-muted text-muted-foreground'}`}
+                                            >
+                                              {roleStats[gmRole.role] || 0}
+                                            </Badge>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Game Masters */}
                         <Card className="bg-muted border-border">
                           <CardHeader>
                             <CardTitle className="text-foreground text-lg flex items-center gap-2">
-                              <Users className="h-5 w-5 text-gaming-gold" />
-                              Gestión de Usuarios
+                              <Crown className="h-5 w-5 text-gaming-gold" />
+                              Game Masters Activos
                             </CardTitle>
                             <CardDescription className="text-muted-foreground">
-                              Administrar roles de jugadores y Game Masters
+                              Staff del servidor con permisos especiales
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -441,67 +514,183 @@ export function PlayerPanel() {
                             ) : usersQuery.error ? (
                               <div className="text-destructive">Error al cargar usuarios</div>
                             ) : (
-                              <div className="space-y-4">
-                                <div className="grid gap-3">
-                                  {usersQuery.data?.users?.map((userData: UserType) => (
-                                    <div key={userData.id} className="flex items-center justify-between p-3 bg-background rounded border">
-                                      <div className="flex items-center gap-3">
-                                        <div>
-                                          <p className="font-medium text-foreground">{userData.username}</p>
-                                          <p className="text-sm text-muted-foreground">{userData.email}</p>
-                                        </div>
-                                        <Badge 
-                                          variant={isGM(userData.role) ? "default" : "secondary"}
-                                          className={isGM(userData.role) ? "bg-gaming-gold text-white" : ""}
-                                        >
-                                          {getRoleDisplayName(userData.role)}
-                                        </Badge>
+                              <div className="space-y-3">
+                                {usersQuery.data?.users?.filter((userData: UserType) => isGM(userData.role)).map((userData: UserType) => (
+                                  <div key={userData.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gaming-gold/10 to-transparent rounded border border-gaming-gold/20">
+                                    <div className="flex items-center gap-3">
+                                      <Crown className="h-5 w-5 text-gaming-gold" />
+                                      <div>
+                                        <p className="font-medium text-foreground flex items-center gap-2">
+                                          {userData.username}
+                                          {userData.id === user.id && <span className="text-sm text-gaming-gold">(Tu cuenta)</span>}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">{userData.email}</p>
                                       </div>
+                                      <Badge className="bg-gaming-gold text-white">
+                                        {getRoleDisplayName(userData.role)}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                       {userData.id !== user.id && (
-                                        <Select
-                                          value={userData.role}
-                                          onValueChange={(newRole) => {
-                                            changeRoleMutation.mutate({
-                                              userId: userData.id,
-                                              newRole: newRole as any
-                                            });
-                                          }}
-                                          disabled={changeRoleMutation.isPending}
-                                        >
-                                          <SelectTrigger className="w-48 bg-input border-border text-foreground" data-testid={`select-role-${userData.id}`}>
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value={USER_ROLES.PLAYER}>
-                                              {ROLE_LABELS[USER_ROLES.PLAYER]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.GM_ASPIRANTE}>
-                                              {ROLE_LABELS[USER_ROLES.GM_ASPIRANTE]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.GM_SOPORTE}>
-                                              {ROLE_LABELS[USER_ROLES.GM_SOPORTE]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.GM_EVENTOS}>
-                                              {ROLE_LABELS[USER_ROLES.GM_EVENTOS]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.GM_SUPERIOR}>
-                                              {ROLE_LABELS[USER_ROLES.GM_SUPERIOR]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.GM_JEFE}>
-                                              {ROLE_LABELS[USER_ROLES.GM_JEFE]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.COMMUNITY_MANAGER}>
-                                              {ROLE_LABELS[USER_ROLES.COMMUNITY_MANAGER]}
-                                            </SelectItem>
-                                            <SelectItem value={USER_ROLES.ADMINISTRADOR}>
-                                              {ROLE_LABELS[USER_ROLES.ADMINISTRADOR]}
-                                            </SelectItem>
-                                          </SelectContent>
-                                        </Select>
+                                        <>
+                                          <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => {
+                                              changeRoleMutation.mutate({
+                                                userId: userData.id,
+                                                newRole: USER_ROLES.PLAYER
+                                              });
+                                            }}
+                                            disabled={changeRoleMutation.isPending}
+                                            data-testid={`button-demote-${userData.id}`}
+                                          >
+                                            <TrendingDown className="h-4 w-4 mr-1" />
+                                            Expulsar GM
+                                          </Button>
+                                          <Select
+                                            value={userData.role}
+                                            onValueChange={(newRole) => {
+                                              changeRoleMutation.mutate({
+                                                userId: userData.id,
+                                                newRole: newRole as any
+                                              });
+                                            }}
+                                            disabled={changeRoleMutation.isPending}
+                                          >
+                                            <SelectTrigger className="w-40 bg-input border-border text-foreground" data-testid={`select-gm-role-${userData.id}`}>
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value={USER_ROLES.GM_ASPIRANTE}>
+                                                GM Nivel 1
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.GM_SOPORTE}>
+                                                GM Nivel 2
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.GM_EVENTOS}>
+                                                GM Nivel 3
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.GM_SUPERIOR}>
+                                                GM Nivel 4
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.GM_JEFE}>
+                                                GM Nivel 5
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.COMMUNITY_MANAGER}>
+                                                GM Nivel 6
+                                              </SelectItem>
+                                              <SelectItem value={USER_ROLES.ADMINISTRADOR}>
+                                                GM Nivel 7
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </>
                                       )}
                                     </div>
-                                  )) || []}
-                                </div>
+                                  </div>
+                                )) || []}
+                                {usersQuery.data?.users?.filter((userData: UserType) => isGM(userData.role)).length === 0 && (
+                                  <p className="text-muted-foreground text-center py-4">No hay Game Masters registrados</p>
+                                )}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        {/* Jugadores */}
+                        <Card className="bg-muted border-border">
+                          <CardHeader>
+                            <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                              <Users className="h-5 w-5 text-gaming-gold" />
+                              Jugadores Registrados
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                              Usuarios sin permisos administrativos
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {usersQuery.isLoading ? (
+                              <div className="text-muted-foreground">Cargando usuarios...</div>
+                            ) : usersQuery.error ? (
+                              <div className="text-destructive">Error al cargar usuarios</div>
+                            ) : (
+                              <div className="space-y-3">
+                                {usersQuery.data?.users?.filter((userData: UserType) => !isGM(userData.role)).map((userData: UserType) => (
+                                  <div key={userData.id} className="flex items-center justify-between p-3 bg-background rounded border">
+                                    <div className="flex items-center gap-3">
+                                      <User className="h-5 w-5 text-muted-foreground" />
+                                      <div>
+                                        <p className="font-medium text-foreground">{userData.username}</p>
+                                        <p className="text-sm text-muted-foreground">{userData.email}</p>
+                                      </div>
+                                      <Badge variant="secondary">
+                                        {getRoleDisplayName(userData.role)}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="default"
+                                        className="bg-gaming-gold hover:bg-gaming-gold/90 text-white"
+                                        onClick={() => {
+                                          changeRoleMutation.mutate({
+                                            userId: userData.id,
+                                            newRole: USER_ROLES.GM_ASPIRANTE
+                                          });
+                                        }}
+                                        disabled={changeRoleMutation.isPending}
+                                        data-testid={`button-promote-${userData.id}`}
+                                      >
+                                        <TrendingUp className="h-4 w-4 mr-1" />
+                                        Promover a GM
+                                      </Button>
+                                      <Select
+                                        value={userData.role}
+                                        onValueChange={(newRole) => {
+                                          changeRoleMutation.mutate({
+                                            userId: userData.id,
+                                            newRole: newRole as any
+                                          });
+                                        }}
+                                        disabled={changeRoleMutation.isPending}
+                                      >
+                                        <SelectTrigger className="w-40 bg-input border-border text-foreground" data-testid={`select-player-role-${userData.id}`}>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value={USER_ROLES.PLAYER}>
+                                            Jugador
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.GM_ASPIRANTE}>
+                                            GM Nivel 1
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.GM_SOPORTE}>
+                                            GM Nivel 2
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.GM_EVENTOS}>
+                                            GM Nivel 3
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.GM_SUPERIOR}>
+                                            GM Nivel 4
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.GM_JEFE}>
+                                            GM Nivel 5
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.COMMUNITY_MANAGER}>
+                                            GM Nivel 6
+                                          </SelectItem>
+                                          <SelectItem value={USER_ROLES.ADMINISTRADOR}>
+                                            GM Nivel 7
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                )) || []}
+                                {usersQuery.data?.users?.filter((userData: UserType) => !isGM(userData.role)).length === 0 && (
+                                  <p className="text-muted-foreground text-center py-4">No hay jugadores registrados</p>
+                                )}
                               </div>
                             )}
                           </CardContent>
