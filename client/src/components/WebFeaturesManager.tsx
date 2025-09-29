@@ -180,18 +180,34 @@ export default function WebFeaturesManager() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Cargando características...</div>
-        </CardContent>
-      </Card>
+      <div className="bg-card border border-border rounded-lg">
+        <div className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gaming-gold"></div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-foreground">Gestión de Características</h3>
+    <div className="bg-card border border-border rounded-lg">
+      <div className="p-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            Gestión de Características Web
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Administra las características que aparecerán en la página principal
+          </p>
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-sm text-muted-foreground">
+            {features.length} característica{features.length !== 1 ? 's' : ''} total{features.length !== 1 ? 'es' : ''}
+          </div>
+
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-create-feature" className="bg-gaming-gold hover:bg-gaming-gold/90">
@@ -442,17 +458,21 @@ export default function WebFeaturesManager() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
+      <div className="space-y-4">
         {features.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
-              No hay características configuradas
-            </CardContent>
-          </Card>
+          <div className="border border-border rounded-lg p-12">
+            <div className="text-center">
+              <ImageIcon className="mx-auto h-16 w-16 text-muted-foreground/50" />
+              <h3 className="mt-4 text-base font-semibold text-foreground">No hay características</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Comienza creando tu primera característica web.
+              </p>
+            </div>
+          </div>
         ) : (
           features.map((feature: WebFeature) => (
-            <Card key={feature.id} className="bg-muted border-border">
-              <CardContent className="p-4">
+            <div key={feature.id} className="border border-border rounded-lg">
+              <div className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -519,8 +539,8 @@ export default function WebFeaturesManager() {
                     </AlertDialog>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))
         )}
       </div>
@@ -768,6 +788,7 @@ export default function WebFeaturesManager() {
           </Form>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
