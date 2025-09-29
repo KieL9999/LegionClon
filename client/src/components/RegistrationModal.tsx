@@ -75,7 +75,7 @@ export default function RegistrationModal({ open, onOpenChange }: RegistrationMo
     onSuccess: (data) => {
       toast({
         title: "¡Cuenta creada exitosamente!",
-        description: "Ya puedes iniciar sesión y comenzar tu aventura en Legion Plus.",
+        description: "Ya puedes iniciar sesión y comenzar tu aventura en AetherWoW.",
       });
       
       onOpenChange(false);
@@ -114,7 +114,7 @@ export default function RegistrationModal({ open, onOpenChange }: RegistrationMo
             Crear Cuenta
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Únete a miles de aventureros en Legion Plus
+            Únete a miles de aventureros en AetherWoW
           </DialogDescription>
         </DialogHeader>
 

@@ -29,14 +29,14 @@ export function useSiteSettings(): UseSiteSettingsReturn {
   useEffect(() => {
     if (!isLoading && settings.length > 0) {
       // Update document title
-      const siteTitle = getSettingValue('site_title', 'Legion Plus - Servidor Privado WoW Legion');
+      const siteTitle = getSettingValue('site_title', 'AetherWoW - Servidor Privado WoW Legion');
       if (siteTitle && document.title !== siteTitle) {
         document.title = siteTitle;
       }
 
       // Update meta description
       const siteDescription = getSettingValue('site_description', 
-        'Únete a la aventura épica en Legion Plus, el mejor servidor privado de World of Warcraft Legion con raids personalizados, jefes únicos y desafíos hardcore.');
+        'Únete a la aventura épica en AetherWoW, el mejor servidor privado de World of Warcraft Legion con contenido personalizado y una comunidad activa.');
       let metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
         metaDescription.setAttribute('content', siteDescription);
@@ -48,7 +48,7 @@ export function useSiteSettings(): UseSiteSettingsReturn {
       }
 
       // Update Open Graph title
-      const ogTitle = getSettingValue('og_title', 'Legion Plus - Servidor Privado WoW Legion');
+      const ogTitle = getSettingValue('og_title', 'AetherWoW - Servidor Privado WoW Legion');
       let metaOgTitle = document.querySelector('meta[property="og:title"]');
       if (metaOgTitle) {
         metaOgTitle.setAttribute('content', ogTitle);

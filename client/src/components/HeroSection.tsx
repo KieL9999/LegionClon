@@ -29,7 +29,7 @@ export default function HeroSection() {
           
           {/* Simplified title - solid color instead of gradient clip */}
           <h1 className="text-5xl md:text-7xl font-gaming font-black mb-6 text-gaming-gold">
-            Legion Plus
+            AetherWoW
           </h1>
           
           {/* Epic narrative text in elegant container */}

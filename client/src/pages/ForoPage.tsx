@@ -30,7 +30,7 @@ export default function ForoPage() {
     {
       id: 2,
       title: "Guías y Tutoriales",
-      description: "Aprende todo sobre Legion Plus con nuestras guías",
+      description: "Aprende todo sobre AetherWoW con nuestras guías",
       topics: 87,
       posts: 523,
       lastPost: "Hace 1 día",
@@ -81,7 +81,7 @@ export default function ForoPage() {
               Foro de la Comunidad
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Conecta con otros jugadores, comparte estrategias y mantente al día con las últimas noticias de Legion Plus
+              Conecta con otros jugadores, comparte estrategias y mantente al día con las últimas noticias de AetherWoW
             </p>
           </div>
 

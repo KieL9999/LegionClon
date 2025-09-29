@@ -34,9 +34,9 @@ export default function RealmistModal({ open, onOpenChange }: RealmistModalProps
 
   // TODO: Replace with real server information
   const serverInfo = {
-    name: "Legion Plus x7",
-    realmlist: "set realmlist logon.legionplus.biz",
-    website: "https://legionplus.biz",
+    name: "AetherWoW",
+    realmlist: "set realmlist logon.aetherwow.com",
+    website: "https://aetherwow.com",
     version: "7.3.5 (26972)",
     playersOnline: 247,
     maxPlayers: 3000,
@@ -80,7 +80,7 @@ export default function RealmistModal({ open, onOpenChange }: RealmistModalProps
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
               src={serverLogo} 
-              alt="Legion Plus" 
+              alt="AetherWoW" 
               className="w-12 h-12 object-contain"
             />
             <div>

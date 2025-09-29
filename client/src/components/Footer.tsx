@@ -20,21 +20,20 @@ export default function Footer() {
   return (
     <footer className="bg-card/50 border-t border-border mt-auto">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Logo & Description */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <img 
                 src={serverLogo} 
-                alt="Legion Plus" 
+                alt="AetherWoW" 
                 className="w-8 h-8 object-contain"
               />
               <div>
                 <h3 className="text-xl font-gaming font-bold text-gaming-gold">
-                  Legion Plus
+                  AetherWoW
                 </h3>
-                <p className="text-sm text-muted-foreground">x7 Server</p>
               </div>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
@@ -43,78 +42,6 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-foreground">Enlaces Rápidos</h4>
-            <div className="space-y-2">
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('inicio')}
-                data-testid="footer-link-inicio"
-              >
-                Inicio
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('noticias')}
-                data-testid="footer-link-noticias"
-              >
-                Noticias
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('rankings')}
-                data-testid="footer-link-rankings"
-              >
-                Rankings
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('guias')}
-                data-testid="footer-link-guias"
-              >
-                Guías
-              </Button>
-            </div>
-          </div>
-
-          {/* Game Info */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-foreground">Información del Juego</h4>
-            <div className="space-y-2">
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('registro')}
-                data-testid="footer-link-registro"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Crear Cuenta
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('descargar')}
-                data-testid="footer-link-descargar"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Descargar Cliente
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="justify-start p-0 h-auto text-muted-foreground hover:text-gaming-gold"
-                onClick={() => handleLinkClick('armeria')}
-                data-testid="footer-link-armeria"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Armería
-              </Button>
-            </div>
-          </div>
 
           {/* Social & Community */}
           <div className="space-y-4">
@@ -167,7 +94,7 @@ export default function Footer() {
         
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Legion Plus. Todos los derechos reservados. 
+            © {currentYear} AetherWoW. Todos los derechos reservados. 
             World of Warcraft es una marca registrada de Blizzard Entertainment.
           </p>
           <div className="flex gap-4 text-sm">
