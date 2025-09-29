@@ -74,15 +74,34 @@ export default function Header() {
         
         <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            {/* Clean Server Status Panel */}
+            {/* Enhanced Server Status Panel */}
             <div className="hidden md:flex items-center">
-              <div className="flex items-center gap-3 bg-gaming-gold/10 backdrop-blur-sm rounded-full px-6 py-2 border border-gaming-gold/30">
-                <Users className="w-5 h-5 text-gaming-gold animate-pulse" />
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-gaming-gold to-yellow-300 bg-clip-text text-transparent" data-testid="text-player-count">
-                    247
-                  </span>
-                  <span className="text-sm font-medium text-gaming-gold/80">jugadores conectados</span>
+              <div className="relative group">
+                {/* Background with subtle gradient and glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gaming-gold/5 via-gaming-gold/10 to-gaming-gold/5 rounded-2xl blur-sm group-hover:blur-md transition-all duration-300"></div>
+                <div className="relative flex items-center gap-4 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-8 py-4 border border-gaming-gold/20 shadow-xl">
+                  {/* Icon with enhanced styling */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gaming-gold/30 rounded-full blur-md"></div>
+                    <div className="relative w-10 h-10 bg-gradient-to-br from-gaming-gold/20 to-yellow-400/20 rounded-full flex items-center justify-center border border-gaming-gold/30">
+                      <Users className="w-6 h-6 text-gaming-gold" />
+                    </div>
+                  </div>
+                  
+                  {/* Content with improved typography */}
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold bg-clip-text text-transparent tracking-tight" data-testid="text-player-count">
+                        247
+                      </span>
+                      <span className="text-sm font-semibold text-gaming-gold/90 uppercase tracking-wider">
+                        Online
+                      </span>
+                    </div>
+                    <span className="text-xs font-medium text-gaming-gold/60 uppercase tracking-wide">
+                      Jugadores Conectados
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
