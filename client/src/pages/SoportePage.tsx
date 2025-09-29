@@ -1,7 +1,132 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+
+const createTicketSchema = z.object({
+  title: z.string().min(1, "El título es requerido").max(200, "El título no puede exceder 200 caracteres"),
+  description: z.string().min(1, "La descripción es requerida"),
+  category: z.string().min(1, "La categoría es requerida"),
+  priority: z.string().min(1, "La prioridad es requerida")
+});
+
+type CreateTicketData = z.infer<typeof createTicketSchema>;
+
+interface SupportTicket {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const statusColors = {
+  open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  in_progress: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  resolved: "bg-green-500/20 text-green-400 border-green-500/30",
+  closed: "bg-gray-500/20 text-gray-400 border-gray-500/30"
+};
+
+const statusLabels = {
+  open: "Abierto",
+  in_progress: "En Progreso",
+  resolved: "Resuelto",
+  closed: "Cerrado"
+};
+
+const priorityColors = {
+  low: "bg-green-500/20 text-green-400 border-green-500/30",
+  normal: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  high: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  urgent: "bg-red-500/20 text-red-400 border-red-500/30"
+};
+
+const priorityLabels = {
+  low: "Baja",
+  normal: "Normal",
+  high: "Alta",
+  urgent: "Urgente"
+};
 
 export default function SoportePage() {
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+
+  const form = useForm<CreateTicketData>({
+    resolver: zodResolver(createTicketSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "general",
+      priority: "normal"
+    }
+  });
+
+  // Fetch user's tickets
+  const { data: tickets, isLoading } = useQuery({
+    queryKey: ['/api/tickets'],
+    enabled: isAuthenticated
+  });
+
+  // Create ticket mutation
+  const createTicketMutation = useMutation({
+    mutationFn: async (data: CreateTicketData) => {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al crear ticket');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Ticket creado",
+        description: "Tu ticket ha sido creado exitosamente"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      setCreateTicketOpen(false);
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al crear el ticket",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onSubmit = (data: CreateTicketData) => {
+    createTicketMutation.mutate(data);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <Header />
@@ -12,7 +137,7 @@ export default function SoportePage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <span className="text-3xl">🎧</span>
+                <span className="text-3xl">❓</span>
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
                 Centro de Soporte
@@ -22,6 +147,191 @@ export default function SoportePage() {
               Estamos aquí para ayudarte. Encuentra respuestas a tus preguntas o contacta con nuestro equipo de soporte.
             </p>
           </div>
+
+          {/* Tickets Section for authenticated users */}
+          {isAuthenticated && (
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-blue-400">Mis Tickets de Soporte</h2>
+                <Dialog open={createTicketOpen} onOpenChange={setCreateTicketOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25"
+                      data-testid="button-create-ticket"
+                    >
+                      ➕ Crear Nuevo Ticket
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-blue-500/20 max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-blue-400 text-xl">Crear Nuevo Ticket de Soporte</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">Título</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Describe brevemente tu problema..."
+                                  className="bg-gray-800/50 border-gray-600 text-white"
+                                  data-testid="input-ticket-title"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">Categoría</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white" data-testid="select-ticket-category">
+                                      <SelectValue placeholder="Selecciona una categoría" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="bg-gray-800 border-gray-600">
+                                    <SelectItem value="general">General</SelectItem>
+                                    <SelectItem value="technical">Técnico</SelectItem>
+                                    <SelectItem value="account">Cuenta</SelectItem>
+                                    <SelectItem value="billing">Donaciones</SelectItem>
+                                    <SelectItem value="other">Otro</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="priority"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">Prioridad</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white" data-testid="select-ticket-priority">
+                                      <SelectValue placeholder="Selecciona la prioridad" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="bg-gray-800 border-gray-600">
+                                    <SelectItem value="low">Baja</SelectItem>
+                                    <SelectItem value="normal">Normal</SelectItem>
+                                    <SelectItem value="high">Alta</SelectItem>
+                                    <SelectItem value="urgent">Urgente</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">Descripción</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Describe tu problema con el mayor detalle posible..."
+                                  className="bg-gray-800/50 border-gray-600 text-white min-h-[100px]"
+                                  data-testid="textarea-ticket-description"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex gap-4">
+                          <Button
+                            type="submit"
+                            disabled={createTicketMutation.isPending}
+                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white flex-1"
+                            data-testid="button-submit-ticket"
+                          >
+                            {createTicketMutation.isPending ? "Creando..." : "Crear Ticket"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setCreateTicketOpen(false)}
+                            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                            data-testid="button-cancel-ticket"
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {/* Tickets List */}
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="text-gray-400">Cargando tickets...</div>
+                </div>
+              ) : (tickets as any)?.tickets?.length > 0 ? (
+                <div className="grid gap-6">
+                  {((tickets as any)?.tickets || []).map((ticket: SupportTicket) => (
+                    <Card key={ticket.id} className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-gray-700/50 shadow-xl" data-testid={`ticket-card-${ticket.id}`}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-white text-lg mb-2">{ticket.title}</CardTitle>
+                            <div className="flex gap-2 mb-3">
+                              <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`status-${ticket.status}`}>
+                                {statusLabels[ticket.status as keyof typeof statusLabels]}
+                              </Badge>
+                              <Badge className={priorityColors[ticket.priority as keyof typeof priorityColors]} data-testid={`priority-${ticket.priority}`}>
+                                {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
+                              </Badge>
+                              <Badge variant="outline" className="border-gray-600 text-gray-300">
+                                {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-right text-sm text-gray-400">
+                            <div>Creado: {format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm', { locale: es })}</div>
+                            {ticket.updatedAt !== ticket.createdAt && (
+                              <div>Actualizado: {format(new Date(ticket.updatedAt), 'dd/MM/yyyy HH:mm', { locale: es })}</div>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-gray-300 leading-relaxed" data-testid={`ticket-description-${ticket.id}`}>
+                          {ticket.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🎫</div>
+                  <h3 className="text-xl font-semibold text-white mb-2">No tienes tickets aún</h3>
+                  <p className="text-gray-400 mb-6">Crea tu primer ticket de soporte para obtener ayuda con cualquier problema</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Content Grid */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">

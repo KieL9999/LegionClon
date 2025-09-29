@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1273,6 +1273,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.error('Update site setting error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Support ticket routes
+  // Get current user's tickets
+  app.get('/api/tickets', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión para ver tus tickets'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      const tickets = await storage.getSupportTicketsByUserId(user.id);
+      
+      res.status(200).json({
+        success: true,
+        tickets
+      });
+      
+    } catch (error) {
+      console.error('Get tickets error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Create new support ticket
+  app.post('/api/tickets', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión para crear un ticket'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Validate request body
+      const validatedData = insertSupportTicketSchema.parse({
+        ...req.body,
+        userId: user.id
+      });
+      
+      // Create ticket
+      const newTicket = await storage.createSupportTicket(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Ticket creado exitosamente',
+        ticket: newTicket
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Create ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Update support ticket
+  app.patch('/api/tickets/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión para actualizar tickets'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      const ticketId = req.params.id;
+      
+      // Check if user owns the ticket or is admin/GM
+      const existingTickets = await storage.getSupportTicketsByUserId(user.id);
+      const userOwnsTicket = existingTickets.some(ticket => ticket.id === ticketId);
+      const isStaff = user.role !== 'player';
+      
+      if (!userOwnsTicket && !isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'No tienes permisos para actualizar este ticket'
+        });
+      }
+
+      // Validate request body
+      const validatedData = updateSupportTicketSchema.parse(req.body);
+      
+      // Update ticket
+      const updatedTicket = await storage.updateSupportTicket(ticketId, validatedData);
+      
+      if (!updatedTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Ticket actualizado exitosamente',
+        ticket: updatedTicket
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+      
+      console.error('Update ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get all tickets (admin/GM only)
+  app.get('/api/admin/tickets', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user || user.role === 'player') {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'No tienes permisos para ver todos los tickets'
+        });
+      }
+
+      const tickets = await storage.getAllSupportTickets();
+      
+      res.status(200).json({
+        success: true,
+        tickets
+      });
+      
+    } catch (error) {
+      console.error('Get all tickets error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

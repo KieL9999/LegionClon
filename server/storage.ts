@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, type SiteSetting, type InsertSiteSetting, type UpdateSiteSetting, users, sessions, webFeatures, serverNews, downloads, siteSettings } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, type SiteSetting, type InsertSiteSetting, type UpdateSiteSetting, type SupportTicket, type InsertSupportTicket, type UpdateSupportTicket, users, sessions, webFeatures, serverNews, downloads, siteSettings, supportTickets } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -39,6 +39,11 @@ export interface IStorage {
   createSiteSetting(setting: InsertSiteSetting): Promise<SiteSetting>;
   updateSiteSetting(key: string, setting: UpdateSiteSetting): Promise<SiteSetting | undefined>;
   deleteSiteSetting(key: string): Promise<SiteSetting | undefined>;
+  getAllSupportTickets(): Promise<SupportTicket[]>;
+  getSupportTicketsByUserId(userId: string): Promise<SupportTicket[]>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  updateSupportTicket(id: string, ticket: UpdateSupportTicket): Promise<SupportTicket | undefined>;
+  deleteSupportTicket(id: string): Promise<SupportTicket | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -392,6 +397,57 @@ export class DatabaseStorage implements IStorage {
       
     return deletedSetting || undefined;
   }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    const tickets = await db
+      .select()
+      .from(supportTickets)
+      .orderBy(desc(supportTickets.createdAt));
+    return tickets;
+  }
+
+  async getSupportTicketsByUserId(userId: string): Promise<SupportTicket[]> {
+    const tickets = await db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.userId, userId))
+      .orderBy(desc(supportTickets.createdAt));
+    return tickets;
+  }
+
+  async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
+    const [ticket] = await db
+      .insert(supportTickets)
+      .values({
+        ...insertTicket,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return ticket;
+  }
+
+  async updateSupportTicket(id: string, updateData: UpdateSupportTicket): Promise<SupportTicket | undefined> {
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set({ 
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(supportTickets.id, id))
+      .returning();
+    
+    return updatedTicket || undefined;
+  }
+
+  async deleteSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [deletedTicket] = await db
+      .delete(supportTickets)
+      .where(eq(supportTickets.id, id))
+      .returning();
+    
+    return deletedTicket || undefined;
+  }
 }
 
 // Memory storage implementation as fallback when database is not available
@@ -402,6 +458,7 @@ export class MemStorage implements IStorage {
   private serverNews: Map<string, ServerNews> = new Map();
   private downloads: Map<string, Download> = new Map();
   private siteSettings: Map<string, SiteSetting> = new Map();
+  private supportTickets: Map<string, SupportTicket> = new Map();
 
   constructor() {
     this.initializeDefaults();
@@ -794,6 +851,63 @@ export class MemStorage implements IStorage {
       this.siteSettings.delete(key);
     }
     return setting;
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return Array.from(this.supportTickets.values())
+      .sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+        return 0;
+      });
+  }
+
+  async getSupportTicketsByUserId(userId: string): Promise<SupportTicket[]> {
+    return Array.from(this.supportTickets.values())
+      .filter(ticket => ticket.userId === userId)
+      .sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+        return 0;
+      });
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const id = randomUUID();
+    const now = new Date();
+    const supportTicket: SupportTicket = {
+      id,
+      userId: ticket.userId,
+      title: ticket.title,
+      description: ticket.description,
+      status: ticket.status || "open",
+      priority: ticket.priority || "normal",
+      category: ticket.category || "general",
+      assignedTo: ticket.assignedTo || null,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.supportTickets.set(id, supportTicket);
+    return supportTicket;
+  }
+
+  async updateSupportTicket(id: string, updateData: UpdateSupportTicket): Promise<SupportTicket | undefined> {
+    const ticket = this.supportTickets.get(id);
+    if (!ticket) return undefined;
+    
+    const updatedTicket = { ...ticket, ...updateData, updatedAt: new Date() };
+    this.supportTickets.set(id, updatedTicket);
+    return updatedTicket;
+  }
+
+  async deleteSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const ticket = this.supportTickets.get(id);
+    if (ticket) {
+      this.supportTickets.delete(id);
+    }
+    return ticket;
   }
 }
 
