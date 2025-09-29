@@ -115,21 +115,6 @@ export default function HeroSection() {
           </Button>
         </div>
 
-        {/* Simplified Features Preview */}
-        <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-300">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-gaming-gold" />
-            <span>Raids Personalizados</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-green-400" />
-            <span>Jefes Únicos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span>Desafío Hardcore</span>
-          </div>
-        </div>
       </div>
       
       {/* Modals */}
