@@ -21,11 +21,6 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-20">
         <div className="mb-8">
-          {/* Simplified server status - no blur effect */}
-          <div className="inline-flex items-center gap-2 bg-black/40 border border-gaming-gold/40 rounded-full px-4 py-2 mb-6">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span className="text-sm font-medium text-gaming-gold">Servidor Online</span>
-          </div>
           
           {/* Simplified title - solid color instead of gradient clip */}
           <h1 className="text-5xl md:text-7xl font-gaming font-black mb-6 text-gaming-gold">
