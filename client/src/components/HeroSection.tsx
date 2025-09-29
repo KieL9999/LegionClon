@@ -47,12 +47,12 @@ export default function HeroSection() {
             <div className="text-sm text-gray-300 font-medium">Jugadores Online</div>
           </div>
           <div className="bg-black/50 border border-gray-700 rounded-lg px-4 py-6 text-center">
-            <div className="text-3xl font-bold text-green-400 mb-2">x7</div>
-            <div className="text-sm text-gray-300 font-medium">Rates de Experiencia</div>
+            <div className="text-3xl font-bold text-green-400 mb-2">1,523</div>
+            <div className="text-sm text-gray-300 font-medium">Jugadores Últimas 24h</div>
           </div>
           <div className="bg-black/50 border border-gray-700 rounded-lg px-4 py-6 text-center">
-            <div className="text-3xl font-bold text-blue-400 mb-2">99.9%</div>
-            <div className="text-sm text-gray-300 font-medium">Tiempo Activo</div>
+            <div className="text-3xl font-bold text-blue-400 mb-2">15,847</div>
+            <div className="text-sm text-gray-300 font-medium">Cuentas Registradas</div>
           </div>
         </div>
 
