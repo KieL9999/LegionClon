@@ -47,7 +47,7 @@ export default function RankingsSection() {
               </h2>
             </div>
             <p className="text-xl text-muted-foreground">
-              Compite por la gloria y demuestra tu dominio en Legion Plus
+              Compite por la gloria y demuestra tu dominio en AetherWoW
             </p>
           </div>
           

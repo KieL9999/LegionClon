@@ -66,7 +66,7 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card">
         <DialogHeader>
           <DialogTitle className="text-2xl font-gaming text-gaming-gold">
-            Descargas de Legion Plus
+            Descargas de AetherWoW
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Elige entre el cliente completo o descargar solo los parches más recientes

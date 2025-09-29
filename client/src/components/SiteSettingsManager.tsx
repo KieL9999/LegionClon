@@ -68,13 +68,13 @@ export default function SiteSettingsManager() {
     const defaultSettings: InsertSiteSetting[] = [
       {
         key: 'site_title',
-        value: 'Legion Plus - Servidor Privado WoW Legion | La Aventura Legendaria Te Espera',
+        value: 'AetherWoW - Servidor Privado WoW Legion | La Aventura Legendaria Te Espera',
         description: 'Título del sitio web que aparece en el navegador',
         type: 'text'
       },
       {
         key: 'site_description',
-        value: 'Únete a la aventura épica en Legion Plus, el mejor servidor privado de World of Warcraft Legion con raids personalizados, jefes únicos y desafíos hardcore. ¡Empieza tu legendaria aventura ahora!',
+        value: 'Únete a la aventura épica en AetherWoW, el mejor servidor privado de World of Warcraft Legion con raids personalizados, jefes únicos y desafíos hardcore. ¡Empieza tu legendaria aventura ahora!',
         description: 'Descripción del sitio para SEO',
         type: 'text'
       },
@@ -86,7 +86,7 @@ export default function SiteSettingsManager() {
       },
       {
         key: 'og_title',
-        value: 'Legion Plus - Servidor Privado WoW Legion',
+        value: 'AetherWoW - Servidor Privado WoW Legion',
         description: 'Título para Open Graph (redes sociales)',
         type: 'text'
       },

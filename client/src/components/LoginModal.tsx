@@ -67,7 +67,7 @@ export default function LoginModal({ open, onOpenChange, onLoginSuccess }: Login
             Iniciar Sesión
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Accede a tu cuenta de Legion Plus para participar en el foro y disfrutar de todas las funciones.
+            Accede a tu cuenta de AetherWoW para participar en el foro y disfrutar de todas las funciones.
           </DialogDescription>
         </DialogHeader>
 

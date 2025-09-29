@@ -414,7 +414,7 @@ export class MemStorage implements IStorage {
       id: adminId,
       username: "admin",
       password: this.hashPassword("admin123"),
-      email: "admin@legionplus.com",
+      email: "admin@aetherwow.com",
       role: "administrador",
       coins: 1000,
       vipLevel: 5,
@@ -430,7 +430,7 @@ export class MemStorage implements IStorage {
     const feature1: WebFeature = {
       id: randomUUID(),
       title: "Legion Raids Exclusivas",
-      description: "Descubre las mazmorras y raids únicas disponibles solo en Legion Plus",
+      description: "Descubre las mazmorras y raids únicas disponibles solo en AetherWoW",
       image: "/api/placeholder/400/300",
       type: "Característica",
       category: "pve",
@@ -443,8 +443,8 @@ export class MemStorage implements IStorage {
 
     // Add default site settings
     const defaultSettings = [
-      { key: "site_title", value: "Legion Plus - Servidor WoW Legion", description: "Título del sitio web", type: "text" },
-      { key: "server_name", value: "Legion Plus", description: "Nombre del servidor", type: "text" },
+      { key: "site_title", value: "AetherWoW - Servidor WoW Legion", description: "Título del sitio web", type: "text" },
+      { key: "server_name", value: "AetherWoW", description: "Nombre del servidor", type: "text" },
       { key: "online_players", value: "247", description: "Jugadores conectados", type: "text" }
     ];
 

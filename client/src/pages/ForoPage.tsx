@@ -182,7 +182,7 @@ export default function ForoPage() {
                 ¡Únete a la Conversación!
               </h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Inicia sesión o crea una cuenta para participar en las discusiones, crear temas y conectar con otros jugadores de Legion Plus.
+                Inicia sesión o crea una cuenta para participar en las discusiones, crear temas y conectar con otros jugadores de AetherWoW.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 

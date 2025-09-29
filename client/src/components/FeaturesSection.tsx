@@ -81,7 +81,7 @@ export default function FeaturesSection() {
             Características Épicas
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Descubre todas las mejoras y contenido personalizado que hacen de Legion Plus una experiencia única
+            Descubre todas las mejoras y contenido personalizado que hacen de AetherWoW una experiencia única
           </p>
         </div>
 

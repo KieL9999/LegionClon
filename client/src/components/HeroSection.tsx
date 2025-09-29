@@ -19,7 +19,7 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-20">
+      <div className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-8">
         <div className="mb-8">
           
           {/* Simplified title - solid color instead of gradient clip */}
