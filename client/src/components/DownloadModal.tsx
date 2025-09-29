@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Lock, Calendar, HardDrive, Users, FileText, AlertCircle } from "lucide-react";
+import { Download, Lock, Calendar, HardDrive, Users, FileText, AlertCircle, Server, Link } from "lucide-react";
 import type { Download as DownloadType } from "@shared/schema";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -22,8 +22,16 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
 
   const handleDownload = (download: DownloadType) => {
     console.log(`Downloading ${download.title}`);
-    // Increment download count could be implemented here
-    window.open(download.downloadUrl, '_blank', 'noopener,noreferrer');
+    
+    if (download.localFilePath) {
+      // Use local file endpoint (automatically increments download count)
+      window.open(`/api/download/${download.id}`, '_blank', 'noopener,noreferrer');
+    } else if (download.downloadUrl) {
+      // Use external URL (TODO: implement download count increment)
+      window.open(download.downloadUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      console.error('No download URL or local file available for:', download.title);
+    }
   };
 
   // Filter downloads by type
@@ -116,6 +124,17 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
                         <Badge variant="secondary" className={getBadgeColor(download.type)}>
                           {getTypeLabel(download.type)}
                         </Badge>
+                        {download.localFilePath ? (
+                          <Badge variant="outline" className="text-xs bg-green-600/20 border-green-600 text-green-300">
+                            <Server className="w-3 h-3 mr-1" />
+                            Local
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600 text-blue-300">
+                            <Link className="w-3 h-3 mr-1" />
+                            Externo
+                          </Badge>
+                        )}
                         <span className="text-sm font-mono text-gaming-gold" data-testid={`text-client-version-${download.id}`}>
                           {download.version}
                         </span>
@@ -185,6 +204,17 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
                           <Badge variant="outline" className={getBadgeColor(download.type)}>
                             {getTypeLabel(download.type)}
                           </Badge>
+                          {download.localFilePath ? (
+                            <Badge variant="outline" className="text-xs bg-green-600/20 border-green-600 text-green-300">
+                              <Server className="w-3 h-3 mr-1" />
+                              Local
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600 text-blue-300">
+                              <Link className="w-3 h-3 mr-1" />
+                              Externo
+                            </Badge>
+                          )}
                           <span className="text-sm font-mono text-gaming-alliance" data-testid={`text-patch-version-${download.id}`}>
                             {download.version}
                           </span>
@@ -249,6 +279,17 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
                             <Badge variant="outline" className={getBadgeColor(download.type)}>
                               {getTypeLabel(download.type)}
                             </Badge>
+                            {download.localFilePath ? (
+                              <Badge variant="outline" className="text-xs bg-green-600/20 border-green-600 text-green-300">
+                                <Server className="w-3 h-3 mr-1" />
+                                Local
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600 text-blue-300">
+                                <Link className="w-3 h-3 mr-1" />
+                                Externo
+                              </Badge>
+                            )}
                             <span className="text-sm font-mono text-gaming-gold" data-testid={`text-addon-version-${download.id}`}>
                               {download.version}
                             </span>
@@ -314,6 +355,17 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
                             <Badge variant="outline" className={getBadgeColor(download.type)}>
                               {getTypeLabel(download.type)}
                             </Badge>
+                            {download.localFilePath ? (
+                              <Badge variant="outline" className="text-xs bg-green-600/20 border-green-600 text-green-300">
+                                <Server className="w-3 h-3 mr-1" />
+                                Local
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600 text-blue-300">
+                                <Link className="w-3 h-3 mr-1" />
+                                Externo
+                              </Badge>
+                            )}
                             <span className="text-sm font-mono text-purple-400" data-testid={`text-tool-version-${download.id}`}>
                               {download.version}
                             </span>

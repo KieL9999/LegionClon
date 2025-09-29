@@ -9,6 +9,7 @@ import HomePage from "@/pages/HomePage";
 import ForoPage from "@/pages/ForoPage";
 import SoportePage from "@/pages/SoportePage";
 import { PlayerPanel } from "@/pages/PlayerPanel";
+import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/foro" component={ForoPage} />
       <Route path="/soporte" component={SoportePage} />
       <Route path="/panel" component={PlayerPanel} />
