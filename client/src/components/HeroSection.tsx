@@ -10,56 +10,57 @@ export default function HeroSection() {
   const [downloadOpen, setDownloadOpen] = useState(false);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Optimized Background - Single overlay instead of multiple gradients */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroBackground})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background/90"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/40"></div>
+        <div className="absolute inset-0 bg-black/60"></div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-20">
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-gaming-gold/30 rounded-full px-4 py-2 mb-6">
-            <div className="w-2 h-2 rounded-full bg-status-online animate-pulse"></div>
+          {/* Simplified server status - no blur effect */}
+          <div className="inline-flex items-center gap-2 bg-black/40 border border-gaming-gold/40 rounded-full px-4 py-2 mb-6">
+            <div className="w-2 h-2 rounded-full bg-green-500"></div>
             <span className="text-sm font-medium text-gaming-gold">Servidor Online</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-gaming font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold">
+          {/* Simplified title - solid color instead of gradient clip */}
+          <h1 className="text-5xl md:text-7xl font-gaming font-black mb-6 text-gaming-gold">
             Legion Plus
           </h1>
           
-          <p className="text-xl md:text-2xl text-foreground mb-4 font-medium">
+          <p className="text-xl md:text-2xl text-white mb-4 font-medium">
             Únete a una aventura legendaria
           </p>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             con giros inesperados y desafíos épicos que te mantendrán al borde de tu asiento.
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
+        {/* Optimized Stats - no blur effects */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
+          <div className="bg-black/50 border border-gray-700 rounded-lg px-4 py-6 text-center">
             <div className="text-3xl font-bold text-gaming-gold mb-2" data-testid="text-online-count">247</div>
-            <div className="text-sm text-muted-foreground font-medium">Jugadores Online</div>
+            <div className="text-sm text-gray-300 font-medium">Jugadores Online</div>
           </div>
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
-            <div className="text-3xl font-bold text-gaming-emerald mb-2">x7</div>
-            <div className="text-sm text-muted-foreground font-medium">Rates de Experiencia</div>
+          <div className="bg-black/50 border border-gray-700 rounded-lg px-4 py-6 text-center">
+            <div className="text-3xl font-bold text-green-400 mb-2">x7</div>
+            <div className="text-sm text-gray-300 font-medium">Rates de Experiencia</div>
           </div>
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
-            <div className="text-3xl font-bold text-gaming-alliance mb-2">99.9%</div>
-            <div className="text-sm text-muted-foreground font-medium">Tiempo Activo</div>
+          <div className="bg-black/50 border border-gray-700 rounded-lg px-4 py-6 text-center">
+            <div className="text-3xl font-bold text-blue-400 mb-2">99.9%</div>
+            <div className="text-sm text-gray-300 font-medium">Tiempo Activo</div>
           </div>
         </div>
 
-        {/* CTA Buttons */}
+        {/* Simplified CTA Buttons - no complex effects */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
-            className="bg-gradient-to-r from-gaming-gold to-yellow-500 hover:from-yellow-500 hover:to-gaming-gold text-black font-bold px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="bg-gaming-gold hover:bg-yellow-500 text-black font-bold px-8 py-3 text-lg"
             onClick={() => setRealmistOpen(true)}
             data-testid="button-start-play"
           >
@@ -69,7 +70,7 @@ export default function HeroSection() {
           <Button 
             size="lg" 
             variant="outline" 
-            className="bg-background/20 backdrop-blur-sm border-2 border-gaming-gold/30 hover:border-gaming-gold text-foreground px-8 py-3 text-lg"
+            className="border-2 border-gaming-gold hover:bg-gaming-gold/10 text-white px-8 py-3 text-lg"
             onClick={() => setDownloadOpen(true)}
             data-testid="button-download-client"
           >
@@ -78,18 +79,18 @@ export default function HeroSection() {
           </Button>
         </div>
 
-        {/* Features Preview */}
-        <div className="mt-12 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+        {/* Simplified Features Preview */}
+        <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-300">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-gaming-gold" />
             <span>Raids Personalizados</span>
           </div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-gaming-emerald" />
+            <Sparkles className="w-4 h-4 text-green-400" />
             <span>Jefes Únicos</span>
           </div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-gaming-alliance" />
+            <Sparkles className="w-4 h-4 text-blue-400" />
             <span>Desafío Hardcore</span>
           </div>
         </div>
