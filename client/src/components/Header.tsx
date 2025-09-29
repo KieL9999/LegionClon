@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings } from "lucide-react";
+import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings, Headphones } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -156,6 +156,16 @@ export default function Header() {
                   <ShoppingBag className="w-4 h-4 mr-2 text-purple-400" />
                   Tienda
                 </Button>
+                <Link href="/soporte">
+                  <Button 
+                    variant="ghost" 
+                    className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/30 rounded-full font-medium transition-all duration-300" 
+                    data-testid="link-soporte"
+                  >
+                    <Headphones className="w-4 h-4 mr-2 text-blue-400" />
+                    Soporte
+                  </Button>
+                </Link>
               </div>
             </nav>
 

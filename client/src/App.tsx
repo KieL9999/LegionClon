@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import HomePage from "@/pages/HomePage";
 import ForoPage from "@/pages/ForoPage";
+import SoportePage from "@/pages/SoportePage";
 import { PlayerPanel } from "@/pages/PlayerPanel";
 import NotFound from "@/pages/not-found";
 
@@ -18,6 +19,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/foro" component={ForoPage} />
+      <Route path="/soporte" component={SoportePage} />
       <Route path="/panel" component={PlayerPanel} />
       <Route component={NotFound} />
     </Switch>
