@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -194,47 +193,52 @@ export default function SiteSettingsManager() {
   const settings = settingsData?.settings || [];
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gaming-gold"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <div className="text-center py-4">Cargando configuraciones...</div>;
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-gaming-gold flex items-center gap-2">
-          <Settings className="w-5 h-5" />
-          Configuraciones del Sitio
-        </CardTitle>
-        <CardDescription>
-          Configura el título, descripción e ícono del sitio web
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {settings.length === 0 ? (
-          <div className="text-center py-8 space-y-4">
-            <p className="text-muted-foreground">
-              No hay configuraciones disponibles
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="bg-muted/50 border border-border rounded-lg p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-foreground">Configuraciones del Sitio</h2>
+            <p className="text-sm text-muted-foreground">
+              Configura el título, descripción e ícono del sitio web
             </p>
+          </div>
+          {settings.length === 0 && (
             <Button
               onClick={initializeDefaults}
               disabled={isInitializing}
-              className="bg-gaming-gold hover:bg-gaming-gold/90"
+              className="bg-gaming-gold hover:bg-gaming-gold/90 text-black font-semibold"
               data-testid="button-initialize-settings"
             >
-              {isInitializing ? "Inicializando..." : "Inicializar Configuraciones"}
+              {isInitializing ? "Inicializando..." : "Inicializar"}
             </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Counter */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Settings className="h-4 w-4" />
+        <span>{settings.length} {settings.length === 1 ? 'configuración' : 'configuraciones'}</span>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-4">
+        {settings.length === 0 ? (
+          <div className="text-center py-8">
+            <Settings className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No hay configuraciones</h3>
+            <p className="text-muted-foreground mb-4">
+              Inicializa las configuraciones del sitio para comenzar
+            </p>
           </div>
         ) : (
           settings.map((setting) => (
-            <div key={setting.id} className="border border-card-border rounded-lg p-4">
+            <div key={setting.id} className="bg-muted/30 border border-border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {getSettingIcon(setting.key)}
@@ -343,7 +347,7 @@ export default function SiteSettingsManager() {
             </div>
           ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
