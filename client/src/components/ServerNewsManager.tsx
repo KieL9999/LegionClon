@@ -253,29 +253,31 @@ export default function ServerNewsManager() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestión de Noticias del Servidor</CardTitle>
-          <CardDescription>Cargando noticias...</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="bg-card border border-border rounded-lg">
+        <div className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gaming-gold"></div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   const news = newsData?.news || [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          Gestión de Noticias del Servidor
-        </CardTitle>
-        <CardDescription>
-          Administra las noticias que aparecerán en la página principal del servidor
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="bg-card border border-border rounded-lg">
+      <div className="p-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
+            Gestión de Noticias del Servidor
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Administra las noticias que aparecerán en la página principal del servidor
+          </p>
+        </div>
+
         <div className="flex justify-between items-center mb-6">
           <div className="text-sm text-muted-foreground">
             {news.length} noticia{news.length !== 1 ? 's' : ''} total{news.length !== 1 ? 'es' : ''}
@@ -283,7 +285,7 @@ export default function ServerNewsManager() {
           
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button data-testid="button-create-news">
+              <Button data-testid="button-create-news" className="bg-gaming-gold hover:bg-gaming-gold/90">
                 <Plus className="w-4 h-4 mr-2" />
                 Crear Noticia
               </Button>
@@ -556,21 +558,19 @@ export default function ServerNewsManager() {
         {/* News List */}
         <div className="space-y-4">
           {news.length === 0 ? (
-            <Card>
-              <CardContent className="flex items-center justify-center py-6">
-                <div className="text-center">
-                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-2 text-sm font-semibold">No hay noticias</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Comienza creando tu primera noticia del servidor.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="border border-border rounded-lg p-12">
+              <div className="text-center">
+                <Calendar className="mx-auto h-16 w-16 text-muted-foreground/50" />
+                <h3 className="mt-4 text-base font-semibold text-foreground">No hay noticias</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Comienza creando tu primera noticia del servidor.
+                </p>
+              </div>
+            </div>
           ) : (
             news.map((newsItem) => (
-              <Card key={newsItem.id} data-testid={`card-news-${newsItem.id}`}>
-                <CardContent className="p-6">
+              <div key={newsItem.id} data-testid={`card-news-${newsItem.id}`} className="border border-border rounded-lg">
+                <div className="p-6">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
@@ -644,8 +644,8 @@ export default function ServerNewsManager() {
                       </AlertDialog>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))
           )}
         </div>
@@ -941,7 +941,7 @@ export default function ServerNewsManager() {
             </Form>
           </DialogContent>
         </Dialog>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
