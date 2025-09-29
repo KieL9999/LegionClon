@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings, Calendar } from "lucide-react";
+import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -191,7 +191,7 @@ export default function Header() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm">💰</span>
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold text-yellow-500 leading-tight">{user?.coins || 0}</span>
+                            <span className="text-xs font-bold text-yellow-500 leading-tight" data-testid="text-coins">{user?.coins || 0}</span>
                             <span className="text-xs text-yellow-300/80 leading-tight">Monedas</span>
                           </div>
                         </div>
@@ -216,7 +216,7 @@ export default function Header() {
                               user?.vipLevel === 3 ? 'text-yellow-500' :
                               user?.vipLevel === 4 ? 'text-cyan-400' :
                               'text-purple-500'
-                            }`}>VIP {user?.vipLevel || 0}</span>
+                            }`} data-testid="text-vip-level">VIP {user?.vipLevel || 0}</span>
                             <span className="text-xs text-white/60 leading-tight">Nivel</span>
                           </div>
                         </div>
@@ -229,7 +229,7 @@ export default function Header() {
                         <div className="flex items-center gap-2">
                           <Shield className={`w-3 h-3 ${user?.isBanned ? 'text-red-500' : 'text-green-500'}`} />
                           <div className="flex flex-col">
-                            <span className={`text-xs font-bold leading-tight ${user?.isBanned ? 'text-red-500' : 'text-green-500'}`}>
+                            <span className={`text-xs font-bold leading-tight ${user?.isBanned ? 'text-red-500' : 'text-green-500'}`} data-testid="status-account">
                               {user?.isBanned ? 'Baneado' : 'Activo'}
                             </span>
                             <span className="text-xs text-white/60 leading-tight">Estado</span>
@@ -278,15 +278,15 @@ export default function Header() {
                       <div className="p-3 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-yellow-500">💰 Monedas:</span>
-                          <span className="text-yellow-300 font-bold">{user?.coins || 0}</span>
+                          <span className="text-yellow-300 font-bold" data-testid="text-coins-mobile">{user?.coins || 0}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-purple-400">VIP:</span>
-                          <span className="text-purple-300 font-bold">Nivel {user?.vipLevel || 0}</span>
+                          <span className="text-purple-300 font-bold" data-testid="text-vip-level-mobile">Nivel {user?.vipLevel || 0}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className={user?.isBanned ? 'text-red-500' : 'text-green-500'}>Estado:</span>
-                          <span className={`font-bold ${user?.isBanned ? 'text-red-400' : 'text-green-400'}`}>
+                          <span className={`font-bold ${user?.isBanned ? 'text-red-400' : 'text-green-400'}`} data-testid="status-account-mobile">
                             {user?.isBanned ? 'Baneado' : 'Activo'}
                           </span>
                         </div>
