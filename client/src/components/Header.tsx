@@ -94,16 +94,8 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Modern Server Status Panel */}
-            <div className="hidden md:flex items-center gap-8">
-              <div className="flex items-center gap-3 bg-green-500/10 backdrop-blur-sm rounded-full px-4 py-2 border border-green-500/20">
-                <div className="relative">
-                  <div className="w-4 h-4 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50"></div>
-                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-green-400 animate-ping opacity-30"></div>
-                </div>
-                <span className="text-sm font-semibold text-green-300">Servidor Online</span>
-              </div>
-              
+            {/* Clean Server Status Panel */}
+            <div className="hidden md:flex items-center">
               <div className="flex items-center gap-3 bg-gaming-gold/10 backdrop-blur-sm rounded-full px-6 py-2 border border-gaming-gold/30">
                 <Users className="w-5 h-5 text-gaming-gold animate-pulse" />
                 <div className="flex items-baseline gap-1">
@@ -115,12 +107,12 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Sleek Navigation Menu */}
+            {/* Clean Symmetric Navigation */}
             <nav className="hidden lg:flex items-center gap-2">
               <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2 border border-white/10">
                 <Link href="/">
                   <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-inicio">
-                    🏠 Inicio
+                    Inicio
                   </Button>
                 </Link>
                 <Button 
@@ -129,7 +121,7 @@ export default function Header() {
                   data-testid="link-noticias"
                   onClick={handleNoticiasClick}
                 >
-                  📰 Noticias
+                  Noticias
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -137,11 +129,11 @@ export default function Header() {
                   data-testid="link-rankings"
                   onClick={handleRankingsClick}
                 >
-                  🏆 Rankings
+                  Rankings
                 </Button>
                 <Link href="/foro">
                   <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-foro">
-                    💬 Foro
+                    Foro
                   </Button>
                 </Link>
                 <Button 
@@ -150,12 +142,8 @@ export default function Header() {
                   data-testid="link-descargar"
                   onClick={() => setDownloadOpen(true)}
                 >
-                  📥 Descargar
+                  Descargar
                 </Button>
-              </div>
-              
-              {/* Premium Actions */}
-              <div className="flex items-center gap-2 ml-3">
                 <Button 
                   variant="ghost" 
                   className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 hover:from-green-600/30 hover:to-emerald-600/30 border border-green-500/30 rounded-full font-medium transition-all duration-300" 
