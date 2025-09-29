@@ -196,53 +196,18 @@ export default function Header() {
                           </div>
                         </div>
                       </div>
-
-                      {/* VIP Level */}
-                      <div className={`bg-gradient-to-r border rounded-xl px-3 py-2 backdrop-blur-sm ${
-                        user?.vipLevel === 0 ? 'from-gray-500/20 to-gray-500/5 border-gray-500/30' :
-                        user?.vipLevel === 1 ? 'from-amber-600/20 to-amber-600/5 border-amber-600/30' :
-                        user?.vipLevel === 2 ? 'from-gray-400/20 to-gray-400/5 border-gray-400/30' :
-                        user?.vipLevel === 3 ? 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30' :
-                        user?.vipLevel === 4 ? 'from-cyan-400/20 to-cyan-400/5 border-cyan-400/30' :
-                        'from-purple-500/20 to-purple-500/5 border-purple-500/30'
-                      }`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{user?.vipLevel || 0}</span>
-                          <div className="flex flex-col">
-                            <span className={`text-xs font-bold leading-tight ${
-                              user?.vipLevel === 0 ? 'text-gray-500' :
-                              user?.vipLevel === 1 ? 'text-amber-600' :
-                              user?.vipLevel === 2 ? 'text-gray-400' :
-                              user?.vipLevel === 3 ? 'text-yellow-500' :
-                              user?.vipLevel === 4 ? 'text-cyan-400' :
-                              'text-purple-500'
-                            }`} data-testid="text-vip-level">VIP {user?.vipLevel || 0}</span>
-                            <span className="text-xs text-white/60 leading-tight">Nivel</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Account Status */}
-                      <div className={`bg-gradient-to-r border rounded-xl px-3 py-2 backdrop-blur-sm ${
-                        user?.isBanned ? 'from-red-500/20 to-red-500/5 border-red-500/30' : 'from-green-500/20 to-green-500/5 border-green-500/30'
-                      }`}>
-                        <div className="flex items-center gap-2">
-                          <Shield className={`w-3 h-3 ${user?.isBanned ? 'text-red-500' : 'text-green-500'}`} />
-                          <div className="flex flex-col">
-                            <span className={`text-xs font-bold leading-tight ${user?.isBanned ? 'text-red-500' : 'text-green-500'}`} data-testid="status-account">
-                              {user?.isBanned ? 'Baneado' : 'Activo'}
-                            </span>
-                            <span className="text-xs text-white/60 leading-tight">Estado</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Link href="/panel">
-                        <Button size="sm" variant="ghost" className="bg-gaming-gold/10 hover:bg-gaming-gold/20 border border-gaming-gold/30 rounded-full px-2 py-2" data-testid="button-player-panel">
-                          <Settings className="w-4 h-4 text-gaming-gold" />
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-gaming-gold/20 via-gaming-gold/30 to-gaming-gold/20 hover:from-gaming-gold/30 hover:via-gaming-gold/40 hover:to-gaming-gold/30 border border-gaming-gold/50 rounded-xl px-4 py-2 shadow-lg shadow-gaming-gold/20 transition-all duration-300 hover:scale-105" 
+                          data-testid="button-player-panel"
+                        >
+                          <User className="w-4 h-4 text-gaming-gold mr-2" />
+                          <span className="font-semibold text-gaming-gold">Panel</span>
                         </Button>
                       </Link>
                       <Button size="sm" variant="ghost" onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-full px-2 py-2" data-testid="button-logout">

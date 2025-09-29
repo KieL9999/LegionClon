@@ -240,7 +240,7 @@ export function PlayerPanel() {
               {/* Profile Tab */}
               <TabsContent value="profile" className="space-y-6">
                 {/* Enhanced Player Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Coins Card */}
                   <Card className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-yellow-500/30">
                     <CardContent className="p-6 text-center">
@@ -253,36 +253,6 @@ export function PlayerPanel() {
                         {user.coins || 0}
                       </h3>
                       <p className="text-sm font-semibold text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.8)]">Monedas</p>
-                    </CardContent>
-                  </Card>
-
-                  {/* VIP Level Card */}
-                  <Card className={`bg-gradient-to-br ${VIP_COLORS[(user.vipLevel || 0) as keyof typeof VIP_COLORS]}`}>
-                    <CardContent className="p-6 text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user.vipLevel === 0 ? 'bg-gray-500/20' : user.vipLevel === 1 ? 'bg-amber-600/20' : user.vipLevel === 2 ? 'bg-gray-400/20' : user.vipLevel === 3 ? 'bg-yellow-500/20' : user.vipLevel === 4 ? 'bg-cyan-400/20' : 'bg-purple-500/20'}`}>
-                          <span className="text-2xl">{VIP_ICONS[(user.vipLevel || 0) as keyof typeof VIP_ICONS]}</span>
-                        </div>
-                      </div>
-                      <h3 className={`text-lg font-bold mb-1 ${user.vipLevel === 0 ? 'text-gray-500' : user.vipLevel === 1 ? 'text-amber-600' : user.vipLevel === 2 ? 'text-gray-400' : user.vipLevel === 3 ? 'text-yellow-500' : user.vipLevel === 4 ? 'text-cyan-400' : 'text-purple-500'}`}>
-                        {VIP_LABELS[(user.vipLevel || 0) as keyof typeof VIP_LABELS]}
-                      </h3>
-                      <p className="text-sm font-semibold text-amber-300 drop-shadow-[0_0_6px_rgba(252,211,77,0.8)]">Nivel VIP</p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Status Card */}
-                  <Card className={`bg-gradient-to-br ${user.isBanned ? 'from-red-500/20 to-red-500/5 border-red-500/30' : 'from-green-500/20 to-green-500/5 border-green-500/30'}`}>
-                    <CardContent className="p-6 text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user.isBanned ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
-                          <Shield className={`w-6 h-6 ${user.isBanned ? 'text-red-500' : 'text-green-500'}`} />
-                        </div>
-                      </div>
-                      <h3 className={`text-lg font-bold mb-1 ${user.isBanned ? 'text-red-500' : 'text-green-500'}`}>
-                        {user.isBanned ? 'BANEADO' : 'ACTIVO'}
-                      </h3>
-                      <p className={`text-sm font-semibold drop-shadow-[0_0_6px] ${user.isBanned ? 'text-red-300 drop-shadow-red-500/80' : 'text-green-300 drop-shadow-green-500/80'}`}>Estado de Cuenta</p>
                     </CardContent>
                   </Card>
 
