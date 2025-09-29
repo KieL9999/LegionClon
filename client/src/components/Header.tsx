@@ -74,8 +74,8 @@ export default function Header() {
         
         <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            {/* Enhanced Logo Section */}
-            <div className="flex items-center gap-4 group">
+            {/* Clean Logo Section */}
+            <div className="flex items-center group">
               <div className="relative">
                 <div className="absolute inset-0 bg-gaming-gold/20 rounded-full blur-xl group-hover:bg-gaming-gold/30 transition-all duration-500"></div>
                 <img 
@@ -83,14 +83,6 @@ export default function Header() {
                   alt="Legion Plus" 
                   className="relative w-14 h-14 object-contain transform group-hover:scale-110 transition-transform duration-300"
                 />
-              </div>
-              <div className="group-hover:translate-x-2 transition-transform duration-300">
-                <h1 className="text-2xl font-gaming font-bold bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold bg-clip-text text-transparent">
-                  Legion Plus
-                </h1>
-                <p className="text-sm font-medium bg-gradient-to-r from-gaming-gold/80 to-yellow-400/80 bg-clip-text text-transparent">
-                  x7 Server • Expansión Legion
-                </p>
               </div>
             </div>
 
