@@ -103,7 +103,7 @@ export default function Header() {
           <nav className="hidden lg:flex items-center gap-4">
             <Link href="/">
               <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-inicio">
-                Inicio
+                🏠 Inicio
               </Button>
             </Link>
             <Button 
@@ -112,7 +112,7 @@ export default function Header() {
               data-testid="link-noticias"
               onClick={handleNoticiasClick}
             >
-              Noticias
+              📰 Noticias
             </Button>
             <Button 
               variant="ghost" 
@@ -120,11 +120,11 @@ export default function Header() {
               data-testid="link-rankings"
               onClick={handleRankingsClick}
             >
-              Rankings
+              🏆 Rankings
             </Button>
             <Link href="/foro">
               <Button variant="ghost" className="text-foreground hover-elevate" data-testid="link-foro">
-                Foro
+                💬 Foro
               </Button>
             </Link>
             <Button 
@@ -133,7 +133,7 @@ export default function Header() {
               data-testid="link-descargar"
               onClick={() => setDownloadOpen(true)}
             >
-              Descargar
+              📥 Descargar
             </Button>
             <Button 
               variant="ghost" 

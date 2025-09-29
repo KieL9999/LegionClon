@@ -40,18 +40,18 @@ export default function HeroSection() {
         </div>
 
         {/* Stats */}
-        <div className="flex flex-wrap justify-center gap-6 mb-8 text-center">
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-4">
-            <div className="text-2xl font-bold text-gaming-gold" data-testid="text-online-count">247</div>
-            <div className="text-sm text-muted-foreground">Jugadores Online</div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
+          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
+            <div className="text-3xl font-bold text-gaming-gold mb-2" data-testid="text-online-count">247</div>
+            <div className="text-sm text-muted-foreground font-medium">Jugadores Online</div>
           </div>
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-4">
-            <div className="text-2xl font-bold text-gaming-emerald">x7</div>
-            <div className="text-sm text-muted-foreground">Rates de Experiencia</div>
+          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
+            <div className="text-3xl font-bold text-gaming-emerald mb-2">x7</div>
+            <div className="text-sm text-muted-foreground font-medium">Rates de Experiencia</div>
           </div>
-          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-4">
-            <div className="text-2xl font-bold text-gaming-alliance">99.9%</div>
-            <div className="text-sm text-muted-foreground">Tiempo Activo</div>
+          <div className="bg-card/60 backdrop-blur-sm border border-card-border rounded-lg px-6 py-6 text-center min-h-[100px] flex flex-col justify-center">
+            <div className="text-3xl font-bold text-gaming-alliance mb-2">99.9%</div>
+            <div className="text-sm text-muted-foreground font-medium">Tiempo Activo</div>
           </div>
         </div>
 
