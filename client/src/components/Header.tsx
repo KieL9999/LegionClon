@@ -88,14 +88,11 @@ export default function Header() {
                     </div>
                   </div>
                   
-                  {/* Content with improved typography */}
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline gap-2">
+                  {/* Content with improved typography - centered */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="flex items-center justify-center">
                       <span className="text-3xl font-bold bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold bg-clip-text text-transparent tracking-tight" data-testid="text-player-count">
                         247
-                      </span>
-                      <span className="text-sm font-semibold text-gaming-gold/90 uppercase tracking-wider">
-                        Online
                       </span>
                     </div>
                     <span className="text-xs font-medium text-gaming-gold/60 uppercase tracking-wide">
