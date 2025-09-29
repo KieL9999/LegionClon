@@ -32,32 +32,42 @@ export default function HeroSection() {
             Legion Plus
           </h1>
           
-          {/* Epic narrative text with beautiful styling */}
-          <div className="text-center space-y-6 mb-8">
-            {/* Opening salutation */}
-            <p className="text-xl md:text-2xl text-white font-semibold">
-              Bienvenidos a las tierras de <span className="text-gaming-gold font-bold">Azerion</span>, <span className="text-blue-400 font-bold">campeones</span>.
-            </p>
-            
-            {/* Main epic description */}
-            <div className="max-w-3xl mx-auto space-y-4">
-              <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
-                Un mundo devastado por la <span className="text-red-400 font-semibold">guerra</span>, marcado por antiguas <span className="text-purple-400 font-semibold">profecías</span> y forjado por el <span className="text-gray-300 font-semibold">acero</span> de los valientes. Aquí, la <span className="text-gray-500 font-semibold">oscuridad</span> no duerme… y la <span className="text-gaming-gold font-semibold">gloria</span> es solo para los dignos.
-              </p>
+          {/* Epic narrative text in elegant container */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="relative bg-black/40 backdrop-blur-sm border border-gaming-gold/30 rounded-xl p-8 md:p-10 shadow-2xl">
+              {/* Decorative corner elements */}
+              <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-gaming-gold/60"></div>
+              <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-gaming-gold/60"></div>
+              <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-gaming-gold/60"></div>
+              <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-gaming-gold/60"></div>
               
-              <p className="text-base md:text-lg text-gray-300 leading-relaxed">
-                Elige tu <span className="text-green-400 font-semibold">facción</span>, blande tu <span className="text-orange-400 font-semibold">arma</span> y únete a la lucha por el destino del reino. Ya sea en los <span className="text-red-300">campos de batalla</span> o en las <span className="text-purple-300">sombras de ruinas olvidadas</span>, cada decisión forja tu <span className="text-gaming-gold font-semibold">leyenda</span>.
-              </p>
-            </div>
-            
-            {/* Call to action finale */}
-            <div className="space-y-2">
-              <p className="text-lg md:text-xl text-white font-bold">
-                Prepárate, <span className="text-red-400 font-bold">guerrero</span> — tu historia comienza ahora.
-              </p>
-              <p className="text-xl md:text-2xl text-gaming-gold font-bold tracking-wide">
-                <span className="text-gaming-gold">Azerion</span> te espera.
-              </p>
+              <div className="text-center space-y-6">
+                {/* Opening salutation */}
+                <p className="text-xl md:text-2xl text-white font-semibold">
+                  Bienvenidos a las tierras de <span className="text-gaming-gold font-bold">Azerion</span>, campeones.
+                </p>
+                
+                {/* Main epic description */}
+                <div className="space-y-4">
+                  <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
+                    Un mundo devastado por la guerra, marcado por antiguas profecías y forjado por el acero de los valientes. Aquí, la oscuridad no duerme… y la gloria es solo para los dignos.
+                  </p>
+                  
+                  <p className="text-base md:text-lg text-gray-300 leading-relaxed">
+                    Elige tu facción, blande tu arma y únete a la lucha por el destino del reino. Ya sea en los campos de batalla o en las sombras de ruinas olvidadas, cada decisión forja tu leyenda.
+                  </p>
+                </div>
+                
+                {/* Call to action finale */}
+                <div className="space-y-3 pt-4 border-t border-gaming-gold/20">
+                  <p className="text-lg md:text-xl text-white font-bold">
+                    Prepárate, guerrero — tu historia comienza ahora.
+                  </p>
+                  <p className="text-xl md:text-2xl text-gaming-gold font-bold tracking-wide">
+                    Azerion te espera.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
