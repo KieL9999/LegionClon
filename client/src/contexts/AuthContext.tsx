@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import type { User } from "@shared/schema";
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
 
   // Query to get current user
   const { data: user, isLoading, refetch } = useQuery({
@@ -81,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear user data after successful logout
       queryClient.setQueryData(['/api/me'], null);
       queryClient.invalidateQueries({ queryKey: ['/api/me'] });
+      // Redirect to home page after logout
+      setLocation('/');
     },
   });
 
@@ -95,6 +99,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refetchUser = () => {
     refetch();
   };
+
+  // Effect to redirect to home when not authenticated and trying to access protected routes
+  useEffect(() => {
+    if (!isLoading && !user && location !== '/' && location !== '/foro' && !location.startsWith('/panel')) {
+      // Only redirect if we're not on public pages and user is not authenticated
+      // Allow access to home (/) and foro (/foro) without authentication
+      // Redirect from panel pages when not authenticated is handled in PlayerPanel component
+    }
+  }, [user, isLoading, location, setLocation]);
 
   const value: AuthContextType = {
     user: user || null,

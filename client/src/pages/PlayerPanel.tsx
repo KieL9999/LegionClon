@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +20,7 @@ import WebFeaturesManager from "@/components/WebFeaturesManager";
 import ServerNewsManager from "@/components/ServerNewsManager";
 import DownloadsManager from "@/components/DownloadsManager";
 import SiteSettingsManager from "@/components/SiteSettingsManager";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ChangePasswordData, ChangeEmailData, ChangeRoleData, User as UserType } from "@shared/schema";
@@ -47,10 +47,18 @@ const filterUsersBySearch = (users: UserType[], searchQuery: string) => {
 };
 
 export function PlayerPanel() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
   const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useLocation();
+
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setLocation('/');
+    }
+  }, [user, isLoading, setLocation]);
 
   // Change password form
   const passwordForm = useForm<ChangePasswordData>({
@@ -148,19 +156,15 @@ export function PlayerPanel() {
     changeEmailMutation.mutate(data);
   };
 
-  if (!user) {
+  // Show loading or redirect if no user
+  if (isLoading || !user) {
     return (
       <div>
         <Header />
         <div className="min-h-screen bg-background pt-24 flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Acceso Denegado</CardTitle>
-              <CardDescription>
-                Debes iniciar sesión para acceder al panel del jugador
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <div className="text-gaming-gold">
+            {isLoading ? 'Cargando...' : 'Redirigiendo...'}
+          </div>
         </div>
       </div>
     );
