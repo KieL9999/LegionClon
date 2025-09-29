@@ -42,29 +42,33 @@ export default function HeroSection() {
               <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-gaming-gold/60"></div>
               
               <div className="text-center space-y-6">
-                {/* Opening salutation */}
-                <p className="text-xl md:text-2xl text-white font-semibold">
-                  Bienvenidos a las tierras de <span className="text-gaming-gold font-bold">Azerion</span>, campeones.
+                {/* Opening war call */}
+                <p className="text-xl md:text-2xl text-white font-bold">
+                  ¡Guerreros de la <span className="text-red-400 font-bold">Horda</span> y la <span className="text-blue-400 font-bold">Alianza</span>!
                 </p>
                 
-                {/* Main epic description */}
+                {/* Main war narrative */}
                 <div className="space-y-4">
                   <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
-                    Un mundo devastado por la guerra, marcado por antiguas profecías y forjado por el acero de los valientes. Aquí, la oscuridad no duerme… y la gloria es solo para los dignos.
+                    El tambor de la guerra resuena una vez más en las tierras de <span className="text-gaming-gold font-semibold">Azeroth</span>. Antiguas heridas siguen abiertas, y aunque la paz es solo un susurro en el viento, una nueva amenaza se alza desde las sombras... una que podría consumir a ambos bandos por igual.
+                  </p>
+                  
+                  <p className="text-lg md:text-xl text-white font-semibold">
+                    El honor, la gloria y la supervivencia están en juego.
                   </p>
                   
                   <p className="text-base md:text-lg text-gray-300 leading-relaxed">
-                    Elige tu facción, blande tu arma y únete a la lucha por el destino del reino. Ya sea en los campos de batalla o en las sombras de ruinas olvidadas, cada decisión forja tu leyenda.
+                    ¿Responderás al llamado del deber? ¿Lucharás por tu facción, por tu gente… o por el destino de todo un mundo?
                   </p>
                 </div>
                 
-                {/* Call to action finale */}
+                {/* Final battle call */}
                 <div className="space-y-3 pt-4 border-t border-gaming-gold/20">
                   <p className="text-lg md:text-xl text-white font-bold">
-                    Prepárate, guerrero — tu historia comienza ahora.
+                    Ya seas <span className="text-red-400 font-bold">Horda</span> o <span className="text-blue-400 font-bold">Alianza</span>, tu leyenda comienza aquí.
                   </p>
                   <p className="text-xl md:text-2xl text-gaming-gold font-bold tracking-wide">
-                    Azerion te espera.
+                    Bienvenido a la batalla.
                   </p>
                 </div>
               </div>
