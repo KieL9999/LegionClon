@@ -30,10 +30,17 @@ export interface IStorage {
   updateServerNews(id: string, news: UpdateServerNews): Promise<ServerNews | undefined>;
   deleteServerNews(id: string): Promise<ServerNews | undefined>;
   getAllDownloads(): Promise<Download[]>;
+  getDownloadById(id: string): Promise<Download | undefined>;
   createDownload(download: InsertDownload): Promise<Download>;
   updateDownload(id: string, download: UpdateDownload): Promise<Download | undefined>;
   deleteDownload(id: string): Promise<Download | undefined>;
   incrementDownloadCount(id: string): Promise<Download | undefined>;
+  updateDownloadWithFile(id: string, fileData: {
+    localFilePath: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSizeBytes: number;
+  }): Promise<Download | undefined>;
   getAllSiteSettings(): Promise<SiteSetting[]>;
   getSiteSettingByKey(key: string): Promise<SiteSetting | undefined>;
   createSiteSetting(setting: InsertSiteSetting): Promise<SiteSetting>;
@@ -307,6 +314,11 @@ export class DatabaseStorage implements IStorage {
     return allDownloads;
   }
 
+  async getDownloadById(id: string): Promise<Download | undefined> {
+    const [download] = await db.select().from(downloads).where(eq(downloads.id, id));
+    return download || undefined;
+  }
+
   async createDownload(insertDownload: InsertDownload): Promise<Download> {
     const [download] = await db
       .insert(downloads)
@@ -346,6 +358,28 @@ export class DatabaseStorage implements IStorage {
       .update(downloads)
       .set({ 
         downloadCount: sql`${downloads.downloadCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(downloads.id, id))
+      .returning();
+    
+    return updatedDownload || undefined;
+  }
+
+  async updateDownloadWithFile(id: string, fileData: {
+    localFilePath: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSizeBytes: number;
+  }): Promise<Download | undefined> {
+    const [updatedDownload] = await db
+      .update(downloads)
+      .set({ 
+        localFilePath: fileData.localFilePath,
+        originalFilename: fileData.originalFilename,
+        mimeType: fileData.mimeType,
+        fileSizeBytes: fileData.fileSizeBytes,
+        downloadUrl: null, // Clear external URL when local file is set
         updatedAt: new Date()
       })
       .where(eq(downloads.id, id))
@@ -759,6 +793,10 @@ export class MemStorage implements IStorage {
       });
   }
 
+  async getDownloadById(id: string): Promise<Download | undefined> {
+    return this.downloads.get(id);
+  }
+
   async createDownload(download: InsertDownload): Promise<Download> {
     const id = randomUUID();
     const now = new Date();
@@ -767,8 +805,12 @@ export class MemStorage implements IStorage {
       title: download.title,
       description: download.description,
       version: download.version,
-      downloadUrl: download.downloadUrl,
+      downloadUrl: download.downloadUrl || null,
       fileSize: download.fileSize,
+      localFilePath: null,
+      originalFilename: null,
+      mimeType: null,
+      fileSizeBytes: null,
       type: download.type || "client",
       platform: download.platform || "windows",
       releaseDate: download.releaseDate || now,
@@ -806,6 +848,28 @@ export class MemStorage implements IStorage {
     const updatedDownload = { 
       ...download, 
       downloadCount: download.downloadCount + 1, 
+      updatedAt: new Date() 
+    };
+    this.downloads.set(id, updatedDownload);
+    return updatedDownload;
+  }
+
+  async updateDownloadWithFile(id: string, fileData: {
+    localFilePath: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSizeBytes: number;
+  }): Promise<Download | undefined> {
+    const download = this.downloads.get(id);
+    if (!download) return undefined;
+    
+    const updatedDownload = { 
+      ...download,
+      localFilePath: fileData.localFilePath,
+      originalFilename: fileData.originalFilename,
+      mimeType: fileData.mimeType,
+      fileSizeBytes: fileData.fileSizeBytes,
+      downloadUrl: null, // Clear external URL when local file is set
       updatedAt: new Date() 
     };
     this.downloads.set(id, updatedDownload);

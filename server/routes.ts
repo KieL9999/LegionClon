@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1057,6 +1057,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Configure multer for download files (separate from images)
+  const downloadsDir = path.join(process.cwd(), 'public', 'uploads', 'downloads');
+  
+  // Ensure downloads directory exists
+  if (!fs.existsSync(downloadsDir)) {
+    fs.mkdirSync(downloadsDir, { recursive: true });
+  }
+
+  const downloadStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // Create type-specific subdirectory
+      const downloadType = req.body.type || 'client';
+      const typeDir = path.join(downloadsDir, downloadType);
+      if (!fs.existsSync(typeDir)) {
+        fs.mkdirSync(typeDir, { recursive: true });
+      }
+      cb(null, typeDir);
+    },
+    filename: (req, file, cb) => {
+      // Generate unique filename with timestamp and random suffix
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      const baseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9.-]/g, '_');
+      cb(null, `${baseName}-${uniqueSuffix}${ext}`);
+    }
+  });
+
+  const uploadDownloadFile = multer({
+    storage: downloadStorage,
+    limits: {
+      fileSize: 2 * 1024 * 1024 * 1024, // 2GB limit for game files
+    },
+    fileFilter: (req, file, cb) => {
+      // Allow common download file types
+      const allowedTypes = [
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/x-rar-compressed',
+        'application/x-7z-compressed',
+        'application/octet-stream',
+        'application/x-msdownload', // .exe files
+        'application/x-msi', // .msi files
+        'text/plain', // .txt files
+      ];
+      
+      if (allowedTypes.includes(file.mimetype) || 
+          file.originalname.match(/\.(zip|rar|7z|exe|msi|txt|patch|bin)$/i)) {
+        cb(null, true);
+      } else {
+        const error = new Error('Tipo de archivo no permitido. Solo se permiten: ZIP, RAR, 7Z, EXE, MSI, TXT') as any;
+        error.code = 'LIMIT_FILE_TYPE';
+        cb(error);
+      }
+    }
+  });
+
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadsDir));
 
@@ -1131,6 +1187,238 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Upload file to download endpoint (admin only)
+  app.post('/api/downloads/:id/upload', uploadAuthMiddleware, uploadDownloadFile.single('file'), async (req, res) => {
+    try {
+      const downloadId = req.params.id;
+      
+      if (!req.file) {
+        return res.status(400).json({
+          error: 'No file uploaded',
+          message: 'No se subió ningún archivo'
+        });
+      }
+
+      // Get the download to update
+      const download = await storage.getDownloadById(downloadId);
+      if (!download) {
+        // Clean up uploaded file
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup uploaded file:', cleanupError);
+        }
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+
+      // If there was an old local file, delete it
+      if (download.localFilePath) {
+        const oldFilePath = path.join(process.cwd(), 'public', download.localFilePath);
+        try {
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        } catch (cleanupError) {
+          console.error('Failed to cleanup old file:', cleanupError);
+        }
+      }
+
+      // Calculate file size in bytes
+      const stats = fs.statSync(req.file.path);
+      const fileSizeBytes = stats.size;
+
+      // Convert bytes to human readable format for the fileSize field
+      const humanFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      };
+
+      // Create relative path for storage
+      const relativePath = path.relative(path.join(process.cwd(), 'public'), req.file.path);
+
+      // Update download with file information
+      const updatedDownload = await storage.updateDownloadWithFile(downloadId, {
+        localFilePath: relativePath.replace(/\\/g, '/'), // Ensure forward slashes for URLs
+        originalFilename: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSizeBytes: fileSizeBytes
+      });
+
+      // Also update the human-readable file size
+      if (updatedDownload) {
+        await storage.updateDownload(downloadId, {
+          fileSize: humanFileSize(fileSizeBytes)
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Archivo subido exitosamente',
+        download: updatedDownload
+      });
+      
+    } catch (error) {
+      console.error('Upload download file error:', error);
+      
+      // Clean up uploaded file if there was an error
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup uploaded file:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Download file endpoint (public with download count)
+  app.get('/api/download/:id', async (req, res) => {
+    try {
+      const downloadId = req.params.id;
+      
+      // Get the download
+      const download = await storage.getDownloadById(downloadId);
+      if (!download) {
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+
+      // Check if it has a local file
+      if (!download.localFilePath) {
+        // If no local file, redirect to external URL if available
+        if (download.downloadUrl) {
+          // Increment download count
+          await storage.incrementDownloadCount(downloadId);
+          return res.redirect(download.downloadUrl);
+        } else {
+          return res.status(404).json({
+            error: 'No download available',
+            message: 'No hay archivo disponible para descarga'
+          });
+        }
+      }
+
+      // Construct full file path
+      const filePath = path.join(process.cwd(), 'public', download.localFilePath);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          error: 'File not found',
+          message: 'Archivo no encontrado en el servidor'
+        });
+      }
+
+      // Increment download count
+      await storage.incrementDownloadCount(downloadId);
+
+      // Set appropriate headers for download
+      res.setHeader('Content-Disposition', `attachment; filename="${download.originalFilename}"`);
+      res.setHeader('Content-Type', download.mimeType || 'application/octet-stream');
+      
+      // Send the file
+      res.sendFile(filePath);
+      
+    } catch (error) {
+      console.error('Download file error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Delete uploaded file endpoint (admin only)
+  app.delete('/api/downloads/:id/file', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'No hay sesión activa'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Check if user is administrator
+      if (user.role !== USER_ROLES.ADMINISTRADOR) {
+        return res.status(403).json({
+          error: 'Insufficient permissions',
+          message: 'Solo los administradores pueden eliminar archivos'
+        });
+      }
+
+      const downloadId = req.params.id;
+      
+      // Get the download
+      const download = await storage.getDownloadById(downloadId);
+      if (!download) {
+        return res.status(404).json({
+          error: 'Download not found',
+          message: 'Descarga no encontrada'
+        });
+      }
+
+      if (!download.localFilePath) {
+        return res.status(400).json({
+          error: 'No local file',
+          message: 'Esta descarga no tiene archivo local'
+        });
+      }
+
+      // Delete the physical file
+      const filePath = path.join(process.cwd(), 'public', download.localFilePath);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileError) {
+        console.error('Failed to delete file:', fileError);
+      }
+
+      // Update download to remove file references
+      const updatedDownload = await storage.updateDownload(downloadId, {
+        localFilePath: null,
+        originalFilename: null,
+        mimeType: null,
+        fileSizeBytes: null
+      });
+
+      res.json({
+        success: true,
+        message: 'Archivo eliminado exitosamente',
+        download: updatedDownload
+      });
+      
+    } catch (error) {
+      console.error('Delete download file error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'

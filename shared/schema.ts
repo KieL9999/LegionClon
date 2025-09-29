@@ -59,9 +59,14 @@ export const downloads = pgTable("downloads", {
   title: varchar("title", { length: 150 }).notNull(),
   description: text("description").notNull(),
   version: varchar("version", { length: 50 }).notNull(),
-  downloadUrl: varchar("download_url", { length: 500 }).notNull(),
+  downloadUrl: varchar("download_url", { length: 500 }), // Made nullable - either URL or local file
   fileSize: varchar("file_size", { length: 50 }).notNull(),
-  type: varchar("type", { length: 50 }).notNull().default("client"), // client, patch, addon
+  // Local file storage fields
+  localFilePath: varchar("local_file_path", { length: 500 }), // Path to locally stored file
+  originalFilename: varchar("original_filename", { length: 255 }), // Original uploaded filename
+  mimeType: varchar("mime_type", { length: 100 }), // MIME type for proper serving
+  fileSizeBytes: integer("file_size_bytes"), // Actual file size in bytes
+  type: varchar("type", { length: 50 }).notNull().default("client"), // client, patch, addon, tool
   platform: varchar("platform", { length: 50 }).notNull().default("windows"), // windows, mac, linux
   releaseDate: timestamp("release_date").default(sql`CURRENT_TIMESTAMP`),
   isActive: boolean("is_active").notNull().default(true),
@@ -224,6 +229,13 @@ export const insertDownloadSchema = createInsertSchema(downloads).omit({
   createdAt: true,
   updatedAt: true,
   downloadCount: true,
+  localFilePath: true, // Handled by server during upload
+  originalFilename: true, // Handled by server during upload
+  mimeType: true, // Handled by server during upload
+  fileSizeBytes: true, // Handled by server during upload
+}).extend({
+  // Make downloadUrl optional since we can now have either URL or local file
+  downloadUrl: z.string().url("URL inválida").optional().or(z.literal("")),
 });
 
 export const updateDownloadSchema = createInsertSchema(downloads).omit({
@@ -231,7 +243,15 @@ export const updateDownloadSchema = createInsertSchema(downloads).omit({
   createdAt: true,
   updatedAt: true,
   downloadCount: true,
-}).partial();
+}).partial().extend({
+  // Make downloadUrl optional since we can now have either URL or local file
+  downloadUrl: z.string().url("URL inválida").optional().or(z.literal("")),
+});
+
+// Schema specifically for file upload data
+export const uploadDownloadFileSchema = z.object({
+  downloadId: z.string().uuid("ID de descarga inválido"),
+});
 
 export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({
   id: true,

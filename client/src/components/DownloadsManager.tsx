@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { insertDownloadSchema, updateDownloadSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Download as DownloadIcon, Link as LinkIcon, HardDrive, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Download as DownloadIcon, Link as LinkIcon, HardDrive, Calendar, Upload, FileText, X } from "lucide-react";
 import type { Download, InsertDownload, UpdateDownload } from "@shared/schema";
 
 const typeOptions = [
@@ -34,6 +34,8 @@ export default function DownloadsManager() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingDownload, setEditingDownload] = useState<Download | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<string | null>(null); // Download ID currently uploading
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Fetch downloads
   const { data: downloadsData, isLoading } = useQuery<{ success: boolean; downloads: Download[] }>({
@@ -125,6 +127,65 @@ export default function DownloadsManager() {
     },
   });
 
+  // File upload mutation
+  const uploadFileMutation = useMutation({
+    mutationFn: async ({ downloadId, file, type }: { downloadId: string; file: File; type: string }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', type);
+      
+      const response = await fetch(`/api/downloads/${downloadId}/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al subir archivo');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/downloads'] });
+      setUploadingFile(null);
+      setSelectedFile(null);
+      toast({
+        title: "Éxito",
+        description: "Archivo subido exitosamente",
+      });
+    },
+    onError: (error: any) => {
+      setUploadingFile(null);
+      toast({
+        title: "Error",
+        description: error.message || "Error al subir el archivo",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete file mutation
+  const deleteFileMutation = useMutation({
+    mutationFn: (downloadId: string) =>
+      apiRequest("DELETE", `/api/downloads/${downloadId}/file`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/downloads'] });
+      toast({
+        title: "Éxito",
+        description: "Archivo eliminado exitosamente",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar el archivo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateSubmit = (data: InsertDownload) => {
     createMutation.mutate(data);
   };
@@ -141,7 +202,7 @@ export default function DownloadsManager() {
       title: download.title,
       description: download.description,
       version: download.version,
-      downloadUrl: download.downloadUrl,
+      downloadUrl: download.downloadUrl || "",
       fileSize: download.fileSize,
       type: download.type,
       platform: download.platform,
@@ -152,6 +213,22 @@ export default function DownloadsManager() {
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id);
+  };
+
+  const handleFileUpload = (downloadId: string, file: File, type: string) => {
+    setUploadingFile(downloadId);
+    uploadFileMutation.mutate({ downloadId, file, type });
+  };
+
+  const handleFileDelete = (downloadId: string) => {
+    deleteFileMutation.mutate(downloadId);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
 
   const downloads = downloadsData?.downloads || [];
@@ -302,15 +379,18 @@ export default function DownloadsManager() {
                     name="downloadUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>URL de Descarga</FormLabel>
+                        <FormLabel>URL de Descarga (Opcional)</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder="https://example.com/download/file.exe"
+                            placeholder="https://example.com/download/file.exe (Opcional - puedes subir archivo local después)"
                             data-testid="input-download-url"
                           />
                         </FormControl>
                         <FormMessage />
+                        <p className="text-xs text-muted-foreground">
+                          Puedes dejar esto vacío y subir un archivo local después de crear la descarga
+                        </p>
                       </FormItem>
                     )}
                   />
@@ -423,9 +503,65 @@ export default function DownloadsManager() {
                           <Calendar className="w-4 h-4" />
                           {new Date(download.releaseDate!).toLocaleDateString()}
                         </div>
+                        <div className="flex items-center gap-1">
+                          {download.localFilePath ? (
+                            <Badge variant="default" className="text-xs bg-green-600">
+                              <FileText className="w-3 h-3 mr-1" />
+                              Archivo Local
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs">
+                              <LinkIcon className="w-3 h-3 mr-1" />
+                              URL Externa
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      {download.localFilePath ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleFileDelete(download.id)}
+                          disabled={deleteFileMutation.isPending}
+                          className="text-red-600 hover:text-red-700"
+                          data-testid={`button-delete-file-${download.id}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="file"
+                            id={`file-input-${download.id}`}
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleFileUpload(download.id, file, download.type);
+                              }
+                            }}
+                            accept=".exe,.zip,.rar,.7z,.msi,.dmg,.pkg,.deb,.rpm,.tar.gz"
+                            data-testid={`input-file-${download.id}`}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById(`file-input-${download.id}`)?.click()}
+                            disabled={uploadingFile === download.id}
+                            data-testid={`button-upload-file-${download.id}`}
+                          >
+                            {uploadingFile === download.id ? (
+                              "Subiendo..."
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -600,15 +736,18 @@ export default function DownloadsManager() {
                 name="downloadUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL de Descarga</FormLabel>
+                    <FormLabel>URL de Descarga (Opcional)</FormLabel>
                     <FormControl>
                       <Input 
                         {...field} 
-                        placeholder="https://example.com/download/file.exe"
+                        placeholder="https://example.com/download/file.exe (Opcional - usa archivo local si está disponible)"
                         data-testid="input-edit-download-url"
                       />
                     </FormControl>
                     <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      La URL externa se usará solo si no hay archivo local subido
+                    </p>
                   </FormItem>
                 )}
               />
