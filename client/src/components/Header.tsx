@@ -74,18 +74,6 @@ export default function Header() {
         
         <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            {/* Clean Logo Section */}
-            <div className="flex items-center group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gaming-gold/20 rounded-full blur-xl group-hover:bg-gaming-gold/30 transition-all duration-500"></div>
-                <img 
-                  src={serverLogo} 
-                  alt="Legion Plus" 
-                  className="relative w-14 h-14 object-contain transform group-hover:scale-110 transition-transform duration-300"
-                />
-              </div>
-            </div>
-
             {/* Clean Server Status Panel */}
             <div className="hidden md:flex items-center">
               <div className="flex items-center gap-3 bg-gaming-gold/10 backdrop-blur-sm rounded-full px-6 py-2 border border-gaming-gold/30">
@@ -100,7 +88,7 @@ export default function Header() {
             </div>
 
             {/* Clean Symmetric Navigation */}
-            <nav className="hidden lg:flex items-center gap-2">
+            <nav className="hidden lg:flex items-center gap-2 ml-8">
               <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2 border border-white/10">
                 <Link href="/">
                   <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-inicio">
