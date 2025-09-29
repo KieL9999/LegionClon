@@ -608,7 +608,13 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const webFeature: WebFeature = {
       id,
-      ...feature,
+      title: feature.title,
+      description: feature.description,
+      image: feature.image,
+      type: feature.type || "Feature",
+      category: feature.category || "general",
+      displayOrder: feature.displayOrder || 0,
+      isActive: feature.isActive ?? true,
       createdAt: now,
       updatedAt: now
     };
@@ -649,7 +655,15 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const serverNews: ServerNews = {
       id,
-      ...news,
+      title: news.title,
+      content: news.content,
+      summary: news.summary,
+      image: news.image,
+      category: news.category || "general",
+      priority: news.priority || "normal",
+      displayOrder: news.displayOrder || 0,
+      isActive: news.isActive ?? true,
+      publishedAt: news.publishedAt || now,
       createdAt: now,
       updatedAt: now
     };
@@ -693,7 +707,16 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const newDownload: Download = {
       id,
-      ...download,
+      title: download.title,
+      description: download.description,
+      version: download.version,
+      downloadUrl: download.downloadUrl,
+      fileSize: download.fileSize,
+      type: download.type || "client",
+      platform: download.platform || "windows",
+      releaseDate: download.releaseDate || now,
+      isActive: download.isActive ?? true,
+      displayOrder: download.displayOrder || 0,
       downloadCount: 0,
       createdAt: now,
       updatedAt: now
@@ -745,7 +768,10 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const siteSetting: SiteSetting = {
       id,
-      ...setting,
+      key: setting.key,
+      value: setting.value,
+      description: setting.description || null,
+      type: setting.type || "text",
       createdAt: now,
       updatedAt: now
     };
