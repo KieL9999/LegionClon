@@ -144,7 +144,7 @@ export default function Header() {
             </nav>
 
             {/* Enhanced Action Buttons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ml-8">
               {isAuthenticated ? (
                 <>
                   <DropdownMenu>
