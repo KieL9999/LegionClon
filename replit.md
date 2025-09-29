@@ -5,7 +5,61 @@ This project is a World of Warcraft Legion private server website, AetherWoW, de
 
 ## Recent Changes (September 29, 2025)
 
-### Complete Brand Transformation and UI Cleanup (Current Session - Latest Changes)
+### Support System Implementation and Navigation Enhancement (Current Session - Latest Changes)
+- ✅ **Support Button Addition**: Added "Soporte" button to main navigation
+  - **Placement**: Positioned next to "Tienda" button in header navigation for symmetry
+  - **Design**: Blue to cyan gradient (from-blue-600/20 to-cyan-600/20) with HelpCircle icon (❓)
+  - **Functionality**: Links to `/soporte` route with proper hover effects and transitions
+  - **Responsive**: Maintains design consistency across all screen sizes
+- ✅ **Support Center Design Update**: Enhanced visual identity
+  - **Icon Change**: Replaced headphones emoji (🎧) with question mark (❓) for better recognition
+  - **Color Consistency**: Maintained blue/cyan theme throughout support sections
+  - **Professional Layout**: Clean, modern design aligned with AetherWoW aesthetic
+- ✅ **Complete Support Ticket System**: Full-featured support ticket management
+  - **Database Schema**: New `supportTickets` table with comprehensive tracking:
+    - `id`: UUID primary key for unique ticket identification
+    - `userId`: User association for ticket ownership
+    - `title`: Brief problem description (max 200 characters)
+    - `description`: Detailed problem explanation
+    - `status`: open, in_progress, resolved, closed states
+    - `priority`: low, normal, high, urgent levels
+    - `category`: general, technical, account, billing, other classifications
+    - `assignedTo`: Optional GM/Admin assignment for ticket management
+    - `createdAt`/`updatedAt`: Full audit trail timestamps
+  - **Storage Implementation**: Complete CRUD operations in both DatabaseStorage and MemStorage
+    - Create, read, update ticket functionality
+    - User-specific ticket filtering
+    - Admin access to all tickets
+    - Proper permission validation
+- ✅ **API Routes for Ticket Management**: Secure backend endpoints
+  - **GET /api/tickets**: Retrieve user's own tickets (authentication required)
+  - **POST /api/tickets**: Create new support tickets with validation
+  - **PATCH /api/tickets/:id**: Update ticket status/details (owner/staff only)
+  - **GET /api/admin/tickets**: Admin/GM access to all tickets
+  - **Security**: Session-based authentication with role-based access control
+  - **Validation**: Zod schema validation for all ticket operations
+- ✅ **Support Page Frontend**: Complete user interface implementation
+  - **Authentication-Based Content**: Different experience for logged/non-logged users
+  - **Ticket Creation Modal**: Full form with title, description, category, priority selection
+  - **Ticket List Display**: Cards showing status, priority, dates with color coding
+  - **Status Indicators**: Visual badges for open (blue), in_progress (yellow), resolved (green), closed (gray)
+  - **Priority Levels**: Color-coded badges for low (green), normal (blue), high (orange), urgent (red)
+  - **Date Formatting**: Spanish locale formatting for creation and update timestamps
+  - **Responsive Design**: Mobile-friendly layout with proper spacing and typography
+- ✅ **User Experience Features**: Enhanced support interaction
+  - **Empty State**: Helpful message when no tickets exist with ticket emoji
+  - **Loading States**: Proper feedback during API calls and data fetching
+  - **Error Handling**: Toast notifications for success/error states
+  - **Form Validation**: Real-time validation with clear error messages
+  - **Accessibility**: Comprehensive data-testid attributes for testing
+- ✅ **Integration with Existing Systems**: Seamless platform integration
+  - **Authentication Context**: Uses existing auth system for user verification
+  - **Query Client**: Integrated with TanStack Query for data management
+  - **UI Components**: Utilizes shadcn/ui components for consistency
+  - **Toast System**: Connected to existing notification system
+  - **Navigation**: Properly integrated with wouter routing system
+
+### Complete Brand Transformation and UI Cleanup (Previous Session)
 - ✅ **Full Brand Migration**: Complete transformation from "Legion Plus" to "AetherWoW"
   - **Updated all instances** across entire codebase: HTML meta tags, component text, default values
   - **Updated server information**: URLs changed to aetherwow.com, admin email to admin@aetherwow.com
@@ -129,10 +183,10 @@ The design adopts a dark gaming aesthetic with golden accents, consistent with t
 ### Technical Implementations
 
 #### Frontend
-The frontend uses React/TypeScript with Vite. Wouter handles client-side routing, TanStack Query manages server state, and React Hook Form with Zod provides type-safe form validation. The architecture emphasizes modularity with reusable components and comprehensive theming.
+The frontend uses React/TypeScript with Vite. Wouter handles client-side routing, TanStack Query manages server state, and React Hook Form with Zod provides type-safe form validation. The architecture emphasizes modularity with reusable components, comprehensive theming, and integrated support system functionality with role-based content display.
 
 #### Backend
-The backend is an Express.js application written in TypeScript with a modular structure. It abstracts database operations via a storage interface with PostgreSQL integration. The API layer handles user registration, authentication, data retrieval, dynamic content management (web features), and secure file uploads. It features organized routes, comprehensive error handling, authentication middleware, and validation with Zod schemas.
+The backend is an Express.js application written in TypeScript with a modular structure. It abstracts database operations via a storage interface with PostgreSQL integration. The API layer handles user registration, authentication, data retrieval, dynamic content management (web features), support ticket management, and secure file uploads. It features organized routes, comprehensive error handling, authentication middleware, and validation with Zod schemas.
 
 #### File Upload System
 Secure file uploads are handled with Multer, including type validation (images only) and size limits (5MB). Authentication middleware ensures only administrators can upload files, which are stored in `/public/uploads/` with unique naming.
@@ -145,6 +199,9 @@ The system features secure user registration and login with PBKDF2 password hash
 
 #### Enhanced Player Panel System
 The player panel includes gradient cards for player statistics: Donation Coins, Account Status (active/banned), Last Login, and Membership Date. It also features detailed account information, ban management displays, and responsive real-time data updates.
+
+#### Support Ticket System
+A comprehensive support system enabling users to create, track, and manage support requests. Features include categorized tickets (general, technical, account, billing, other), priority levels (low, normal, high, urgent), status tracking (open, in_progress, resolved, closed), and role-based access control. The system includes both user-facing ticket management and administrative oversight capabilities.
 
 ### System Design Choices
 
@@ -164,6 +221,7 @@ The application uses Drizzle ORM with PostgreSQL (Neon Database) when available,
 - `downloads`: Dynamic download management system.
 - `server_news`: News and announcements system.
 - `site_settings`: Site configuration management (title, favicon, SEO, etc.).
+- `support_tickets`: Complete support ticket system with status tracking, priority levels, categories, and assignment capabilities.
 
 ## External Dependencies
 - **UI Frameworks**: Radix UI, shadcn/ui
