@@ -187,11 +187,13 @@ export default function Header() {
                     {/* Player Stats Cards */}
                     <div className="flex items-center gap-2">
                       {/* Coins */}
-                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 border border-yellow-500/30 rounded-xl px-3 py-2 backdrop-blur-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">💰</span>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold text-yellow-500 leading-tight" data-testid="text-coins">{user?.coins || 0}</span>
+                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 border border-yellow-500/30 rounded-xl px-4 py-3 backdrop-blur-sm">
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <span className="text-lg">💰</span>
+                          </div>
+                          <div className="flex flex-col items-center text-center">
+                            <span className="text-sm font-bold text-yellow-500 leading-tight" data-testid="text-coins">{user?.coins || 0}</span>
                             <span className="text-xs text-yellow-300/80 leading-tight">Monedas</span>
                           </div>
                         </div>
@@ -203,11 +205,12 @@ export default function Header() {
                       <Link href="/panel">
                         <Button 
                           size="sm" 
-                          className="bg-gradient-to-r from-gaming-gold/20 via-gaming-gold/30 to-gaming-gold/20 hover:from-gaming-gold/30 hover:via-gaming-gold/40 hover:to-gaming-gold/30 border border-gaming-gold/50 rounded-xl px-4 py-2 shadow-lg shadow-gaming-gold/20 transition-all duration-300 hover:scale-105" 
+                          variant="default"
+                          className="bg-gradient-to-r from-gaming-gold/90 via-gaming-gold to-gaming-gold/90 hover:from-gaming-gold hover:via-yellow-400 hover:to-gaming-gold text-black border border-gaming-gold rounded-xl px-4 py-2.5 shadow-lg shadow-gaming-gold/30 transition-all duration-300 hover:scale-105 font-semibold" 
                           data-testid="button-player-panel"
                         >
-                          <User className="w-4 h-4 text-gaming-gold mr-2" />
-                          <span className="font-semibold text-gaming-gold">Panel</span>
+                          <User className="w-4 h-4 mr-2" />
+                          <span className="text-sm">Panel</span>
                         </Button>
                       </Link>
                       <Button size="sm" variant="ghost" onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-full px-2 py-2" data-testid="button-logout">
