@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -238,19 +237,24 @@ export default function DownloadsManager() {
   }
 
   return (
-    <Card className="bg-muted border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground flex items-center justify-between">
-          <span>Gestión de Descargas</span>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="bg-muted/50 border border-border rounded-lg p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-foreground">Gestión de Descargas</h2>
+            <p className="text-sm text-muted-foreground">
+              Gestiona las descargas disponibles para los usuarios: cliente completo, parches y herramientas
+            </p>
+          </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button 
-                size="sm" 
-                className="bg-gaming-gold hover:bg-gaming-gold/90"
+                className="bg-gaming-gold hover:bg-gaming-gold/90 text-black font-semibold"
                 data-testid="button-create-download"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Agregar Descarga
+                Crear Descarga
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -450,12 +454,17 @@ export default function DownloadsManager() {
               </Form>
             </DialogContent>
           </Dialog>
-        </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Gestiona las descargas disponibles para los usuarios: cliente completo, parches y herramientas
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </div>
+      </div>
+      
+      {/* Counter */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <DownloadIcon className="h-4 w-4" />
+        <span>{downloads.length} {downloads.length === 1 ? 'descarga' : 'descargas'} configuradas</span>
+      </div>
+
+      {/* Content */}
+      <div>
         {downloads.length === 0 ? (
           <div className="text-center py-8">
             <DownloadIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
@@ -465,14 +474,15 @@ export default function DownloadsManager() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {downloads.map((download) => (
-              <Card key={download.id} className="bg-background border-border">
-                <CardHeader className="pb-3">
+              <div key={download.id} className="group relative bg-muted/30 border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                <div className="space-y-3">
+                  {/* Title and badges */}
                   <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-lg">{download.title}</h4>
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-semibold text-base">{download.title}</h4>
                         <Badge variant="secondary" className="text-xs">
                           {typeOptions.find(t => t.value === download.type)?.label}
                         </Badge>
@@ -485,53 +495,58 @@ export default function DownloadsManager() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-muted-foreground text-sm">{download.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <LinkIcon className="w-4 h-4" />
-                          {download.version}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <HardDrive className="w-4 h-4" />
-                          {download.fileSize}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <DownloadIcon className="w-4 h-4" />
-                          {download.downloadCount} descargas
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(download.releaseDate!).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {download.localFilePath ? (
-                            <Badge variant="default" className="text-xs bg-green-600">
-                              <FileText className="w-3 h-3 mr-1" />
-                              Archivo Local
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">
-                              <LinkIcon className="w-3 h-3 mr-1" />
-                              URL Externa
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+                      <p className="text-muted-foreground text-sm line-clamp-2">{download.description}</p>
                     </div>
-                    <div className="flex gap-2">
+                  </div>
+
+                  {/* Metadata */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <LinkIcon className="w-3 h-3" />
+                      {download.version}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <HardDrive className="w-3 h-3" />
+                      {download.fileSize}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <DownloadIcon className="w-3 h-3" />
+                      {download.downloadCount}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(download.releaseDate!).toLocaleDateString()}
+                    </div>
+                    {download.localFilePath ? (
+                      <Badge variant="default" className="text-xs bg-green-600">
+                        <FileText className="w-3 h-3 mr-1" />
+                        Archivo Local
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        <LinkIcon className="w-3 h-3 mr-1" />
+                        URL Externa
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-2">
+                    <div className="flex items-center gap-1 flex-1">
                       {download.localFilePath ? (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleFileDelete(download.id)}
                           disabled={deleteFileMutation.isPending}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 h-8"
                           data-testid={`button-delete-file-${download.id}`}
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3 h-3 mr-1" />
+                          Eliminar Archivo
                         </Button>
                       ) : (
-                        <div className="flex items-center gap-1">
+                        <>
                           <input
                             type="file"
                             id={`file-input-${download.id}`}
@@ -550,63 +565,70 @@ export default function DownloadsManager() {
                             size="sm"
                             onClick={() => document.getElementById(`file-input-${download.id}`)?.click()}
                             disabled={uploadingFile === download.id}
+                            className="h-8"
                             data-testid={`button-upload-file-${download.id}`}
                           >
                             {uploadingFile === download.id ? (
                               "Subiendo..."
                             ) : (
                               <>
-                                <Upload className="w-4 h-4" />
+                                <Upload className="w-3 h-3 mr-1" />
+                                Subir Archivo
                               </>
                             )}
                           </Button>
-                        </div>
+                        </>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(download)}
-                        data-testid={`button-edit-download-${download.id}`}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            data-testid={`button-delete-download-${download.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Eliminar descarga?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta acción no se puede deshacer. La descarga será eliminada permanentemente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(download.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleEdit(download)}
+                      data-testid={`button-edit-download-${download.id}`}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          data-testid={`button-delete-download-${download.id}`}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Eliminar descarga?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer. La descarga "{download.title}" será eliminada permanentemente
+                            {download.localFilePath && " junto con su archivo local"}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel data-testid={`button-cancel-delete-${download.id}`}>
+                            Cancelar
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(download.id)}
+                            className="bg-destructive hover:bg-destructive/90"
+                            data-testid={`button-confirm-delete-${download.id}`}
+                          >
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
-                </CardHeader>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         )}
-      </CardContent>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingDownload} onOpenChange={() => setEditingDownload(null)}>
@@ -807,6 +829,6 @@ export default function DownloadsManager() {
           </Form>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }
