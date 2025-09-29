@@ -1,9 +1,35 @@
-# Legion Gaming Server Website
+# AetherWoW Gaming Server Website
 
 ## Overview
-This project is a World of Warcraft Legion private server website, Legion Plus, designed to be a central hub for its community. It aims to enhance player engagement and server promotion by offering features such as user registration, server information, news management, player rankings, and interactive community functionalities. The website is styled with a dark, Legion-themed gaming aesthetic and supports custom content.
+This project is a World of Warcraft Legion private server website, AetherWoW, designed to be a central hub for its community. It aims to enhance player engagement and server promotion by offering features such as user registration, server information, news management, player rankings, and interactive community functionalities. The website is styled with a dark, Legion-themed gaming aesthetic and supports custom content.
 
 ## Recent Changes (September 29, 2025)
+
+### Complete Brand Transformation and UI Cleanup (Current Session - Latest Changes)
+- ✅ **Full Brand Migration**: Complete transformation from "Legion Plus" to "AetherWoW"
+  - **Updated all instances** across entire codebase: HTML meta tags, component text, default values
+  - **Updated server information**: URLs changed to aetherwow.com, admin email to admin@aetherwow.com
+  - **Modified default site settings**: All references to Legion Plus changed to AetherWoW
+  - **Updated component descriptions**: FeaturesSection, RankingsSection, LoginModal, RegistrationModal, etc.
+  - **Fixed example components**: NewsCard examples updated with correct props and AetherWoW branding
+- ✅ **Hero Section Content Cleanup**: Removed promotional features and improved layout
+  - **Removed feature highlights**: "Raids Personalizados", "Jefes Únicos", "Desafío Hardcore" completely removed
+  - **Removed server status indicator**: "Servidor Online" badge removed for cleaner appearance
+  - **Improved title positioning**: Moved "AetherWoW" title closer to dashboard (reduced pt-20 to pt-8)
+- ✅ **Footer Simplification and Content Removal**: Streamlined footer design
+  - **Removed logo and branding section**: AetherWoW logo, name, and description completely removed
+  - **Removed navigation sections**: "Enlaces Rápidos" and "Información del Juego" sections eliminated
+  - **Removed community section**: Social media icons, forum links, and community content removed
+  - **Maintained essential legal**: Only copyright and policy links preserved
+  - **Updated layout structure**: Changed from 4-column to minimal design with proper spacing
+- ✅ **Server References Cleanup**: Eliminated all "x7 Server" references
+  - **Removed from footer**: "x7 Server" text completely eliminated
+  - **Updated RealmistModal**: Changed "Legion Plus x7" to just "AetherWoW"
+  - **Cleaned up storage defaults**: Updated sample data to reflect new branding
+- ✅ **Code Quality and Error Resolution**
+  - **Fixed LSP diagnostic errors**: Corrected NewsCard example component props
+  - **Cleaned up unused imports**: Removed unnecessary dependencies from Footer component
+  - **Updated TypeScript interfaces**: Ensured all components use correct prop types
 
 ### Hero Section Content Overhaul and Design Enhancement (Current Session)
 - ✅ **Homepage Statistics Update**: Replaced generic server metrics with player-focused data

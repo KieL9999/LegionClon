@@ -5,12 +5,13 @@ export default function NewsCardExample() {
   return (
     <div className="max-w-sm">
       <NewsCard 
-        id={1}
         title="AetherWoW: El futuro de los servidores privados de Legion"
-        excerpt="Descubre las últimas actualizaciones y mejoras que hemos implementado para ofrecer la mejor experiencia de World of Warcraft Legion."
-        date="18.08.2025"
+        summary="Descubre las últimas actualizaciones y mejoras que hemos implementado para ofrecer la mejor experiencia de World of Warcraft Legion."
+        content="Contenido completo de la noticia sobre las mejoras implementadas en AetherWoW."
+        category="updates"
+        priority="high"
+        publishedAt="2025-08-18"
         image={newsImage}
-        slug="legion-plus-futuro-servidores-legion"
       />
     </div>
   );
