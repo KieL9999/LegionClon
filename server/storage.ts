@@ -55,7 +55,9 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    // No initialization needed for database storage
+    if (!db) {
+      throw new Error('Database not initialized. DATABASE_URL is required.');
+    }
   }
 
   private hashPassword(password: string): string {
@@ -71,28 +73,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const [user] = await db!.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db!.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db!.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
 
   async getAllUsers(): Promise<User[]> {
-    const allUsers = await db.select().from(users);
+    const allUsers = await db!.select().from(users);
     return allUsers;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = this.hashPassword(insertUser.password);
-    const [user] = await db
+    const [user] = await db!
       .insert(users)
       .values({
         username: insertUser.username,
@@ -115,7 +117,7 @@ export class DatabaseStorage implements IStorage {
   async createSession(userId: string): Promise<Session> {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     
-    const [session] = await db
+    const [session] = await db!
       .insert(sessions)
       .values({
         userId,
@@ -128,18 +130,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSession(sessionId: string): Promise<Session | undefined> {
-    const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
+    const [session] = await db!.select().from(sessions).where(eq(sessions.id, sessionId));
     if (session && session.expiresAt > new Date()) {
       return session;
     } else if (session) {
       // Session expired, delete it
-      await db.delete(sessions).where(eq(sessions.id, sessionId));
+      await db!.delete(sessions).where(eq(sessions.id, sessionId));
     }
     return undefined;
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await db.delete(sessions).where(eq(sessions.id, sessionId));
+    await db!.delete(sessions).where(eq(sessions.id, sessionId));
   }
 
   async getUserBySession(sessionId: string): Promise<User | undefined> {
@@ -152,7 +154,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserPassword(userId: string, newPassword: string): Promise<User> {
     const hashedPassword = this.hashPassword(newPassword);
-    const [updatedUser] = await db
+    const [updatedUser] = await db!
       .update(users)
       .set({ 
         password: hashedPassword,
@@ -169,7 +171,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserEmail(userId: string, newEmail: string): Promise<User> {
-    const [updatedUser] = await db
+    const [updatedUser] = await db!
       .update(users)
       .set({ 
         email: newEmail,
@@ -186,7 +188,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserRole(userId: string, role: string): Promise<User> {
-    const [updatedUser] = await db
+    const [updatedUser] = await db!
       .update(users)
       .set({ 
         role,
@@ -203,7 +205,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserLastLogin(userId: string): Promise<User> {
-    const [updatedUser] = await db
+    const [updatedUser] = await db!
       .update(users)
       .set({ 
         lastLogin: new Date(),
@@ -220,7 +222,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllWebFeatures(): Promise<WebFeature[]> {
-    const features = await db
+    const features = await db!
       .select()
       .from(webFeatures)
       .where(eq(webFeatures.isActive, true))
@@ -229,7 +231,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createWebFeature(insertFeature: InsertWebFeature): Promise<WebFeature> {
-    const [feature] = await db
+    const [feature] = await db!
       .insert(webFeatures)
       .values({
         ...insertFeature,
@@ -241,7 +243,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateWebFeature(id: string, updateData: UpdateWebFeature): Promise<WebFeature | undefined> {
-    const [updatedFeature] = await db
+    const [updatedFeature] = await db!
       .update(webFeatures)
       .set({ 
         ...updateData,
@@ -254,7 +256,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteWebFeature(id: string): Promise<WebFeature | undefined> {
-    const [deletedFeature] = await db
+    const [deletedFeature] = await db!
       .delete(webFeatures)
       .where(eq(webFeatures.id, id))
       .returning();
@@ -263,7 +265,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllServerNews(): Promise<ServerNews[]> {
-    const news = await db
+    const news = await db!
       .select()
       .from(serverNews)
       .where(eq(serverNews.isActive, true))
@@ -272,7 +274,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createServerNews(insertNews: InsertServerNews): Promise<ServerNews> {
-    const [news] = await db
+    const [news] = await db!
       .insert(serverNews)
       .values({
         ...insertNews,
@@ -284,7 +286,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateServerNews(id: string, updateData: UpdateServerNews): Promise<ServerNews | undefined> {
-    const [updatedNews] = await db
+    const [updatedNews] = await db!
       .update(serverNews)
       .set({ 
         ...updateData,
@@ -297,7 +299,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteServerNews(id: string): Promise<ServerNews | undefined> {
-    const [deletedNews] = await db
+    const [deletedNews] = await db!
       .delete(serverNews)
       .where(eq(serverNews.id, id))
       .returning();
@@ -306,7 +308,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllDownloads(): Promise<Download[]> {
-    const allDownloads = await db
+    const allDownloads = await db!
       .select()
       .from(downloads)
       .where(eq(downloads.isActive, true))
@@ -315,12 +317,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDownloadById(id: string): Promise<Download | undefined> {
-    const [download] = await db.select().from(downloads).where(eq(downloads.id, id));
+    const [download] = await db!.select().from(downloads).where(eq(downloads.id, id));
     return download || undefined;
   }
 
   async createDownload(insertDownload: InsertDownload): Promise<Download> {
-    const [download] = await db
+    const [download] = await db!
       .insert(downloads)
       .values({
         ...insertDownload,
@@ -332,7 +334,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDownload(id: string, updateData: UpdateDownload): Promise<Download | undefined> {
-    const [updatedDownload] = await db
+    const [updatedDownload] = await db!
       .update(downloads)
       .set({ 
         ...updateData,
@@ -345,7 +347,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDownload(id: string): Promise<Download | undefined> {
-    const [deletedDownload] = await db
+    const [deletedDownload] = await db!
       .delete(downloads)
       .where(eq(downloads.id, id))
       .returning();
@@ -354,7 +356,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementDownloadCount(id: string): Promise<Download | undefined> {
-    const [updatedDownload] = await db
+    const [updatedDownload] = await db!
       .update(downloads)
       .set({ 
         downloadCount: sql`${downloads.downloadCount} + 1`,
@@ -372,7 +374,7 @@ export class DatabaseStorage implements IStorage {
     mimeType: string;
     fileSizeBytes: number;
   }): Promise<Download | undefined> {
-    const [updatedDownload] = await db
+    const [updatedDownload] = await db!
       .update(downloads)
       .set({ 
         localFilePath: fileData.localFilePath,
@@ -388,17 +390,17 @@ export class DatabaseStorage implements IStorage {
     return updatedDownload || undefined;
   }
   async getAllSiteSettings(): Promise<SiteSetting[]> {
-    const allSettings = await db.select().from(siteSettings);
+    const allSettings = await db!.select().from(siteSettings);
     return allSettings;
   }
 
   async getSiteSettingByKey(key: string): Promise<SiteSetting | undefined> {
-    const [setting] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    const [setting] = await db!.select().from(siteSettings).where(eq(siteSettings.key, key));
     return setting || undefined;
   }
 
   async createSiteSetting(insertSetting: InsertSiteSetting): Promise<SiteSetting> {
-    const [newSetting] = await db
+    const [newSetting] = await db!
       .insert(siteSettings)
       .values({
         ...insertSetting,
@@ -411,7 +413,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSiteSetting(key: string, updateSetting: UpdateSiteSetting): Promise<SiteSetting | undefined> {
-    const [updatedSetting] = await db
+    const [updatedSetting] = await db!
       .update(siteSettings)
       .set({
         ...updateSetting,
@@ -424,7 +426,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSiteSetting(key: string): Promise<SiteSetting | undefined> {
-    const [deletedSetting] = await db
+    const [deletedSetting] = await db!
       .delete(siteSettings)
       .where(eq(siteSettings.key, key))
       .returning();
@@ -433,7 +435,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSupportTickets(): Promise<SupportTicket[]> {
-    const tickets = await db
+    const tickets = await db!
       .select()
       .from(supportTickets)
       .orderBy(desc(supportTickets.createdAt));
@@ -441,7 +443,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSupportTicketsByUserId(userId: string): Promise<SupportTicket[]> {
-    const tickets = await db
+    const tickets = await db!
       .select()
       .from(supportTickets)
       .where(eq(supportTickets.userId, userId))
@@ -450,7 +452,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
-    const [ticket] = await db
+    const [ticket] = await db!
       .insert(supportTickets)
       .values({
         ...insertTicket,
@@ -462,7 +464,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSupportTicket(id: string, updateData: UpdateSupportTicket): Promise<SupportTicket | undefined> {
-    const [updatedTicket] = await db
+    const [updatedTicket] = await db!
       .update(supportTickets)
       .set({ 
         ...updateData,
@@ -475,7 +477,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSupportTicket(id: string): Promise<SupportTicket | undefined> {
-    const [deletedTicket] = await db
+    const [deletedTicket] = await db!
       .delete(supportTickets)
       .where(eq(supportTickets.id, id))
       .returning();
