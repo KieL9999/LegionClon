@@ -42,10 +42,10 @@ interface SupportTicket {
 }
 
 const statusColors = {
-  open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  open: "bg-green-500/20 text-green-400 border-green-500/30",
   in_progress: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  resolved: "bg-green-500/20 text-green-400 border-green-500/30",
-  closed: "bg-gray-500/20 text-gray-400 border-gray-500/30"
+  resolved: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  closed: "bg-red-500/20 text-red-400 border-red-500/30"
 };
 
 const statusLabels = {
@@ -374,8 +374,11 @@ export default function SoportePage() {
                               <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
                                 {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
                               </Badge>
-                              <span className="text-xs text-gray-400 self-center ml-2">
-                                {format(new Date(ticket.createdAt), 'dd/MM/yyyy', { locale: es })}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-gray-500">📅</span>
+                              <span className="text-sm font-medium text-blue-400">
+                                {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
                               </span>
                             </div>
                           </div>
