@@ -95,6 +95,7 @@ export const supportTickets = pgTable("support_tickets", {
   priority: varchar("priority", { length: 20 }).notNull().default("normal"), // low, normal, high, urgent
   category: varchar("category", { length: 50 }).notNull().default("general"), // general, technical, account, billing, other
   assignedTo: uuid("assigned_to"), // GM/Admin assigned to ticket (optional)
+  imageUrl: varchar("image_url", { length: 500 }), // Optional screenshot or image attachment
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });

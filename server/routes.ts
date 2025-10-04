@@ -1194,6 +1194,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Authentication middleware for ticket image uploads (any authenticated user)
+  const ticketUploadAuthMiddleware = async (req: any, res: any, next: any) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Not authenticated',
+          message: 'Debes iniciar sesión para subir imágenes'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida o expirada'
+        });
+      }
+
+      // Store user in request for later use
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error('Ticket upload auth error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  };
+
+  // Upload ticket image endpoint (authenticated users)
+  app.post('/api/upload-ticket-image', ticketUploadAuthMiddleware, upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          error: 'No file uploaded',
+          message: 'No se subió ningún archivo'
+        });
+      }
+
+      // Return the uploaded file URL
+      const fileUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({
+        success: true,
+        message: 'Imagen subida exitosamente',
+        url: fileUrl,
+        filename: req.file.filename
+      });
+      
+    } catch (error) {
+      console.error('Upload ticket image error:', error);
+      
+      // Clean up uploaded file if there was an error
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup uploaded file:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
   // Upload file to download endpoint (admin only)
   app.post('/api/downloads/:id/upload', uploadAuthMiddleware, uploadDownloadFile.single('file'), async (req, res) => {
     try {

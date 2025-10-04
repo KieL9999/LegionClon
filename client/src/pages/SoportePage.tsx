@@ -23,7 +23,8 @@ const createTicketSchema = z.object({
   title: z.string().min(1, "El título es requerido").max(200, "El título no puede exceder 200 caracteres"),
   description: z.string().min(1, "La descripción es requerida"),
   category: z.string().min(1, "La categoría es requerida"),
-  priority: z.string().min(1, "La prioridad es requerida")
+  priority: z.string().min(1, "La prioridad es requerida"),
+  imageUrl: z.string().optional()
 });
 
 type CreateTicketData = z.infer<typeof createTicketSchema>;
@@ -35,6 +36,7 @@ interface SupportTicket {
   status: string;
   priority: string;
   category: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +71,8 @@ const priorityLabels = {
 
 export default function SoportePage() {
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -78,7 +82,8 @@ export default function SoportePage() {
       title: "",
       description: "",
       category: "general",
-      priority: "normal"
+      priority: "normal",
+      imageUrl: ""
     }
   });
 
@@ -113,6 +118,7 @@ export default function SoportePage() {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       setCreateTicketOpen(false);
       form.reset();
+      setSelectedImage(null);
     },
     onError: (error: any) => {
       toast({
@@ -123,8 +129,44 @@ export default function SoportePage() {
     }
   });
 
-  const onSubmit = (data: CreateTicketData) => {
-    createTicketMutation.mutate(data);
+  const onSubmit = async (data: CreateTicketData) => {
+    try {
+      let imageUrl = "";
+      
+      // Upload image if one is selected
+      if (selectedImage) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('image', selectedImage);
+        
+        const response = await fetch('/api/upload-ticket-image', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al subir la imagen');
+        }
+        
+        const result = await response.json();
+        imageUrl = result.url;
+        setUploadingImage(false);
+      }
+      
+      // Create ticket with image URL if available
+      createTicketMutation.mutate({
+        ...data,
+        imageUrl: imageUrl || undefined
+      });
+    } catch (error: any) {
+      setUploadingImage(false);
+      toast({
+        title: "Error",
+        description: error.message || "Error al subir la imagen",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -257,14 +299,33 @@ export default function SoportePage() {
                           )}
                         />
 
+                        <div>
+                          <label className="block text-white mb-2">Imagen (opcional)</label>
+                          <div className="flex items-center gap-4">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                              className="bg-gray-800/50 border-gray-600 text-white file:bg-blue-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer"
+                              data-testid="input-ticket-image"
+                            />
+                            {selectedImage && (
+                              <span className="text-sm text-gray-300">
+                                {selectedImage.name}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">Adjunta una captura de pantalla para ayudarnos a entender mejor el problema (máx. 5MB)</p>
+                        </div>
+
                         <div className="flex gap-4">
                           <Button
                             type="submit"
-                            disabled={createTicketMutation.isPending}
+                            disabled={createTicketMutation.isPending || uploadingImage}
                             className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white flex-1"
                             data-testid="button-submit-ticket"
                           >
-                            {createTicketMutation.isPending ? "Creando..." : "Crear Ticket"}
+                            {uploadingImage ? "Subiendo imagen..." : createTicketMutation.isPending ? "Creando..." : "Crear Ticket"}
                           </Button>
                           <Button
                             type="button"
@@ -316,9 +377,19 @@ export default function SoportePage() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-gray-300 leading-relaxed" data-testid={`ticket-description-${ticket.id}`}>
+                        <p className="text-gray-300 leading-relaxed mb-4" data-testid={`ticket-description-${ticket.id}`}>
                           {ticket.description}
                         </p>
+                        {ticket.imageUrl && (
+                          <div className="mt-4">
+                            <img 
+                              src={ticket.imageUrl} 
+                              alt="Captura del problema" 
+                              className="max-w-full h-auto rounded-lg border border-gray-600"
+                              data-testid={`ticket-image-${ticket.id}`}
+                            />
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
