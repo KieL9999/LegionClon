@@ -264,56 +264,90 @@ export default function TicketDetailPage() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border border-blue-500/20 rounded-2xl p-6 overflow-y-auto mb-6" data-testid="chat-messages-container">
-            <div className="space-y-4">
+          <div className="flex-1 bg-gradient-to-br from-gray-900/50 via-black/40 to-gray-900/50 backdrop-blur-xl border border-cyan-500/10 rounded-2xl overflow-hidden mb-6 flex flex-col" data-testid="chat-messages-container">
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-cyan-900/20 via-blue-900/20 to-cyan-900/20 border-b border-cyan-500/20 px-6 py-4">
+              <h3 className="text-lg font-semibold text-cyan-400">Conversación</h3>
+              <p className="text-sm text-gray-400">Respuesta en tiempo real</p>
+            </div>
+            
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
               {messages.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">No hay mensajes todavía. ¡Sé el primero en enviar uno!</p>
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4">
+                    <Send className="w-8 h-8 text-cyan-400" />
+                  </div>
+                  <p className="text-gray-400 text-center">No hay mensajes todavía.</p>
+                  <p className="text-gray-500 text-sm text-center mt-1">¡Inicia la conversación!</p>
                 </div>
               ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}
-                    data-testid={`message-${msg.id}`}
-                  >
+                messages.map((msg) => {
+                  const isCurrentUser = msg.senderId === user?.id;
+                  const isTicketOwner = msg.senderId === ticket.userId;
+                  
+                  return (
                     <div
-                      className={`max-w-[70%] rounded-lg p-4 ${
-                        msg.senderId === user?.id
-                          ? 'bg-blue-600/30 border border-blue-500/30'
-                          : msg.isStaff
-                          ? 'bg-purple-600/30 border border-purple-500/30'
-                          : 'bg-gray-700/50 border border-gray-600/30'
-                      }`}
+                      key={msg.id}
+                      className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
+                      data-testid={`message-${msg.id}`}
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-sm font-semibold ${
-                          msg.isStaff ? 'text-purple-400' : 'text-blue-400'
-                        }`}>
-                          {msg.senderName}
+                      <div className={`max-w-[75%] ${isCurrentUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                        {/* Sender Info */}
+                        <div className="flex items-center gap-2 px-1">
+                          <span className={`text-xs font-medium ${
+                            msg.isStaff 
+                              ? 'text-purple-400' 
+                              : isTicketOwner 
+                              ? 'text-cyan-400' 
+                              : 'text-gray-400'
+                          }`}>
+                            {msg.senderName}
+                          </span>
+                          {msg.isStaff && (
+                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px] px-1.5 py-0">
+                              Soporte
+                            </Badge>
+                          )}
+                          {isTicketOwner && !msg.isStaff && (
+                            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-[10px] px-1.5 py-0">
+                              Usuario
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* Message Bubble */}
+                        <div
+                          className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
+                            msg.isStaff
+                              ? 'bg-gradient-to-br from-purple-600/30 to-purple-700/20 border border-purple-500/30 hover:border-purple-500/50'
+                              : isTicketOwner
+                              ? 'bg-gradient-to-br from-cyan-600/30 to-blue-600/20 border border-cyan-500/30 hover:border-cyan-500/50'
+                              : 'bg-gradient-to-br from-gray-700/40 to-gray-800/30 border border-gray-600/30 hover:border-gray-600/50'
+                          }`}
+                        >
+                          <p className="text-white text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                            {msg.message}
+                          </p>
+                        </div>
+                        
+                        {/* Timestamp */}
+                        <span className="text-[11px] text-gray-500 px-1">
+                          {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
                         </span>
-                        {msg.isStaff && (
-                          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                            Soporte
-                          </Badge>
-                        )}
                       </div>
-                      <p className="text-white whitespace-pre-wrap">{msg.message}</p>
-                      <span className="text-xs text-gray-400 mt-2 block">
-                        {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
-                      </span>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
               <div ref={messagesEndRef} />
             </div>
           </div>
 
           {/* Message Input */}
-          <Card className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-blue-500/20 p-4">
+          <Card className="bg-gradient-to-br from-gray-900/60 via-black/50 to-gray-900/60 backdrop-blur-xl border border-cyan-500/10 p-5 shadow-2xl">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3 items-end">
                 <FormField
                   control={form.control}
                   name="message"
@@ -322,7 +356,7 @@ export default function TicketDetailPage() {
                       <FormControl>
                         <Textarea
                           placeholder="Escribe tu mensaje..."
-                          className="bg-gray-800/50 border-gray-600 text-white resize-none"
+                          className="bg-gray-800/60 border-gray-600/50 text-white resize-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl transition-all"
                           rows={2}
                           data-testid="textarea-message"
                           {...field}
@@ -335,10 +369,10 @@ export default function TicketDetailPage() {
                 <Button
                   type="submit"
                   disabled={sendMessageMutation.isPending}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white self-end"
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg hover:shadow-cyan-500/20 transition-all duration-200"
                   data-testid="button-send-message"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 </Button>
               </form>
             </Form>
