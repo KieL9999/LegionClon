@@ -156,6 +156,17 @@ export const ROLE_LABELS = {
   [USER_ROLES.ADMINISTRADOR]: 'GM Nivel 7: Administrador'
 } as const;
 
+export const ROLE_COLORS = {
+  [USER_ROLES.PLAYER]: 'from-gray-500/20 to-gray-500/5 border-gray-500/30 text-gray-400',
+  [USER_ROLES.GM_ASPIRANTE]: 'from-green-500/20 to-green-500/5 border-green-500/30 text-green-400',
+  [USER_ROLES.GM_SOPORTE]: 'from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-400',
+  [USER_ROLES.GM_EVENTOS]: 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/30 text-cyan-400',
+  [USER_ROLES.GM_SUPERIOR]: 'from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-400',
+  [USER_ROLES.GM_JEFE]: 'from-orange-500/20 to-orange-500/5 border-orange-500/30 text-orange-400',
+  [USER_ROLES.COMMUNITY_MANAGER]: 'from-pink-500/20 to-pink-500/5 border-pink-500/30 text-pink-400',
+  [USER_ROLES.ADMINISTRADOR]: 'from-red-500/20 to-red-500/5 border-red-500/30 text-red-400'
+} as const;
+
 // VIP Levels
 export const VIP_LEVELS = {
   NONE: 0,

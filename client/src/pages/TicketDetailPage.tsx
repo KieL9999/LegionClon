@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ArrowLeft, Send, CheckCircle2, XCircle, User, Calendar, Shield, Ban, Paperclip } from "lucide-react";
-import { VIP_LABELS, VIP_COLORS, ROLE_LABELS } from "@shared/schema";
+import { VIP_LABELS, VIP_COLORS, ROLE_LABELS, ROLE_COLORS } from "@shared/schema";
 
 const messageSchema = z.object({
   message: z.string().min(1, "El mensaje no puede estar vacío").max(1000, "El mensaje no puede exceder 1000 caracteres")
@@ -361,13 +361,27 @@ export default function TicketDetailPage() {
                       const isCurrentUser = msg.senderId === user?.id;
                       const isTicketOwner = msg.senderId === ticket.userId;
                       
-                      // Generate anonymous code for staff members (last 4 chars of sender ID)
+                      // Generate anonymous code (last 4 chars of sender ID)
                       const anonymousCode = msg.senderId.slice(-4).toUpperCase();
                       
-                      // Show real name only to staff, anonymous code to players
-                      const displayName = msg.isStaff && !isStaff 
-                        ? `Soporte #${anonymousCode}` 
-                        : msg.senderName;
+                      // Capitalize first letter of username
+                      const capitalizedName = msg.senderName.charAt(0).toUpperCase() + msg.senderName.slice(1);
+                      
+                      // Show anonymous codes based on user type
+                      let displayName;
+                      if (!isStaff) {
+                        // Players see anonymous codes for everyone except themselves
+                        if (isCurrentUser) {
+                          displayName = capitalizedName;
+                        } else if (msg.isStaff) {
+                          displayName = `Soporte #${anonymousCode}`;
+                        } else {
+                          displayName = `Usuario #${anonymousCode}`;
+                        }
+                      } else {
+                        // Staff sees real names
+                        displayName = capitalizedName;
+                      }
                       
                       return (
                         <div
@@ -495,7 +509,9 @@ export default function TicketDetailPage() {
                       <User className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-gray-400 mb-1">Usuario</div>
-                        <div className="text-white font-medium truncate" data-testid="text-player-username">{ticketOwner.username}</div>
+                        <div className="text-white font-medium truncate" data-testid="text-player-username">
+                          {ticketOwner.username.charAt(0).toUpperCase() + ticketOwner.username.slice(1)}
+                        </div>
                       </div>
                     </div>
 
@@ -504,7 +520,7 @@ export default function TicketDetailPage() {
                       <Shield className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-gray-400 mb-1">Rol</div>
-                        <div className="text-white text-sm" data-testid="text-player-role">
+                        <div className={`bg-gradient-to-r ${ROLE_COLORS[ticketOwner.role as keyof typeof ROLE_COLORS]} border rounded-lg px-3 py-2 text-sm font-medium`} data-testid="text-player-role">
                           {ROLE_LABELS[ticketOwner.role as keyof typeof ROLE_LABELS] || ticketOwner.role}
                         </div>
                       </div>
