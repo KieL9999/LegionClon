@@ -77,6 +77,14 @@ const categoryColors = {
   other: "bg-gray-500/20 text-gray-400 border-gray-500/30"
 };
 
+const categoryLabels = {
+  general: "General",
+  technical: "Técnico",
+  account: "Cuenta",
+  billing: "Donaciones",
+  other: "Otro"
+};
+
 export default function SoportePage() {
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -380,7 +388,7 @@ export default function SoportePage() {
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs text-gray-400 font-medium">Categoría:</span>
                                 <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
-                                  {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
+                                  {categoryLabels[ticket.category as keyof typeof categoryLabels]}
                                 </Badge>
                               </div>
                             </div>
