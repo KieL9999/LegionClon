@@ -192,18 +192,27 @@ export default function SoportePage() {
       <main className="container mx-auto px-6 py-16">
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <span className="text-3xl">❓</span>
+          <div className="text-center mb-16">
+            <div className="relative inline-block mb-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 blur-2xl opacity-20"></div>
+              <div className="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 backdrop-blur-xl rounded-3xl p-10 border border-blue-500/30 shadow-2xl">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/50 transform -rotate-6">
+                    <span className="text-4xl transform rotate-6">💬</span>
+                  </div>
+                  <h1 className="text-6xl font-black bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
+                    Centro de Soporte
+                  </h1>
+                </div>
+                <p className="text-lg text-gray-300 max-w-2xl">
+                  Estamos aquí para ayudarte. Encuentra respuestas a tus preguntas o contacta con nuestro equipo de soporte.
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-sm text-green-400 font-medium">Equipo disponible 24/7</span>
+                </div>
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                Centro de Soporte
-              </h1>
             </div>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Estamos aquí para ayudarte. Encuentra respuestas a tus preguntas o contacta con nuestro equipo de soporte.
-            </p>
           </div>
 
           {/* Tickets Section for authenticated users */}
