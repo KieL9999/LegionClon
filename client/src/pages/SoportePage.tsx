@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -374,14 +375,27 @@ export default function SoportePage() {
                 </Dialog>
               </div>
 
-              {/* Tickets List */}
-              {isLoading ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-400">Cargando tickets...</div>
-                </div>
-              ) : (tickets as any)?.tickets?.length > 0 ? (
-                <div className="grid gap-4">
-                  {((tickets as any)?.tickets || []).map((ticket: SupportTicket) => (
+              {/* Tickets List with Tabs */}
+              <Tabs defaultValue="active" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-gray-800/50 mb-6">
+                  <TabsTrigger value="active" className="data-[state=active]:bg-blue-600" data-testid="tab-active-tickets">
+                    Tickets Activos
+                  </TabsTrigger>
+                  <TabsTrigger value="closed" className="data-[state=active]:bg-gray-600" data-testid="tab-closed-tickets">
+                    Tickets Cerrados
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="active">
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <div className="text-gray-400">Cargando tickets...</div>
+                    </div>
+                  ) : ((tickets as any)?.tickets || []).filter((t: SupportTicket) => t.status === 'open' || t.status === 'in_progress').length > 0 ? (
+                    <div className="grid gap-4">
+                      {((tickets as any)?.tickets || [])
+                        .filter((t: SupportTicket) => t.status === 'open' || t.status === 'in_progress')
+                        .map((ticket: SupportTicket) => (
                     <Card key={ticket.id} className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-gray-700/50 shadow-lg hover:shadow-blue-500/20 transition-shadow" data-testid={`ticket-card-${ticket.id}`}>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between gap-4">
@@ -440,22 +454,110 @@ export default function SoportePage() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🎫</div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    {isGM ? "No hay tickets pendientes" : "No tienes tickets aún"}
-                  </h3>
-                  <p className="text-gray-400 mb-6">
-                    {isGM 
-                      ? "Todos los tickets de soporte aparecerán aquí cuando los jugadores los creen"
-                      : "Crea tu primer ticket de soporte para obtener ayuda con cualquier problema"
-                    }
-                  </p>
-                </div>
-              )}
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🎫</div>
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        No hay tickets activos
+                      </h3>
+                      <p className="text-gray-400 mb-6">
+                        {isGM 
+                          ? "Los tickets abiertos o en progreso aparecerán aquí"
+                          : "No tienes tickets activos. Crea uno si necesitas ayuda"
+                        }
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="closed">
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <div className="text-gray-400">Cargando tickets...</div>
+                    </div>
+                  ) : ((tickets as any)?.tickets || []).filter((t: SupportTicket) => t.status === 'resolved' || t.status === 'closed').length > 0 ? (
+                    <div className="grid gap-4">
+                      {((tickets as any)?.tickets || [])
+                        .filter((t: SupportTicket) => t.status === 'resolved' || t.status === 'closed')
+                        .map((ticket: SupportTicket) => (
+                    <Card key={ticket.id} className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-gray-700/50 shadow-lg hover:shadow-gray-500/20 transition-shadow opacity-80" data-testid={`ticket-card-${ticket.id}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-white text-lg font-semibold truncate">{ticket.title}</h3>
+                              {isGM && (
+                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                  ID Usuario: {ticket.userId.slice(0, 8)}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-3 items-center">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Estado:</span>
+                                <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`status-${ticket.status}`}>
+                                  {statusLabels[ticket.status as keyof typeof statusLabels]}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Prioridad:</span>
+                                <Badge className={priorityColors[ticket.priority as keyof typeof priorityColors]} data-testid={`priority-${ticket.priority}`}>
+                                  {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Categoría:</span>
+                                <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
+                                  {categoryLabels[ticket.category as keyof typeof categoryLabels]}
+                                </Badge>
+                              </div>
+                              {isGM && ticket.assignedTo && (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs text-gray-400 font-medium">Asignado a:</span>
+                                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                                    {ticket.assignedTo.slice(0, 8)}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-3">
+                              <span className="text-xs text-gray-500">📅</span>
+                              <span className="text-sm font-medium text-blue-400">
+                                {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
+                              </span>
+                            </div>
+                          </div>
+                          <Link href={`/ticket/${ticket.id}`}>
+                            <Button
+                              className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white shadow-lg shrink-0"
+                              data-testid={`button-view-ticket-${ticket.id}`}
+                            >
+                              Ver
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">✅</div>
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        No hay tickets cerrados
+                      </h3>
+                      <p className="text-gray-400 mb-6">
+                        {isGM 
+                          ? "Los tickets resueltos o cerrados aparecerán aquí para revisión"
+                          : "Tus tickets cerrados aparecerán aquí cuando se resuelvan"
+                        }
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           )}
 
