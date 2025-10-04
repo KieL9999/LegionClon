@@ -465,11 +465,16 @@ export default function SoportePage() {
                     <p className="text-gray-300 text-sm">soporte@aetherwow.com</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                  <span className="text-xl">🎫</span>
-                  <div>
-                    <h3 className="font-semibold text-white">Ticket de Soporte</h3>
-                    <p className="text-gray-300 text-sm">Próximamente: Sistema de tickets integrado</p>
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-lg border border-green-500/30">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500/20">
+                    <span className="text-xl">🎫</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-white">Ticket de Soporte</h3>
+                      <span className="px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30 rounded-full">Activo</span>
+                    </div>
+                    <p className="text-gray-300 text-sm">Crea y gestiona tus tickets de soporte directamente desde tu cuenta</p>
                   </div>
                 </div>
               </div>
