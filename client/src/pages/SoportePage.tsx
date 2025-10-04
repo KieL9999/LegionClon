@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { USER_ROLES } from "@shared/schema";
 
 const createTicketSchema = z.object({
   title: z.string().min(1, "El título es requerido").max(200, "El título no puede exceder 200 caracteres"),
@@ -32,12 +33,14 @@ type CreateTicketData = z.infer<typeof createTicketSchema>;
 
 interface SupportTicket {
   id: string;
+  userId: string;
   title: string;
   description: string;
   status: string;
   priority: string;
   category: string;
   imageUrl?: string;
+  assignedTo?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,7 +93,7 @@ export default function SoportePage() {
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<CreateTicketData>({
@@ -104,9 +107,12 @@ export default function SoportePage() {
     }
   });
 
-  // Fetch user's tickets
+  // Check if user is GM (any level)
+  const isGM = user?.role !== USER_ROLES.PLAYER;
+
+  // Fetch tickets - GMs see all tickets, players see only their tickets
   const { data: tickets, isLoading } = useQuery({
-    queryKey: ['/api/tickets'],
+    queryKey: isGM ? ['/api/admin/tickets'] : ['/api/tickets'],
     enabled: isAuthenticated
   });
 
@@ -133,6 +139,7 @@ export default function SoportePage() {
         description: "Tu ticket ha sido creado exitosamente"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
       setCreateTicketOpen(false);
       form.reset();
       setSelectedImage(null);
@@ -211,7 +218,14 @@ export default function SoportePage() {
           {isAuthenticated && (
             <div className="mb-12 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl p-8 border border-blue-500/20 shadow-xl">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold text-blue-400">Mis Tickets de Soporte</h2>
+                <div>
+                  <h2 className="text-3xl font-bold text-blue-400">
+                    {isGM ? "Todos los Tickets de Soporte" : "Mis Tickets de Soporte"}
+                  </h2>
+                  {isGM && (
+                    <p className="text-sm text-gray-400 mt-1">Vista de administrador - Mostrando todos los tickets de jugadores</p>
+                  )}
+                </div>
                 <Dialog open={createTicketOpen} onOpenChange={setCreateTicketOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -372,7 +386,14 @@ export default function SoportePage() {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-white text-lg font-semibold mb-3 truncate">{ticket.title}</h3>
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-white text-lg font-semibold truncate">{ticket.title}</h3>
+                              {isGM && (
+                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                  ID Usuario: {ticket.userId.slice(0, 8)}
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex flex-wrap gap-3 items-center">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs text-gray-400 font-medium">Estado:</span>
@@ -392,6 +413,14 @@ export default function SoportePage() {
                                   {categoryLabels[ticket.category as keyof typeof categoryLabels]}
                                 </Badge>
                               </div>
+                              {isGM && ticket.assignedTo && (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs text-gray-400 font-medium">Asignado a:</span>
+                                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                                    {ticket.assignedTo.slice(0, 8)}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center gap-2 mt-3">
                               <span className="text-xs text-gray-500">📅</span>
@@ -416,8 +445,15 @@ export default function SoportePage() {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🎫</div>
-                  <h3 className="text-xl font-semibold text-white mb-2">No tienes tickets aún</h3>
-                  <p className="text-gray-400 mb-6">Crea tu primer ticket de soporte para obtener ayuda con cualquier problema</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    {isGM ? "No hay tickets pendientes" : "No tienes tickets aún"}
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    {isGM 
+                      ? "Todos los tickets de soporte aparecerán aquí cuando los jugadores los creen"
+                      : "Crea tu primer ticket de soporte para obtener ayuda con cualquier problema"
+                    }
+                  </p>
                 </div>
               )}
             </div>
