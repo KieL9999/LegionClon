@@ -61,6 +61,16 @@ Features secure user registration and login with PBKDF2 password hashing and ses
 #### Support Ticket System
 A comprehensive system allows users to create, track, and manage support requests. It includes categorized tickets (general, technical, account, billing, other), priority levels (low, normal, high, urgent), and status tracking (open, in_progress, resolved, closed), with role-based access for both users and administrators.
 
+**Real-Time Chat System (October 4, 2025):**
+Implemented a full real-time chat system for support tickets enabling instant communication between users and staff:
+- **WebSocket Server**: Dedicated WebSocket endpoint at `/ws` for real-time message delivery
+- **Authentication**: Secure WebSocket authentication using httpOnly session cookies from HTTP upgrade request
+- **Message Storage**: New `ticket_messages` database table with sender tracking and timestamps
+- **Chat Interface**: Modern chat UI in TicketDetailPage with message history, real-time updates, and auto-scroll
+- **REST API**: Endpoints for fetching ticket details with messages and creating new messages
+- **Subscription System**: Clients subscribe to specific tickets and receive instant updates when new messages arrive
+- **Security**: Session-based authentication ensures only authorized users can view and send messages
+
 ### System Design Choices
 
 #### Data Storage
@@ -80,6 +90,7 @@ The application uses Drizzle ORM with PostgreSQL (Neon Database) and Drizzle Kit
 - `server_news`: News and announcements.
 - `site_settings`: Site configuration.
 - `support_tickets`: Complete support ticket system.
+- `ticket_messages`: Real-time chat messages for support tickets with sender tracking and timestamps.
 
 ## Recent Updates
 
