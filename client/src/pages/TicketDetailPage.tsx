@@ -361,6 +361,14 @@ export default function TicketDetailPage() {
                       const isCurrentUser = msg.senderId === user?.id;
                       const isTicketOwner = msg.senderId === ticket.userId;
                       
+                      // Generate anonymous code for staff members (last 4 chars of sender ID)
+                      const anonymousCode = msg.senderId.slice(-4).toUpperCase();
+                      
+                      // Show real name only to staff, anonymous code to players
+                      const displayName = msg.isStaff && !isStaff 
+                        ? `Soporte #${anonymousCode}` 
+                        : msg.senderName;
+                      
                       return (
                         <div
                           key={msg.id}
@@ -377,7 +385,7 @@ export default function TicketDetailPage() {
                                   ? 'text-cyan-400' 
                                   : 'text-gray-400'
                               }`}>
-                                {msg.senderName}
+                                {displayName}
                               </span>
                               {msg.isStaff && (
                                 <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px] px-1.5 py-0">
