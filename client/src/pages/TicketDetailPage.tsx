@@ -17,7 +17,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Send, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle, User, Mail, Calendar, Coins, Shield, Ban, Paperclip, Image as ImageIcon } from "lucide-react";
+import { VIP_LABELS, VIP_COLORS, ROLE_LABELS } from "@shared/schema";
 
 const messageSchema = z.object({
   message: z.string().min(1, "El mensaje no puede estar vacío").max(1000, "El mensaje no puede exceder 1000 caracteres")
@@ -45,6 +46,19 @@ interface Ticket {
   category: string;
   assignedTo?: string;
   imageUrl?: string;
+  createdAt: string;
+}
+
+interface TicketOwner {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  coins: number;
+  vipLevel: number;
+  isBanned: boolean;
+  banReason?: string;
+  lastLogin?: string;
   createdAt: string;
 }
 
@@ -193,6 +207,7 @@ export default function TicketDetailPage() {
   };
 
   const ticket = ticketData?.ticket as Ticket;
+  const ticketOwner = ticketData?.ticketOwner as TicketOwner;
 
   // Take ticket mutation
   const takeTicketMutation = useMutation({
@@ -278,185 +293,298 @@ export default function TicketDetailPage() {
       <Header />
       
       <main className="container mx-auto px-6 py-8 flex-1 flex flex-col">
-        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
-          {/* Header */}
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
+          {/* Back Button - More Visible */}
           <div className="mb-6">
             <Button
-              variant="ghost"
-              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 mb-4"
+              variant="outline"
+              className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 hover:border-cyan-500/50 hover:text-cyan-300 font-semibold"
               onClick={() => navigate('/soporte')}
               data-testid="button-back"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="mr-2 h-5 w-5" />
               Volver a Soporte
             </Button>
-            
-            <Card className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-blue-500/20 p-6">
-              <div className="flex items-start justify-between gap-6">
-                <div className="flex-1">
-                  <div className="mb-4">
-                    <span className="text-sm text-gray-400 font-medium">Título:</span>
-                    <h1 className="text-2xl font-bold text-white mt-1" data-testid="text-ticket-title">{ticket.title}</h1>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <span className="text-sm text-gray-400 font-medium">Descripción:</span>
-                    <p className="text-gray-300 mt-1">{ticket.description}</p>
-                  </div>
-                  
-                  <div className="flex gap-3 items-center flex-wrap">
-                    <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`badge-status-${ticket.status}`}>
-                      {statusLabels[ticket.status as keyof typeof statusLabels]}
-                    </Badge>
-                    <span className="text-sm text-gray-400">
-                      Creado: {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
-                    </span>
-                  </div>
-
-                  {/* Action Buttons */}
-                  {isStaff && (
-                    <div className="flex gap-3 mt-4">
-                      {canTakeTicket && (
-                        <Button
-                          onClick={() => takeTicketMutation.mutate()}
-                          disabled={takeTicketMutation.isPending}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                          data-testid="button-take-ticket"
-                        >
-                          Tomar Ticket
-                        </Button>
-                      )}
-                      {canCloseTicket && (
-                        <Button
-                          onClick={() => setShowCloseDialog(true)}
-                          className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
-                          data-testid="button-close-ticket"
-                        >
-                          Cerrar Ticket
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {ticket.imageUrl && (
-                  <img
-                    src={ticket.imageUrl}
-                    alt="Captura del ticket"
-                    className="w-32 h-32 object-cover rounded-lg"
-                  />
-                )}
-              </div>
-            </Card>
           </div>
 
-          {/* Chat Messages */}
-          <div className="flex-1 bg-gradient-to-br from-gray-900/50 via-black/40 to-gray-900/50 backdrop-blur-xl border border-cyan-500/10 rounded-2xl overflow-hidden mb-6 flex flex-col" data-testid="chat-messages-container">
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-              {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4">
-                    <Send className="w-8 h-8 text-cyan-400" />
+          {/* Main Content Area */}
+          <div className="flex-1 flex gap-6">
+            {/* Left Side - Chat Area */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* Ticket Header */}
+              <Card className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-blue-500/20 p-6 mb-6">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="mb-4">
+                      <span className="text-sm text-gray-400 font-medium">Título:</span>
+                      <h1 className="text-2xl font-bold text-white mt-1" data-testid="text-ticket-title">{ticket.title}</h1>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <span className="text-sm text-gray-400 font-medium">Descripción:</span>
+                      <p className="text-gray-300 mt-1">{ticket.description}</p>
+                    </div>
+                    
+                    <div className="flex gap-3 items-center flex-wrap">
+                      <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`badge-status-${ticket.status}`}>
+                        {statusLabels[ticket.status as keyof typeof statusLabels]}
+                      </Badge>
+                      <span className="text-sm text-gray-400">
+                        Creado: {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-gray-400 text-center">No hay mensajes todavía.</p>
-                  <p className="text-gray-500 text-sm text-center mt-1">¡Inicia la conversación!</p>
+                  {ticket.imageUrl && (
+                    <img
+                      src={ticket.imageUrl}
+                      alt="Captura del ticket"
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  )}
                 </div>
-              ) : (
-                messages.map((msg) => {
-                  const isCurrentUser = msg.senderId === user?.id;
-                  const isTicketOwner = msg.senderId === ticket.userId;
-                  
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
-                      data-testid={`message-${msg.id}`}
-                    >
-                      <div className={`max-w-[75%] ${isCurrentUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-                        {/* Sender Info */}
-                        <div className="flex items-center gap-2 px-1">
-                          <span className={`text-xs font-medium ${
-                            msg.isStaff 
-                              ? 'text-purple-400' 
-                              : isTicketOwner 
-                              ? 'text-cyan-400' 
-                              : 'text-gray-400'
-                          }`}>
-                            {msg.senderName}
-                          </span>
-                          {msg.isStaff && (
-                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px] px-1.5 py-0">
-                              Soporte
-                            </Badge>
-                          )}
-                          {isTicketOwner && !msg.isStaff && (
-                            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-[10px] px-1.5 py-0">
-                              Usuario
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {/* Message Bubble */}
+              </Card>
+
+              {/* Chat Messages */}
+              <div className="flex-1 bg-gradient-to-br from-gray-900/50 via-black/40 to-gray-900/50 backdrop-blur-xl border border-cyan-500/10 rounded-2xl overflow-hidden mb-6 flex flex-col" data-testid="chat-messages-container">
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <Send className="w-8 h-8 text-cyan-400" />
+                      </div>
+                      <p className="text-gray-400 text-center">No hay mensajes todavía.</p>
+                      <p className="text-gray-500 text-sm text-center mt-1">¡Inicia la conversación!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isCurrentUser = msg.senderId === user?.id;
+                      const isTicketOwner = msg.senderId === ticket.userId;
+                      
+                      return (
                         <div
-                          className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
-                            msg.isStaff
-                              ? 'bg-gradient-to-br from-purple-600/30 to-purple-700/20 border border-purple-500/30 hover:border-purple-500/50'
-                              : isTicketOwner
-                              ? 'bg-gradient-to-br from-cyan-600/30 to-blue-600/20 border border-cyan-500/30 hover:border-cyan-500/50'
-                              : 'bg-gradient-to-br from-gray-700/40 to-gray-800/30 border border-gray-600/30 hover:border-gray-600/50'
-                          }`}
+                          key={msg.id}
+                          className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
+                          data-testid={`message-${msg.id}`}
                         >
-                          <p className="text-white text-[15px] leading-relaxed whitespace-pre-wrap break-words">
-                            {msg.message}
-                          </p>
+                          <div className={`max-w-[75%] ${isCurrentUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                            {/* Sender Info */}
+                            <div className="flex items-center gap-2 px-1">
+                              <span className={`text-xs font-medium ${
+                                msg.isStaff 
+                                  ? 'text-purple-400' 
+                                  : isTicketOwner 
+                                  ? 'text-cyan-400' 
+                                  : 'text-gray-400'
+                              }`}>
+                                {msg.senderName}
+                              </span>
+                              {msg.isStaff && (
+                                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px] px-1.5 py-0">
+                                  Soporte
+                                </Badge>
+                              )}
+                              {isTicketOwner && !msg.isStaff && (
+                                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-[10px] px-1.5 py-0">
+                                  Usuario
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Message Bubble */}
+                            <div
+                              className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
+                                msg.isStaff
+                                  ? 'bg-gradient-to-br from-purple-600/30 to-purple-700/20 border border-purple-500/30 hover:border-purple-500/50'
+                                  : isTicketOwner
+                                  ? 'bg-gradient-to-br from-cyan-600/30 to-blue-600/20 border border-cyan-500/30 hover:border-cyan-500/50'
+                                  : 'bg-gradient-to-br from-gray-700/40 to-gray-800/30 border border-gray-600/30 hover:border-gray-600/50'
+                              }`}
+                            >
+                              <p className="text-white text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                                {msg.message}
+                              </p>
+                            </div>
+                            
+                            {/* Timestamp */}
+                            <span className="text-[11px] text-gray-500 px-1">
+                              {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
+                            </span>
+                          </div>
                         </div>
-                        
-                        {/* Timestamp */}
-                        <span className="text-[11px] text-gray-500 px-1">
-                          {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
-                        </span>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
+
+              {/* Message Input */}
+              <Card className="bg-gradient-to-br from-gray-900/60 via-black/50 to-gray-900/60 backdrop-blur-xl border border-cyan-500/10 p-5 shadow-2xl">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3 items-end">
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Textarea
+                              placeholder="Escribe tu mensaje..."
+                              className="bg-gray-800/60 border-gray-600/50 text-white resize-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl transition-all"
+                              rows={2}
+                              data-testid="textarea-message"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/60 text-gray-300 h-10 w-10 p-0 rounded-xl"
+                      data-testid="button-attach-image"
+                      title="Adjuntar imagen"
+                    >
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={sendMessageMutation.isPending}
+                      className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg hover:shadow-cyan-500/20 transition-all duration-200"
+                      data-testid="button-send-message"
+                    >
+                      <Send className="h-5 w-5" />
+                    </Button>
+                  </form>
+                </Form>
+              </Card>
+            </div>
+
+            {/* Right Side - Player Info Panel (Only visible to Staff) */}
+            {isStaff && ticketOwner && (
+              <div className="w-80 flex-shrink-0">
+                <Card className="bg-gradient-to-br from-gray-900/60 via-black/50 to-gray-900/60 backdrop-blur-xl border border-purple-500/20 p-6 sticky top-8">
+                  <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <User className="h-5 w-5 text-purple-400" />
+                    Información del Jugador
+                  </h2>
+
+                  {/* VIP Level - Priority Display */}
+                  <div className="mb-6">
+                    <div className={`bg-gradient-to-r ${VIP_COLORS[ticketOwner.vipLevel as keyof typeof VIP_COLORS]} border rounded-lg p-4 text-center`}>
+                      <div className="text-sm font-medium opacity-80 mb-1">Nivel VIP</div>
+                      <div className="text-2xl font-bold">{VIP_LABELS[ticketOwner.vipLevel as keyof typeof VIP_LABELS]}</div>
+                      <div className="text-xs mt-1 opacity-70">Prioridad: {ticketOwner.vipLevel > 0 ? 'Alta' : 'Normal'}</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mb-6">
+                    {/* Username */}
+                    <div className="flex items-start gap-3">
+                      <User className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-400 mb-1">Usuario</div>
+                        <div className="text-white font-medium truncate" data-testid="text-player-username">{ticketOwner.username}</div>
                       </div>
                     </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
 
-          {/* Message Input */}
-          <Card className="bg-gradient-to-br from-gray-900/60 via-black/50 to-gray-900/60 backdrop-blur-xl border border-cyan-500/10 p-5 shadow-2xl">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3 items-end">
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Textarea
-                          placeholder="Escribe tu mensaje..."
-                          className="bg-gray-800/60 border-gray-600/50 text-white resize-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl transition-all"
-                          rows={2}
-                          data-testid="textarea-message"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  disabled={sendMessageMutation.isPending}
-                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg hover:shadow-cyan-500/20 transition-all duration-200"
-                  data-testid="button-send-message"
-                >
-                  <Send className="h-5 w-5" />
-                </Button>
-              </form>
-            </Form>
-          </Card>
+                    {/* Email */}
+                    <div className="flex items-start gap-3">
+                      <Mail className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-400 mb-1">Email</div>
+                        <div className="text-white text-sm break-all" data-testid="text-player-email">{ticketOwner.email}</div>
+                      </div>
+                    </div>
+
+                    {/* Role */}
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-400 mb-1">Rol</div>
+                        <div className="text-white text-sm" data-testid="text-player-role">
+                          {ROLE_LABELS[ticketOwner.role as keyof typeof ROLE_LABELS] || ticketOwner.role}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Coins */}
+                    <div className="flex items-start gap-3">
+                      <Coins className="h-5 w-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-400 mb-1">Monedas</div>
+                        <div className="text-yellow-400 font-medium" data-testid="text-player-coins">{ticketOwner.coins}</div>
+                      </div>
+                    </div>
+
+                    {/* Account Created */}
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-400 mb-1">Cuenta Creada</div>
+                        <div className="text-white text-sm">
+                          {format(new Date(ticketOwner.createdAt), "dd/MM/yyyy", { locale: es })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Last Login */}
+                    {ticketOwner.lastLogin && (
+                      <div className="flex items-start gap-3">
+                        <Calendar className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-400 mb-1">Último Acceso</div>
+                          <div className="text-white text-sm">
+                            {format(new Date(ticketOwner.lastLogin), "dd/MM/yyyy HH:mm", { locale: es })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ban Status */}
+                    {ticketOwner.isBanned && (
+                      <div className="flex items-start gap-3">
+                        <Ban className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-400 mb-1">Estado</div>
+                          <div className="text-red-400 font-medium">Baneado</div>
+                          {ticketOwner.banReason && (
+                            <div className="text-xs text-gray-400 mt-1">{ticketOwner.banReason}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons for Staff */}
+                  <div className="space-y-3 pt-6 border-t border-gray-700/50">
+                    {canTakeTicket && (
+                      <Button
+                        onClick={() => takeTicketMutation.mutate()}
+                        disabled={takeTicketMutation.isPending}
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        data-testid="button-take-ticket"
+                      >
+                        Tomar Ticket
+                      </Button>
+                    )}
+                    {canCloseTicket && (
+                      <Button
+                        onClick={() => setShowCloseDialog(true)}
+                        className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
+                        data-testid="button-close-ticket"
+                      >
+                        Cerrar Ticket
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
         </div>
       </main>
       

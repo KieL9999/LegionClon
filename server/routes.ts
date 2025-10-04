@@ -1779,10 +1779,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
 
+      // Get ticket owner information (for staff to view)
+      const ticketOwner = await storage.getUser(ticket.userId);
+      const ticketOwnerInfo = ticketOwner ? {
+        id: ticketOwner.id,
+        username: ticketOwner.username,
+        email: ticketOwner.email,
+        role: ticketOwner.role,
+        coins: ticketOwner.coins,
+        vipLevel: ticketOwner.vipLevel,
+        isBanned: ticketOwner.isBanned,
+        banReason: ticketOwner.banReason,
+        lastLogin: ticketOwner.lastLogin,
+        createdAt: ticketOwner.createdAt
+      } : null;
+
       res.status(200).json({
         success: true,
         ticket,
-        messages: messagesWithUsers
+        messages: messagesWithUsers,
+        ticketOwner: ticketOwnerInfo
       });
 
     } catch (error) {
