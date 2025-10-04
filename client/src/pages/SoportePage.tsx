@@ -452,15 +452,19 @@ export default function SoportePage() {
               </div>
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                  <span className="text-xl">💬</span>
-                  <div>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/50">
+                    <span className="text-xl">💬</span>
+                  </div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-white">Discord</h3>
                     <p className="text-gray-300 text-sm">Únete a nuestro servidor de Discord para soporte en tiempo real</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                  <span className="text-xl">📧</span>
-                  <div>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/50">
+                    <span className="text-xl">📧</span>
+                  </div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-white">Email</h3>
                     <p className="text-gray-300 text-sm">soporte@aetherwow.com</p>
                   </div>
