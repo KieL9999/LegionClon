@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, type SiteSetting, type InsertSiteSetting, type UpdateSiteSetting, type SupportTicket, type InsertSupportTicket, type UpdateSupportTicket, users, sessions, webFeatures, serverNews, downloads, siteSettings, supportTickets } from "@shared/schema";
+import { type User, type InsertUser, type Session, type ChangePasswordData, type ChangeEmailData, type WebFeature, type InsertWebFeature, type UpdateWebFeature, type ServerNews, type InsertServerNews, type UpdateServerNews, type Download, type InsertDownload, type UpdateDownload, type SiteSetting, type InsertSiteSetting, type UpdateSiteSetting, type SupportTicket, type InsertSupportTicket, type UpdateSupportTicket, type TicketMessage, type InsertTicketMessage, users, sessions, webFeatures, serverNews, downloads, siteSettings, supportTickets, ticketMessages } from "@shared/schema";
 import { randomUUID, createHash, pbkdf2Sync, randomBytes } from "crypto";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -48,9 +48,12 @@ export interface IStorage {
   deleteSiteSetting(key: string): Promise<SiteSetting | undefined>;
   getAllSupportTickets(): Promise<SupportTicket[]>;
   getSupportTicketsByUserId(userId: string): Promise<SupportTicket[]>;
+  getSupportTicketById(id: string): Promise<SupportTicket | undefined>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   updateSupportTicket(id: string, ticket: UpdateSupportTicket): Promise<SupportTicket | undefined>;
   deleteSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  getTicketMessages(ticketId: string): Promise<TicketMessage[]>;
+  createTicketMessage(message: InsertTicketMessage): Promise<TicketMessage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -451,6 +454,14 @@ export class DatabaseStorage implements IStorage {
     return tickets;
   }
 
+  async getSupportTicketById(id: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db!
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.id, id));
+    return ticket || undefined;
+  }
+
   async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
     const [ticket] = await db!
       .insert(supportTickets)
@@ -484,6 +495,26 @@ export class DatabaseStorage implements IStorage {
     
     return deletedTicket || undefined;
   }
+
+  async getTicketMessages(ticketId: string): Promise<TicketMessage[]> {
+    const messages = await db!
+      .select()
+      .from(ticketMessages)
+      .where(eq(ticketMessages.ticketId, ticketId))
+      .orderBy(ticketMessages.createdAt);
+    return messages;
+  }
+
+  async createTicketMessage(insertMessage: InsertTicketMessage): Promise<TicketMessage> {
+    const [message] = await db!
+      .insert(ticketMessages)
+      .values({
+        ...insertMessage,
+        createdAt: new Date()
+      })
+      .returning();
+    return message;
+  }
 }
 
 // Memory storage implementation as fallback when database is not available
@@ -495,6 +526,7 @@ export class MemStorage implements IStorage {
   private downloads: Map<string, Download> = new Map();
   private siteSettings: Map<string, SiteSetting> = new Map();
   private supportTickets: Map<string, SupportTicket> = new Map();
+  private ticketMessages: Map<string, TicketMessage> = new Map();
 
   constructor() {
     this.initializeDefaults();
@@ -974,6 +1006,35 @@ export class MemStorage implements IStorage {
       this.supportTickets.delete(id);
     }
     return ticket;
+  }
+
+  async getSupportTicketById(id: string): Promise<SupportTicket | undefined> {
+    return this.supportTickets.get(id);
+  }
+
+  async getTicketMessages(ticketId: string): Promise<TicketMessage[]> {
+    return Array.from(this.ticketMessages.values())
+      .filter(msg => msg.ticketId === ticketId)
+      .sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return a.createdAt.getTime() - b.createdAt.getTime();
+        }
+        return 0;
+      });
+  }
+
+  async createTicketMessage(message: InsertTicketMessage): Promise<TicketMessage> {
+    const id = randomUUID();
+    const now = new Date();
+    const ticketMessage: TicketMessage = {
+      id,
+      ticketId: message.ticketId,
+      senderId: message.senderId,
+      message: message.message,
+      createdAt: now
+    };
+    this.ticketMessages.set(id, ticketMessage);
+    return ticketMessage;
   }
 }
 
