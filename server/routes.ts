@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { WebSocket, WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, insertTicketMessageSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
@@ -1846,6 +1847,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateSupportTicket(ticketId, { status: 'in_progress' });
       }
 
+      // Broadcast message to WebSocket subscribers
+      const messageData = {
+        ...newMessage,
+        senderName: user.username,
+        isStaff
+      };
+      
+      if (typeof (app as any).broadcastTicketMessage === 'function') {
+        (app as any).broadcastTicketMessage(ticketId, messageData);
+      }
+
       res.status(201).json({
         success: true,
         message: newMessage,
@@ -1975,6 +1987,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // WebSocket server for real-time ticket messages
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Map to track connected clients by ticket ID
+  const ticketConnections = new Map<string, Set<WebSocket>>();
+
+  wss.on('connection', async (ws, req) => {
+    let currentTicketId: string | null = null;
+    let authenticatedUserId: string | null = null;
+
+    ws.on('message', async (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+
+        if (message.type === 'auth') {
+          // Authenticate using session ID from message
+          const sessionId = message.sessionId;
+          if (sessionId) {
+            const user = await storage.getUserBySession(sessionId);
+            if (user) {
+              authenticatedUserId = user.id;
+              ws.send(JSON.stringify({ type: 'auth_success', userId: user.id }));
+            } else {
+              ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid session' }));
+              ws.close();
+            }
+          }
+        } else if (message.type === 'subscribe' && authenticatedUserId) {
+          // Subscribe to a ticket
+          const ticketId = message.ticketId;
+          const ticket = await storage.getSupportTicketById(ticketId);
+
+          if (ticket) {
+            const user = await storage.getUser(authenticatedUserId);
+            const isStaff = user && user.role !== 'player';
+            
+            // Check if user owns the ticket or is staff
+            if (ticket.userId === authenticatedUserId || isStaff) {
+              // Unsubscribe from previous ticket if any
+              if (currentTicketId && ticketConnections.has(currentTicketId)) {
+                ticketConnections.get(currentTicketId)?.delete(ws);
+              }
+
+              // Subscribe to new ticket
+              currentTicketId = ticketId;
+              if (!ticketConnections.has(ticketId)) {
+                ticketConnections.set(ticketId, new Set());
+              }
+              ticketConnections.get(ticketId)?.add(ws);
+
+              ws.send(JSON.stringify({ 
+                type: 'subscribed', 
+                ticketId 
+              }));
+            } else {
+              ws.send(JSON.stringify({ 
+                type: 'error', 
+                message: 'No tienes permiso para ver este ticket' 
+              }));
+            }
+          } else {
+            ws.send(JSON.stringify({ 
+              type: 'error', 
+              message: 'Ticket no encontrado' 
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({ 
+          type: 'error', 
+          message: 'Error procesando mensaje' 
+        }));
+      }
+    });
+
+    ws.on('close', () => {
+      // Clean up on disconnect
+      if (currentTicketId && ticketConnections.has(currentTicketId)) {
+        ticketConnections.get(currentTicketId)?.delete(ws);
+        if (ticketConnections.get(currentTicketId)?.size === 0) {
+          ticketConnections.delete(currentTicketId);
+        }
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+
+  // Function to broadcast new messages to ticket subscribers
+  const broadcastTicketMessage = (ticketId: string, message: any) => {
+    const connections = ticketConnections.get(ticketId);
+    if (connections) {
+      const data = JSON.stringify({
+        type: 'new_message',
+        message
+      });
+      
+      connections.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      });
+    }
+  };
+
+  // Export broadcast function for use in routes
+  (app as any).broadcastTicketMessage = broadcastTicketMessage;
 
   return httpServer;
 }
