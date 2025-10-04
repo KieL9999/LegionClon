@@ -493,31 +493,6 @@ export default function SoportePage() {
               </div>
             </div>
           </div>
-
-          {/* Status Section */}
-          <div className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl p-8 border border-green-500/20 shadow-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-2xl">🟢</span>
-              <h2 className="text-2xl font-bold text-green-400">Estado del Servidor</h2>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-green-900/20 rounded-lg border border-green-500/30">
-                <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-2"></div>
-                <h3 className="font-semibold text-green-400">Servidor Principal</h3>
-                <p className="text-green-300 text-sm">En línea</p>
-              </div>
-              <div className="text-center p-4 bg-green-900/20 rounded-lg border border-green-500/30">
-                <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-2"></div>
-                <h3 className="font-semibold text-green-400">Base de Datos</h3>
-                <p className="text-green-300 text-sm">Operacional</p>
-              </div>
-              <div className="text-center p-4 bg-green-900/20 rounded-lg border border-green-500/30">
-                <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-2"></div>
-                <h3 className="font-semibold text-green-400">Sitio Web</h3>
-                <p className="text-green-300 text-sm">Funcionando</p>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
       
