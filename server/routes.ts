@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, insertTicketMessageSchema, USER_ROLES } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1718,6 +1718,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.error('Create ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Get ticket by ID with messages
+  app.get('/api/tickets/:id', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión para ver este ticket'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      const ticketId = req.params.id;
+      const ticket = await storage.getSupportTicketById(ticketId);
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: 'Not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+
+      // Check if user owns the ticket or is staff (GM or higher)
+      const isStaff = user.role !== 'player';
+      if (ticket.userId !== user.id && !isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'No tienes permiso para ver este ticket'
+        });
+      }
+
+      // Get messages for the ticket
+      const messages = await storage.getTicketMessages(ticketId);
+
+      // Get user info for each message
+      const messagesWithUsers = await Promise.all(
+        messages.map(async (msg) => {
+          const sender = await storage.getUser(msg.senderId);
+          return {
+            ...msg,
+            senderName: sender?.username || 'Usuario desconocido',
+            isStaff: sender?.role !== 'player'
+          };
+        })
+      );
+
+      res.status(200).json({
+        success: true,
+        ticket,
+        messages: messagesWithUsers
+      });
+
+    } catch (error) {
+      console.error('Get ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Create a message for a ticket
+  app.post('/api/tickets/:id/messages', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión para enviar mensajes'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      const ticketId = req.params.id;
+      const ticket = await storage.getSupportTicketById(ticketId);
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: 'Not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+
+      // Check if user owns the ticket or is staff
+      const isStaff = user.role !== 'player';
+      if (ticket.userId !== user.id && !isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'No tienes permiso para enviar mensajes en este ticket'
+        });
+      }
+
+      // Validate message
+      const validatedData = insertTicketMessageSchema.parse({
+        ticketId,
+        senderId: user.id,
+        message: req.body.message
+      });
+
+      // Create message
+      const newMessage = await storage.createTicketMessage(validatedData);
+
+      // Update ticket status to in_progress if it's open and staff is responding
+      if (ticket.status === 'open' && isStaff) {
+        await storage.updateSupportTicket(ticketId, { status: 'in_progress' });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: newMessage,
+        senderName: user.username,
+        isStaff
+      });
+
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Datos inválidos',
+          details: error.errors
+        });
+      }
+
+      console.error('Create message error:', error);
       res.status(500).json({
         error: 'Internal server error',
         message: 'Error interno del servidor'
