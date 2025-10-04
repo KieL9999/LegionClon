@@ -6,23 +6,24 @@ AetherWoW is a World of Warcraft Legion private server website designed to be a 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Replit Setup (October 1, 2025)
+## Replit Setup (October 4, 2025)
 This project was successfully imported from GitHub and configured to run in the Replit environment:
 
 ### Environment Configuration
 - **Runtime**: Node.js 20 with TypeScript
 - **Port**: 5000 (frontend and backend on same port)
 - **Host**: 0.0.0.0 (required for Replit proxy)
-- **Database**: PostgreSQL (already provisioned via DATABASE_URL)
-- **Development Server**: Vite dev server with HMR
+- **Database**: PostgreSQL (Neon Database via DATABASE_URL)
+- **Development Server**: Vite dev server with HMR and allowedHosts: true
 - **Build System**: Vite + esbuild
 
-### Key Setup Steps Completed
-1. Modified `server/db.ts` to gracefully handle missing DATABASE_URL and fall back to MemStorage
-2. Configured workflow to run `npm run dev` on port 5000 with webview output
-3. Database schema synced using `drizzle-kit push`
+### Key Setup Steps Completed (Fresh Import - October 4, 2025)
+1. Verified existing configuration supports Replit proxy environment (`allowedHosts: true` in server/vite.ts)
+2. Confirmed workflow "Start application" runs `npm run dev` on port 5000 with webview output
+3. Database connection already established and working correctly
 4. Verified all routes and authentication working correctly
-5. Deployment config set for autoscale production deployment
+5. Deployment config set for autoscale production deployment with npm build/start
+6. Application successfully running and accessible
 
 ### Running the Application
 - **Development**: Workflow "Start application" runs `npm run dev` automatically
