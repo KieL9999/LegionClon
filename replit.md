@@ -163,8 +163,31 @@ Implemented role-based access control for the Support Page to provide different 
 - Conditional rendering of GM-specific badges and information
 - All changes maintain responsive design and dark gaming aesthetic
 
+### Ticket Management System Enhancements (October 4, 2025 - Latest)
+Major improvements to ticket closure workflow and organization:
+
+**Close Ticket with Resolution Status:**
+- GMs can now close tickets with resolution status via dialog:
+  - **"Sí, Resuelto"**: Marks ticket as `resolved` (problema resuelto exitosamente)
+  - **"No, Cerrar sin Resolver"**: Marks ticket as `closed` (cerrado sin resolver)
+- Close button appears for GMs who have taken the ticket
+- Button only available for tickets in `open` or `in_progress` status
+
+**Tabs for Active and Closed Tickets:**
+- Support page now has two tabs for better organization:
+  - **"Tickets Activos"**: Shows tickets with status `open` or `in_progress`
+  - **"Tickets Cerrados"**: Shows tickets with status `resolved` or `closed`
+- Both players and GMs can view tickets in both tabs
+- Closed tickets have distinct visual styling (slightly transparent) to differentiate from active tickets
+
+**Persistent Ticket History:**
+- All tickets remain in the system after closure for review and audit purposes
+- GMs can review all closed tickets to track resolution patterns
+- Players can access their complete ticket history
+- Closed tickets are fully viewable with complete conversation history
+
 **Active Users:**
-- User "kiel" (ID: 5b0ce757-9a47-4e55-a5f1-4f9d32aa6912) has been granted Administrador (Level 7) role for testing and administration purposes
+- User "kiel" (ID: 4b856e14-4b65-4b99-93fd-8db8337607c4) has been granted Administrador (Level 7) role for testing and administration purposes
 
 ## External Dependencies
 - **UI Frameworks**: Radix UI, shadcn/ui
