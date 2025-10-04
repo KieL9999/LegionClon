@@ -80,6 +80,44 @@ The application uses Drizzle ORM with PostgreSQL (Neon Database) and Drizzle Kit
 - `site_settings`: Site configuration.
 - `support_tickets`: Complete support ticket system.
 
+## Recent Updates
+
+### Support Page UI/UX Improvements (October 4, 2025)
+Comprehensive visual enhancements to the Support Page (`client/src/pages/SoportePage.tsx`):
+
+**Ticket Creation Form:**
+- Increased input field height for "Imagen (opcional)" to properly display file selection button (h-14 with py-3)
+- Removed emoji from "Crear Nuevo Ticket" button for cleaner professional look
+
+**Ticket List Display:**
+- Redesigned ticket cards to be compact with horizontal layout
+- Added "Ver" button for viewing full ticket conversations
+- Removed detailed description and images from list view for better overview
+- Implemented color-coded visual system:
+  - **Status badges**: Abierto (green), En Progreso (yellow), Resuelto (blue), Cerrado (red)
+  - **Priority badges**: Baja (green), Normal (blue), Alta (orange), Urgente (red)
+  - **Category badges**: General (purple), Técnico (cyan), Cuenta (indigo), Donaciones (amber), Otro (gray)
+- Added clear labels: "Estado:", "Prioridad:", "Categoría:" for improved differentiation
+- Enhanced date display with calendar icon and formatted date: "dd de MMMM, yyyy"
+- All categories now display in Spanish (Technical → Técnico, Account → Cuenta, etc.)
+
+**Header Section:**
+- Redesigned "Centro de Soporte" header with elegant card container
+- Removed descriptive text to reduce vertical space
+- Added "Equipo disponible 24/7" indicator with animated green pulse dot
+- Maintains professional gradient styling consistent with site theme
+
+**Contact Options:**
+- Updated all contact methods (Discord, Email, Ticket de Soporte) with color-coded backgrounds
+- Discord: Purple gradient, Email: Blue gradient, Ticket de Soporte: Green gradient with "Activo" badge
+- All contact cards now use consistent circular icon containers
+- Changed Ticket de Soporte from "Próximamente" to active status
+
+**Removed Sections:**
+- Eliminated "Estado del Servidor" section to streamline page focus
+
+All changes maintain dark gaming aesthetic with proper color hierarchy and professional appearance optimized for user experience.
+
 ## External Dependencies
 - **UI Frameworks**: Radix UI, shadcn/ui
 - **Styling**: Tailwind CSS
