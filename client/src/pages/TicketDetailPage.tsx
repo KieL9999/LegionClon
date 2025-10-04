@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle } from "lucide-react";
 
 const messageSchema = z.object({
   message: z.string().min(1, "El mensaje no puede estar vacío").max(1000, "El mensaje no puede exceder 1000 caracteres")
@@ -42,6 +43,7 @@ interface Ticket {
   status: string;
   priority: string;
   category: string;
+  assignedTo?: string;
   imageUrl?: string;
   createdAt: string;
 }
@@ -68,6 +70,7 @@ export default function TicketDetailPage() {
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
 
   const form = useForm<MessageData>({
     resolver: zodResolver(messageSchema),
@@ -189,6 +192,58 @@ export default function TicketDetailPage() {
     sendMessageMutation.mutate(data);
   };
 
+  const ticket = ticketData?.ticket as Ticket;
+
+  // Take ticket mutation
+  const takeTicketMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('PATCH', `/api/tickets/${id}/take`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Ticket Asignado",
+        description: "El ticket ha sido asignado a ti"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets', id] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al tomar el ticket",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Close ticket mutation
+  const closeTicketMutation = useMutation({
+    mutationFn: async (resolved: boolean) => {
+      const response = await apiRequest('PATCH', `/api/tickets/${id}/close`, { resolved });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Ticket Cerrado",
+        description: "El ticket ha sido cerrado exitosamente"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets', id] });
+      setShowCloseDialog(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al cerrar el ticket",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const isStaff = user && user.role !== 'player';
+  const isAssignedToMe = ticket && ticket.assignedTo === user?.id;
+  const canTakeTicket = isStaff && ticket?.status === 'open' && !ticket?.assignedTo;
+  const canCloseTicket = isStaff && isAssignedToMe && (ticket?.status === 'open' || ticket?.status === 'in_progress');
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -200,8 +255,6 @@ export default function TicketDetailPage() {
       </div>
     );
   }
-
-  const ticket = ticketData?.ticket as Ticket;
 
   if (!ticket) {
     return (
@@ -239,10 +292,18 @@ export default function TicketDetailPage() {
             </Button>
             
             <Card className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-blue-500/20 p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-6">
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-white mb-2" data-testid="text-ticket-title">{ticket.title}</h1>
-                  <p className="text-gray-300 mb-4">{ticket.description}</p>
+                  <div className="mb-4">
+                    <span className="text-sm text-gray-400 font-medium">Título:</span>
+                    <h1 className="text-2xl font-bold text-white mt-1" data-testid="text-ticket-title">{ticket.title}</h1>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <span className="text-sm text-gray-400 font-medium">Descripción:</span>
+                    <p className="text-gray-300 mt-1">{ticket.description}</p>
+                  </div>
+                  
                   <div className="flex gap-3 items-center flex-wrap">
                     <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`badge-status-${ticket.status}`}>
                       {statusLabels[ticket.status as keyof typeof statusLabels]}
@@ -251,12 +312,37 @@ export default function TicketDetailPage() {
                       Creado: {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
                     </span>
                   </div>
+
+                  {/* Action Buttons */}
+                  {isStaff && (
+                    <div className="flex gap-3 mt-4">
+                      {canTakeTicket && (
+                        <Button
+                          onClick={() => takeTicketMutation.mutate()}
+                          disabled={takeTicketMutation.isPending}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                          data-testid="button-take-ticket"
+                        >
+                          Tomar Ticket
+                        </Button>
+                      )}
+                      {canCloseTicket && (
+                        <Button
+                          onClick={() => setShowCloseDialog(true)}
+                          className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
+                          data-testid="button-close-ticket"
+                        >
+                          Cerrar Ticket
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {ticket.imageUrl && (
                   <img
                     src={ticket.imageUrl}
                     alt="Captura del ticket"
-                    className="w-32 h-32 object-cover rounded-lg ml-4"
+                    className="w-32 h-32 object-cover rounded-lg"
                   />
                 )}
               </div>
@@ -265,12 +351,6 @@ export default function TicketDetailPage() {
 
           {/* Chat Messages */}
           <div className="flex-1 bg-gradient-to-br from-gray-900/50 via-black/40 to-gray-900/50 backdrop-blur-xl border border-cyan-500/10 rounded-2xl overflow-hidden mb-6 flex flex-col" data-testid="chat-messages-container">
-            {/* Chat Header */}
-            <div className="bg-gradient-to-r from-cyan-900/20 via-blue-900/20 to-cyan-900/20 border-b border-cyan-500/20 px-6 py-4">
-              <h3 className="text-lg font-semibold text-cyan-400">Conversación</h3>
-              <p className="text-sm text-gray-400">Respuesta en tiempo real</p>
-            </div>
-            
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
               {messages.length === 0 ? (
@@ -381,6 +461,38 @@ export default function TicketDetailPage() {
       </main>
       
       <Footer />
+
+      {/* Close Ticket Dialog */}
+      <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Cerrar Ticket</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              ¿Se pudo resolver el problema del usuario?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3">
+            <Button
+              onClick={() => closeTicketMutation.mutate(true)}
+              disabled={closeTicketMutation.isPending}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 flex items-center gap-2"
+              data-testid="button-resolved"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Sí, Resuelto
+            </Button>
+            <Button
+              onClick={() => closeTicketMutation.mutate(false)}
+              disabled={closeTicketMutation.isPending}
+              className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 flex items-center gap-2"
+              data-testid="button-not-resolved"
+            >
+              <XCircle className="h-4 w-4" />
+              No, Cerrar sin Resolver
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

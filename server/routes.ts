@@ -1951,6 +1951,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Take ticket (assign to current user - staff only)
+  app.patch('/api/tickets/:id/take', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Only staff can take tickets
+      const isStaff = user.role !== 'player';
+      if (!isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Solo el personal de soporte puede tomar tickets'
+        });
+      }
+
+      const ticketId = req.params.id;
+      
+      // Update ticket to assign it to current user and change status to in_progress
+      const updatedTicket = await storage.updateSupportTicket(ticketId, {
+        assignedTo: user.id,
+        status: 'in_progress'
+      });
+      
+      if (!updatedTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Ticket asignado exitosamente',
+        ticket: updatedTicket
+      });
+      
+    } catch (error) {
+      console.error('Take ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
+  // Close ticket (staff only)
+  app.patch('/api/tickets/:id/close', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Only staff can close tickets
+      const isStaff = user.role !== 'player';
+      if (!isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Solo el personal de soporte puede cerrar tickets'
+        });
+      }
+
+      const ticketId = req.params.id;
+      const { resolved } = req.body;
+      
+      // Update ticket status based on whether it was resolved
+      const status = resolved ? 'resolved' : 'closed';
+      const updatedTicket = await storage.updateSupportTicket(ticketId, {
+        status
+      });
+      
+      if (!updatedTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Ticket cerrado exitosamente',
+        ticket: updatedTicket
+      });
+      
+    } catch (error) {
+      console.error('Close ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
   // Get all tickets (admin/GM only)
   app.get('/api/admin/tickets', async (req, res) => {
     try {
