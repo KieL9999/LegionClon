@@ -136,6 +136,36 @@ Comprehensive visual enhancements to the Support Page (`client/src/pages/Soporte
 
 All changes maintain dark gaming aesthetic with proper color hierarchy and professional appearance optimized for user experience.
 
+### GM Role-Based Support View (October 4, 2025 - Latest)
+Implemented role-based access control for the Support Page to provide different experiences for GMs and players:
+
+**GM View (All GM Levels 1-7):**
+- GMs now see ALL tickets from all users, not just their own tickets
+- Uses `/api/admin/tickets` endpoint instead of `/api/tickets`
+- Title displays "Todos los Tickets de Soporte" with explanatory subtitle
+- Each ticket card shows:
+  - **User ID Badge**: Purple badge displaying the first 8 characters of the ticket creator's ID
+  - **Assigned To Badge**: Cyan badge showing GM assignment when ticket is assigned (first 8 characters)
+  - All standard ticket information (status, priority, category, date)
+- Empty state message: "No hay tickets pendientes - Todos los tickets de soporte aparecerán aquí cuando los jugadores los creen"
+
+**Player View:**
+- Players see only their own tickets (existing behavior)
+- Uses `/api/tickets` endpoint
+- Title displays "Mis Tickets de Soporte"
+- Standard ticket display without GM-specific information
+- Empty state message: "No tienes tickets aún - Crea tu primer ticket de soporte para obtener ayuda con cualquier problema"
+
+**Technical Implementation:**
+- Role check: `const isGM = user?.role !== USER_ROLES.PLAYER`
+- Dynamic query key based on role for proper cache management
+- Both query keys invalidated on ticket creation
+- Conditional rendering of GM-specific badges and information
+- All changes maintain responsive design and dark gaming aesthetic
+
+**Active Users:**
+- User "kiel" (ID: 5b0ce757-9a47-4e55-a5f1-4f9d32aa6912) has been granted Administrador (Level 7) role for testing and administration purposes
+
 ## External Dependencies
 - **UI Frameworks**: Radix UI, shadcn/ui
 - **Styling**: Tailwind CSS
