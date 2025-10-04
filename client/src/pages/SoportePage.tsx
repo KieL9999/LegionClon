@@ -451,8 +451,8 @@ export default function SoportePage() {
                 <h2 className="text-2xl font-bold text-cyan-400">Contactar Soporte</h2>
               </div>
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/50">
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-900/20 to-purple-800/10 rounded-lg border border-purple-500/30">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-500/20">
                     <span className="text-xl">💬</span>
                   </div>
                   <div className="flex-1">
@@ -460,8 +460,8 @@ export default function SoportePage() {
                     <p className="text-gray-300 text-sm">Únete a nuestro servidor de Discord para soporte en tiempo real</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/50">
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-900/20 to-blue-800/10 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-500/20">
                     <span className="text-xl">📧</span>
                   </div>
                   <div className="flex-1">
