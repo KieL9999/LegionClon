@@ -69,6 +69,14 @@ const priorityLabels = {
   urgent: "Urgente"
 };
 
+const categoryColors = {
+  general: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  technical: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  account: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  billing: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  other: "bg-gray-500/20 text-gray-400 border-gray-500/30"
+};
+
 export default function SoportePage() {
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -201,7 +209,7 @@ export default function SoportePage() {
                       className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25"
                       data-testid="button-create-ticket"
                     >
-                      ➕ Crear Nuevo Ticket
+                      Crear Nuevo Ticket
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-blue-500/20 max-w-2xl">
@@ -363,7 +371,7 @@ export default function SoportePage() {
                               <Badge className={priorityColors[ticket.priority as keyof typeof priorityColors]} data-testid={`priority-${ticket.priority}`}>
                                 {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
                               </Badge>
-                              <Badge variant="outline" className="border-gray-600 text-gray-300">
+                              <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
                                 {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
                               </Badge>
                               <span className="text-xs text-gray-400 self-center ml-2">
@@ -375,7 +383,7 @@ export default function SoportePage() {
                             className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25 shrink-0"
                             data-testid={`button-view-ticket-${ticket.id}`}
                           >
-                            👁️ Ver
+                            Ver
                           </Button>
                         </div>
                       </CardContent>
