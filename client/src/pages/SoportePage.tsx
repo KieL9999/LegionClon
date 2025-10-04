@@ -192,18 +192,17 @@ export default function SoportePage() {
       <main className="container mx-auto px-6 py-16">
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-4 mb-3">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/40">
-                <span className="text-2xl">💬</span>
+          <div className="mb-12">
+            <div className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl p-8 border border-blue-500/20 shadow-xl">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent mb-3">
+                  Centro de Soporte
+                </h1>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-sm text-green-400 font-medium">Equipo disponible 24/7</span>
+                </div>
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
-                Centro de Soporte
-              </h1>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm text-green-400 font-medium">Equipo disponible 24/7</span>
             </div>
           </div>
 
