@@ -349,14 +349,14 @@ export default function SoportePage() {
                   <div className="text-gray-400">Cargando tickets...</div>
                 </div>
               ) : (tickets as any)?.tickets?.length > 0 ? (
-                <div className="grid gap-6">
+                <div className="grid gap-4">
                   {((tickets as any)?.tickets || []).map((ticket: SupportTicket) => (
-                    <Card key={ticket.id} className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-gray-700/50 shadow-xl" data-testid={`ticket-card-${ticket.id}`}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-white text-lg mb-2">{ticket.title}</CardTitle>
-                            <div className="flex gap-2 mb-3">
+                    <Card key={ticket.id} className="bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg border-gray-700/50 shadow-lg hover:shadow-blue-500/20 transition-shadow" data-testid={`ticket-card-${ticket.id}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white text-lg font-semibold mb-3 truncate">{ticket.title}</h3>
+                            <div className="flex flex-wrap gap-2">
                               <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`status-${ticket.status}`}>
                                 {statusLabels[ticket.status as keyof typeof statusLabels]}
                               </Badge>
@@ -366,30 +366,18 @@ export default function SoportePage() {
                               <Badge variant="outline" className="border-gray-600 text-gray-300">
                                 {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
                               </Badge>
+                              <span className="text-xs text-gray-400 self-center ml-2">
+                                {format(new Date(ticket.createdAt), 'dd/MM/yyyy', { locale: es })}
+                              </span>
                             </div>
                           </div>
-                          <div className="text-right text-sm text-gray-400">
-                            <div>Creado: {format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm', { locale: es })}</div>
-                            {ticket.updatedAt !== ticket.createdAt && (
-                              <div>Actualizado: {format(new Date(ticket.updatedAt), 'dd/MM/yyyy HH:mm', { locale: es })}</div>
-                            )}
-                          </div>
+                          <Button
+                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25 shrink-0"
+                            data-testid={`button-view-ticket-${ticket.id}`}
+                          >
+                            👁️ Ver
+                          </Button>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-300 leading-relaxed mb-4" data-testid={`ticket-description-${ticket.id}`}>
-                          {ticket.description}
-                        </p>
-                        {ticket.imageUrl && (
-                          <div className="mt-4">
-                            <img 
-                              src={ticket.imageUrl} 
-                              alt="Captura del problema" 
-                              className="max-w-full h-auto rounded-lg border border-gray-600"
-                              data-testid={`ticket-image-${ticket.id}`}
-                            />
-                          </div>
-                        )}
                       </CardContent>
                     </Card>
                   ))}
