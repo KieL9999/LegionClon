@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Send, CheckCircle2, XCircle, User, Mail, Calendar, Coins, Shield, Ban, Paperclip, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle, User, Calendar, Shield, Ban, Paperclip } from "lucide-react";
 import { VIP_LABELS, VIP_COLORS, ROLE_LABELS } from "@shared/schema";
 
 const messageSchema = z.object({
@@ -292,10 +292,10 @@ export default function TicketDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex flex-col">
       <Header />
       
-      <main className="container mx-auto px-6 py-8 flex-1 flex flex-col">
+      <main className="container mx-auto px-6 py-12 flex-1 flex flex-col">
         <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
           {/* Back Button - More Visible */}
-          <div className="mb-6">
+          <div className="mb-8 mt-4">
             <Button
               variant="outline"
               className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 hover:border-cyan-500/50 hover:text-cyan-300 font-semibold"
@@ -491,15 +491,6 @@ export default function TicketDetailPage() {
                       </div>
                     </div>
 
-                    {/* Email */}
-                    <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-gray-400 mb-1">Email</div>
-                        <div className="text-white text-sm break-all" data-testid="text-player-email">{ticketOwner.email}</div>
-                      </div>
-                    </div>
-
                     {/* Role */}
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
@@ -508,15 +499,6 @@ export default function TicketDetailPage() {
                         <div className="text-white text-sm" data-testid="text-player-role">
                           {ROLE_LABELS[ticketOwner.role as keyof typeof ROLE_LABELS] || ticketOwner.role}
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Coins */}
-                    <div className="flex items-start gap-3">
-                      <Coins className="h-5 w-5 text-yellow-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-gray-400 mb-1">Monedas</div>
-                        <div className="text-yellow-400 font-medium" data-testid="text-player-coins">{ticketOwner.coins}</div>
                       </div>
                     </div>
 
