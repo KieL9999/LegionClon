@@ -984,6 +984,7 @@ export class MemStorage implements IStorage {
       priority: ticket.priority || "normal",
       category: ticket.category || "general",
       assignedTo: ticket.assignedTo || null,
+      imageUrl: ticket.imageUrl || null,
       createdAt: now,
       updatedAt: now
     };

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -399,12 +400,14 @@ export default function SoportePage() {
                               </span>
                             </div>
                           </div>
-                          <Button
-                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25 shrink-0"
-                            data-testid={`button-view-ticket-${ticket.id}`}
-                          >
-                            Ver
-                          </Button>
+                          <Link href={`/ticket/${ticket.id}`}>
+                            <Button
+                              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25 shrink-0"
+                              data-testid={`button-view-ticket-${ticket.id}`}
+                            >
+                              Ver
+                            </Button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>

@@ -107,18 +107,7 @@ export default function TicketDetailPage() {
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
-      // Authenticate
-      const sessionId = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('sessionId='))
-        ?.split('=')[1];
-
-      if (sessionId) {
-        websocket.send(JSON.stringify({
-          type: 'auth',
-          sessionId
-        }));
-      }
+      console.log('WebSocket connected');
     };
 
     websocket.onmessage = (event) => {
@@ -126,7 +115,7 @@ export default function TicketDetailPage() {
         const data = JSON.parse(event.data);
 
         if (data.type === 'auth_success') {
-          // Subscribe to ticket
+          // Subscribe to ticket after authentication
           websocket.send(JSON.stringify({
             type: 'subscribe',
             ticketId: id
@@ -169,10 +158,19 @@ export default function TicketDetailPage() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: MessageData) => {
-      return await apiRequest(`/api/tickets/${id}/messages`, {
+      const response = await fetch(`/api/tickets/${id}/messages`, {
         method: 'POST',
-        body: JSON.stringify(data)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
       });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al enviar el mensaje');
+      }
+      return response.json();
     },
     onSuccess: () => {
       form.reset();

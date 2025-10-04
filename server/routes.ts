@@ -1998,24 +1998,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let currentTicketId: string | null = null;
     let authenticatedUserId: string | null = null;
 
+    // Authenticate using session cookie from request
+    const cookies = req.headers.cookie?.split('; ').reduce((acc, cookie) => {
+      const [key, value] = cookie.split('=');
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, string>) || {};
+
+    const sessionId = cookies.sessionId;
+    
+    if (sessionId) {
+      const user = await storage.getUserBySession(sessionId);
+      if (user) {
+        authenticatedUserId = user.id;
+        ws.send(JSON.stringify({ type: 'auth_success', userId: user.id }));
+      } else {
+        ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid session' }));
+        ws.close();
+        return;
+      }
+    } else {
+      ws.send(JSON.stringify({ type: 'auth_error', message: 'No session found' }));
+      ws.close();
+      return;
+    }
+
     ws.on('message', async (data) => {
       try {
         const message = JSON.parse(data.toString());
 
-        if (message.type === 'auth') {
-          // Authenticate using session ID from message
-          const sessionId = message.sessionId;
-          if (sessionId) {
-            const user = await storage.getUserBySession(sessionId);
-            if (user) {
-              authenticatedUserId = user.id;
-              ws.send(JSON.stringify({ type: 'auth_success', userId: user.id }));
-            } else {
-              ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid session' }));
-              ws.close();
-            }
-          }
-        } else if (message.type === 'subscribe' && authenticatedUserId) {
+        if (message.type === 'subscribe' && authenticatedUserId) {
           // Subscribe to a ticket
           const ticketId = message.ticketId;
           const ticket = await storage.getSupportTicketById(ticketId);
