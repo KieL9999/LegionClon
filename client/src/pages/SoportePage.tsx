@@ -150,7 +150,7 @@ export default function SoportePage() {
 
           {/* Tickets Section for authenticated users */}
           {isAuthenticated && (
-            <div className="mb-12">
+            <div className="mb-12 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl p-8 border border-blue-500/20 shadow-xl">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-3xl font-bold text-blue-400">Mis Tickets de Soporte</h2>
                 <Dialog open={createTicketOpen} onOpenChange={setCreateTicketOpen}>
