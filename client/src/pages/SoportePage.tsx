@@ -364,18 +364,27 @@ export default function SoportePage() {
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <h3 className="text-white text-lg font-semibold mb-3 truncate">{ticket.title}</h3>
-                            <div className="flex flex-wrap gap-2">
-                              <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`status-${ticket.status}`}>
-                                {statusLabels[ticket.status as keyof typeof statusLabels]}
-                              </Badge>
-                              <Badge className={priorityColors[ticket.priority as keyof typeof priorityColors]} data-testid={`priority-${ticket.priority}`}>
-                                {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
-                              </Badge>
-                              <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
-                                {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
-                              </Badge>
+                            <div className="flex flex-wrap gap-3 items-center">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Estado:</span>
+                                <Badge className={statusColors[ticket.status as keyof typeof statusColors]} data-testid={`status-${ticket.status}`}>
+                                  {statusLabels[ticket.status as keyof typeof statusLabels]}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Prioridad:</span>
+                                <Badge className={priorityColors[ticket.priority as keyof typeof priorityColors]} data-testid={`priority-${ticket.priority}`}>
+                                  {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-medium">Categoría:</span>
+                                <Badge className={categoryColors[ticket.category as keyof typeof categoryColors]}>
+                                  {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
+                                </Badge>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-2 mt-3">
                               <span className="text-xs text-gray-500">📅</span>
                               <span className="text-sm font-medium text-blue-400">
                                 {format(new Date(ticket.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
