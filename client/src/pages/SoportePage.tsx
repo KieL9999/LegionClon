@@ -306,7 +306,7 @@ export default function SoportePage() {
                               type="file"
                               accept="image/*"
                               onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-                              className="bg-gray-800/50 border-gray-600 text-white file:bg-blue-600 file:text-white file:border-0 file:px-8 file:py-3 file:rounded-md file:cursor-pointer"
+                              className="bg-gray-800/50 border-gray-600 text-white py-4 file:bg-blue-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer"
                               data-testid="input-ticket-image"
                             />
                             {selectedImage && (
