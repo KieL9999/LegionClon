@@ -8,6 +8,7 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
 import HomePage from "@/pages/HomePage";
 import ForoPage from "@/pages/ForoPage";
 import SoportePage from "@/pages/SoportePage";
+import TicketDetailPage from "@/pages/TicketDetailPage";
 import { PlayerPanel } from "@/pages/PlayerPanel";
 import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/login" component={LoginPage} />
       <Route path="/foro" component={ForoPage} />
       <Route path="/soporte" component={SoportePage} />
+      <Route path="/ticket/:id" component={TicketDetailPage} />
       <Route path="/panel" component={PlayerPanel} />
       <Route component={NotFound} />
     </Switch>
