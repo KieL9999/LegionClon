@@ -6,24 +6,29 @@ AetherWoW is a World of Warcraft Legion private server website designed to be a 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Replit Setup (October 4, 2025)
+## Replit Setup (October 4, 2025 - Latest Fresh Import)
 This project was successfully imported from GitHub and configured to run in the Replit environment:
 
 ### Environment Configuration
 - **Runtime**: Node.js 20 with TypeScript
 - **Port**: 5000 (frontend and backend on same port)
 - **Host**: 0.0.0.0 (required for Replit proxy)
-- **Database**: PostgreSQL (Neon Database via DATABASE_URL)
+- **Database**: PostgreSQL (Replit managed database via DATABASE_URL)
 - **Development Server**: Vite dev server with HMR and allowedHosts: true
 - **Build System**: Vite + esbuild
 
-### Key Setup Steps Completed (Fresh Import - October 4, 2025)
-1. Verified existing configuration supports Replit proxy environment (`allowedHosts: true` in server/vite.ts)
-2. Confirmed workflow "Start application" runs `npm run dev` on port 5000 with webview output
-3. Database connection already established and working correctly
-4. Verified all routes and authentication working correctly
-5. Deployment config set for autoscale production deployment with npm build/start
-6. Application successfully running and accessible
+### Fresh Import Setup Completed (October 4, 2025)
+1. **Database Setup**: Created PostgreSQL database and pushed schema using `npm run db:push`
+2. **Vite Configuration**: Confirmed `allowedHosts: true` in server/vite.ts for Replit proxy support
+3. **Workflow Configuration**: Set up "Start application" workflow with:
+   - Command: `npm run dev`
+   - Port: 5000
+   - Output Type: webview
+4. **Deployment Configuration**: Configured autoscale deployment with:
+   - Build: `npm run build`
+   - Run: `npm run start`
+5. **Application Verification**: Tested homepage - all routes and frontend working correctly
+6. **WebSocket Server**: Real-time chat for support tickets configured and functional
 
 ### Running the Application
 - **Development**: Workflow "Start application" runs `npm run dev` automatically
