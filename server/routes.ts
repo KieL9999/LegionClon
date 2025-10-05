@@ -39,8 +39,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user
       const newUser = await storage.createUser(validatedData);
       
+      // Update last login timestamp
+      const updatedUser = await storage.updateUserLastLogin(newUser.id);
+      
+      // Create session to auto-login the user
+      const session = await storage.createSession(newUser.id);
+      
+      // Set secure httpOnly cookie
+      res.cookie('sessionId', session.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'strict'
+      });
+      
       // Return user without password
-      const { password, ...userResponse } = newUser;
+      const { password, ...userResponse } = updatedUser;
       
       res.status(201).json({
         success: true,
