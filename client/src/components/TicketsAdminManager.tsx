@@ -203,47 +203,91 @@ export default function TicketsAdminManager() {
     return (
       <Card 
         key={ticket.id} 
-        className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 relative"
+        className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300"
         data-testid={`admin-ticket-card-${ticket.id}`}
       >
-        {/* VIP Badge - Top Right */}
-        <div className="absolute top-4 right-4 z-10">
-          <Badge 
-            className={`${vipColors[vipLevel] || vipColors[0]} font-bold text-sm px-3 py-1 flex items-center gap-1.5`}
-            data-testid={`ticket-vip-${ticket.id}`}
-          >
-            <Crown className="w-4 h-4" />
-            {vipLabels[vipLevel] || "VIP 0"}
-          </Badge>
-        </div>
+        <CardContent className="p-6">
+          {/* Header with VIP and Status centered */}
+          <div className="flex items-center justify-center gap-3 mb-4 pb-4 border-b border-slate-700/50">
+            <Badge 
+              className={statusColors[ticket.status as keyof typeof statusColors]}
+              data-testid={`ticket-status-${ticket.id}`}
+            >
+              <StatusIcon className="w-4 h-4 mr-1.5" />
+              {statusLabels[ticket.status as keyof typeof statusLabels]}
+            </Badge>
+            
+            <Badge 
+              className={`${vipColors[vipLevel] || vipColors[0]} font-bold px-3 py-1.5 flex items-center gap-1.5`}
+              data-testid={`ticket-vip-${ticket.id}`}
+            >
+              <Crown className="w-4 h-4" />
+              {vipLabels[vipLevel] || "VIP 0"}
+            </Badge>
 
-        <CardContent className="p-6 pr-24">
+            <Badge 
+              className={priorityColors[ticket.priority as keyof typeof priorityColors]}
+              data-testid={`ticket-priority-${ticket.id}`}
+            >
+              {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
+            </Badge>
+          </div>
+
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0 space-y-3">
-              {/* Header with title and status icon */}
-              <div className="flex items-start gap-3">
-                <div className="mt-1">
-                  <StatusIcon className="w-5 h-5 text-gaming-gold" />
+            <div className="flex-1 min-w-0 space-y-4">
+              {/* Title Section */}
+              <div>
+                <div className="text-xs text-gaming-gold font-semibold mb-1 uppercase tracking-wide">Título</div>
+                <h3 className="text-xl font-bold text-foreground mb-2" data-testid={`ticket-title-${ticket.id}`}>
+                  {ticket.title}
+                </h3>
+              </div>
+
+              {/* Description Section */}
+              <div>
+                <div className="text-xs text-gaming-gold font-semibold mb-1 uppercase tracking-wide">Descripción</div>
+                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                  {ticket.description}
+                </p>
+              </div>
+
+              {/* Metadata Grid - Better organized */}
+              <div className="grid grid-cols-3 gap-4 pt-3 border-t border-slate-700/30">
+                {/* Category */}
+                <div>
+                  <div className="text-xs text-muted-foreground font-medium mb-1.5">Categoría</div>
+                  <Badge 
+                    className={`${categoryColors[ticket.category as keyof typeof categoryColors]} w-full justify-center`}
+                    data-testid={`ticket-category-${ticket.id}`}
+                  >
+                    {categoryLabels[ticket.category as keyof typeof categoryLabels]}
+                  </Badge>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-foreground truncate mb-1" data-testid={`ticket-title-${ticket.id}`}>
-                    {ticket.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {ticket.description}
-                  </p>
+
+                {/* User */}
+                <div>
+                  <div className="text-xs text-muted-foreground font-medium mb-1.5">Usuario</div>
+                  <Badge 
+                    className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 font-semibold w-full justify-center"
+                    data-testid={`ticket-user-${ticket.id}`}
+                  >
+                    <User className="w-3 h-3 mr-1.5" />
+                    {ticket.creatorUsername || 'Desconocido'}
+                  </Badge>
+                </div>
+
+                {/* Date */}
+                <div>
+                  <div className="text-xs text-muted-foreground font-medium mb-1.5">Fecha de creación</div>
+                  <div className="flex items-center justify-center gap-1.5 text-sm text-foreground bg-slate-800/50 border border-slate-700/50 rounded-md px-2 py-1.5">
+                    <Calendar className="w-3 h-3 text-gaming-gold" />
+                    <span className="font-medium">{format(new Date(ticket.createdAt), "dd/MM/yyyy", { locale: es })}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* User Info */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <User className="w-4 h-4 text-gaming-gold" />
-                <Badge 
-                  className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 font-semibold"
-                  data-testid={`ticket-user-${ticket.id}`}
-                >
-                  {ticket.creatorUsername || 'Desconocido'}
-                </Badge>
+              {/* Assignment Info */}
+              <div className="pt-2">
                 {ticket.assignedUserInfo ? (
                   <Badge 
                     className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold"
@@ -259,36 +303,6 @@ export default function TicketsAdminManager() {
                     Sin Asignar
                   </Badge>
                 )}
-              </div>
-
-              {/* Metadata badges */}
-              <div className="flex flex-wrap gap-2">
-                <Badge 
-                  className={statusColors[ticket.status as keyof typeof statusColors]}
-                  data-testid={`ticket-status-${ticket.id}`}
-                >
-                  {statusLabels[ticket.status as keyof typeof statusLabels]}
-                </Badge>
-                <Badge 
-                  className={priorityColors[ticket.priority as keyof typeof priorityColors]}
-                  data-testid={`ticket-priority-${ticket.id}`}
-                >
-                  {priorityLabels[ticket.priority as keyof typeof priorityLabels]}
-                </Badge>
-                <Badge 
-                  className={categoryColors[ticket.category as keyof typeof categoryColors]}
-                  data-testid={`ticket-category-${ticket.id}`}
-                >
-                  {categoryLabels[ticket.category as keyof typeof categoryLabels]}
-                </Badge>
-              </div>
-
-              {/* Date */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>{format(new Date(ticket.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}</span>
-                </div>
               </div>
             </div>
 

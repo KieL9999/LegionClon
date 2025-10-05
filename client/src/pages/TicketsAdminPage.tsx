@@ -322,90 +322,104 @@ export default function TicketsAdminPage() {
               return (
                 <Card
                   key={ticket.id}
-                  className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 group cursor-pointer relative"
-                  onClick={() => setLocation(`/ticket/${ticket.id}`)}
+                  className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 group"
                   data-testid={`ticket-card-${ticket.id}`}
                 >
-                  {/* VIP Badge - Top Right */}
-                  <div className="absolute top-3 right-3 z-10">
-                    <Badge 
-                      className={`${vipColors[vipLevel] || vipColors[0]} font-bold text-xs px-2 py-0.5 flex items-center gap-1`}
-                      data-testid={`ticket-vip-${ticket.id}`}
-                    >
-                      <Crown className="w-3 h-3" />
-                      {vipLabels[vipLevel] || "VIP 0"}
-                    </Badge>
-                  </div>
-
-                  <CardContent className="p-5 pr-20">
-                    {/* Status Badge */}
-                    <div className="flex items-center gap-2 mb-3">
+                  <CardContent className="p-5">
+                    {/* Header with Status, VIP and Priority centered */}
+                    <div className="flex items-center justify-center gap-2 mb-4 pb-3 border-b border-slate-700/50">
                       <Badge className={`${statusInfo?.color} border px-2 py-1`}>
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {statusInfo?.label || ticket.status}
                       </Badge>
+                      
+                      <Badge 
+                        className={`${vipColors[vipLevel] || vipColors[0]} font-bold px-2 py-1 flex items-center gap-1`}
+                        data-testid={`ticket-vip-${ticket.id}`}
+                      >
+                        <Crown className="w-3 h-3" />
+                        {vipLabels[vipLevel] || "VIP 0"}
+                      </Badge>
+
                       <Badge className={`bg-slate-800/50 ${priorityConfig[ticket.priority as keyof typeof priorityConfig]?.color} border-slate-700`}>
                         {priorityConfig[ticket.priority as keyof typeof priorityConfig]?.label}
                       </Badge>
                     </div>
 
-                    {/* Ticket Info */}
-                    <div className="space-y-3">
+                    {/* Title Section */}
+                    <div className="mb-3">
+                      <div className="text-xs text-gaming-gold font-semibold mb-1 uppercase tracking-wide">Título</div>
                       <h3 
-                        className="font-bold text-white text-lg line-clamp-1 group-hover:text-gaming-gold transition-colors"
+                        className="font-bold text-white text-base line-clamp-1 group-hover:text-gaming-gold transition-colors cursor-pointer"
                         data-testid={`ticket-title-${ticket.id}`}
+                        onClick={() => setLocation(`/ticket/${ticket.id}`)}
                       >
                         {ticket.title}
                       </h3>
+                    </div>
 
-                      <p className="text-sm text-slate-400 line-clamp-2 min-h-[2.5rem]">
+                    {/* Description Section */}
+                    <div className="mb-3">
+                      <div className="text-xs text-gaming-gold font-semibold mb-1 uppercase tracking-wide">Descripción</div>
+                      <p className="text-sm text-slate-400 line-clamp-2 min-h-[2.5rem] leading-relaxed">
                         {ticket.description}
                       </p>
+                    </div>
 
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <Tag className="w-4 h-4" />
+                    {/* Metadata Grid - Better organized */}
+                    <div className="grid grid-cols-3 gap-2 mb-3 pt-3 border-t border-slate-700/30">
+                      {/* Category */}
+                      <div>
+                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Categoría</div>
+                        <div className="flex items-center justify-center gap-1 text-xs">
+                          <Tag className="w-3 h-3" />
                           <span className={categoryConfig[ticket.category as keyof typeof categoryConfig]?.color}>
                             {categoryConfig[ticket.category as keyof typeof categoryConfig]?.label}
                           </span>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <User className="w-4 h-4" />
-                          <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30">
-                            {ticket.creatorUsername || 'Desconocido'}
+                      {/* User */}
+                      <div>
+                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Usuario</div>
+                        <div className="flex justify-center">
+                          <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 text-xs px-2 py-0.5">
+                            <User className="w-3 h-3 mr-1" />
+                            {ticket.creatorUsername || 'N/A'}
                           </Badge>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <Calendar className="w-4 h-4" />
-                          <span>{format(new Date(ticket.createdAt), "dd MMM yyyy", { locale: es })}</span>
-                        </div>
-
-                        <div className="pt-2 border-t border-slate-700/50">
-                          {ticket.assignedUserInfo ? (
-                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold">
-                              Asignado: {ticket.assignedUserInfo.username}
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
-                              Sin Asignar
-                            </Badge>
-                          )}
+                      {/* Date */}
+                      <div>
+                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Fecha de creación</div>
+                        <div className="flex items-center justify-center gap-1 text-xs text-slate-300 bg-slate-800/50 border border-slate-700/50 rounded px-2 py-1">
+                          <Calendar className="w-3 h-3 text-gaming-gold" />
+                          <span className="font-medium">{format(new Date(ticket.createdAt), "dd/MM/yy", { locale: es })}</span>
                         </div>
                       </div>
                     </div>
 
+                    {/* Assignment Info */}
+                    <div className="mb-3">
+                      {ticket.assignedUserInfo ? (
+                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold text-xs">
+                          Asignado: {ticket.assignedUserInfo.username}
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs">
+                          Sin Asignar
+                        </Badge>
+                      )}
+                    </div>
+
                     {/* Actions */}
-                    <div className="mt-4 pt-4 border-t border-slate-700/50 flex gap-2">
+                    <div className="flex gap-2 pt-3 border-t border-slate-700/50">
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1 bg-slate-800/50 border-slate-700 hover:bg-gaming-gold/10 hover:border-gaming-gold text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLocation(`/ticket/${ticket.id}`);
-                        }}
+                        onClick={() => setLocation(`/ticket/${ticket.id}`)}
                         data-testid={`button-view-${ticket.id}`}
                       >
                         <Eye className="w-4 h-4 mr-1" />
