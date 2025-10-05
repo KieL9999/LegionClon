@@ -144,23 +144,24 @@ export default function TicketsAdminManager() {
               <div className="flex items-center gap-2 flex-wrap">
                 <User className="w-4 h-4 text-gaming-gold" />
                 <Badge 
-                  className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30"
+                  className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 font-semibold"
                   data-testid={`ticket-user-${ticket.id}`}
                 >
-                  Usuario: {ticket.creatorUsername || 'Desconocido'}
+                  Creado por: {ticket.creatorUsername || 'Desconocido'}#{ticket.userId.slice(-4).toUpperCase()}
                 </Badge>
-                <Badge 
-                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-mono text-xs"
-                  data-testid={`ticket-user-id-${ticket.id}`}
-                >
-                  ID: {ticket.userId.slice(0, 8)}...
-                </Badge>
-                {ticket.assignedUserInfo && (
+                {ticket.assignedUserInfo ? (
                   <Badge 
-                    className="bg-purple-500/20 text-purple-400 border-purple-500/30"
+                    className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold"
                     data-testid={`ticket-assigned-user-${ticket.id}`}
                   >
-                    Asignado a: {ticket.assignedUserInfo.username} • Código {ticket.assignedTo?.slice(0, 8)}
+                    Asignado a: {ticket.assignedUserInfo.username}#{ticket.assignedTo?.slice(-4).toUpperCase()}
+                  </Badge>
+                ) : (
+                  <Badge 
+                    className="bg-gray-500/20 text-gray-400 border-gray-500/30"
+                    data-testid={`ticket-unassigned-${ticket.id}`}
+                  >
+                    Sin asignar
                   </Badge>
                 )}
               </div>
