@@ -52,22 +52,22 @@ interface SupportTicket {
 
 const statusConfig = {
   open: {
-    label: "Disponible",
+    label: "Abierto",
     color: "bg-green-500/10 text-green-400 border-green-500/30",
     icon: AlertCircle
   },
   in_progress: {
-    label: "Móviles",
+    label: "En Progreso",
     color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
     icon: Clock
   },
   resolved: {
-    label: "Accesorios",
+    label: "Resuelto",
     color: "bg-blue-500/10 text-blue-400 border-blue-500/30",
     icon: CheckCircle2
   },
   closed: {
-    label: "Agotado",
+    label: "Cerrado",
     color: "bg-red-500/10 text-red-400 border-red-500/30",
     icon: XCircle
   }
