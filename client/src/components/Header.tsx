@@ -72,30 +72,30 @@ export default function Header() {
         {/* Golden accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gaming-gold to-transparent opacity-60"></div>
         
-        <div className="container mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-2">
             {/* Enhanced Server Status Panel */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center shrink-0">
               <div className="relative group">
                 {/* Background with subtle gradient and glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-gaming-gold/5 via-gaming-gold/10 to-gaming-gold/5 rounded-2xl blur-sm group-hover:blur-md transition-all duration-300"></div>
-                <div className="relative flex items-center gap-3 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-4 py-2 border border-gaming-gold/20 shadow-xl">
+                <div className="relative flex items-center gap-2 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-3 py-1.5 border border-gaming-gold/20 shadow-xl">
                   {/* Icon with enhanced styling */}
                   <div className="relative">
                     <div className="absolute inset-0 bg-gaming-gold/30 rounded-full blur-md"></div>
-                    <div className="relative w-8 h-8 bg-gradient-to-br from-gaming-gold/20 to-yellow-400/20 rounded-full flex items-center justify-center border border-gaming-gold/30">
-                      <Users className="w-5 h-5 text-gaming-gold" />
+                    <div className="relative w-7 h-7 bg-gradient-to-br from-gaming-gold/20 to-yellow-400/20 rounded-full flex items-center justify-center border border-gaming-gold/30">
+                      <Users className="w-4 h-4 text-gaming-gold" />
                     </div>
                   </div>
                   
                   {/* Content with improved typography - centered */}
                   <div className="flex flex-col items-center text-center">
                     <div className="flex items-center justify-center">
-                      <span className="text-2xl font-bold bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold bg-clip-text text-transparent tracking-tight" data-testid="text-player-count">
+                      <span className="text-xl font-bold bg-gradient-to-r from-gaming-gold via-yellow-300 to-gaming-gold bg-clip-text text-transparent tracking-tight" data-testid="text-player-count">
                         247
                       </span>
                     </div>
-                    <span className="text-[10px] font-medium text-gaming-gold/60 uppercase tracking-wide">
+                    <span className="text-[9px] font-medium text-gaming-gold/60 uppercase tracking-wide">
                       Jugadores Conectados
                     </span>
                   </div>
@@ -104,16 +104,17 @@ export default function Header() {
             </div>
 
             {/* Clean Symmetric Navigation */}
-            <nav className="hidden lg:flex items-center gap-2 ml-4">
-              <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2 border border-white/10">
+            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+              <div className="flex items-center gap-0.5 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1.5 border border-white/10">
                 <Link href="/">
-                  <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-inicio">
+                  <Button variant="ghost" size="sm" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium text-xs px-3 py-1.5 h-auto" data-testid="link-inicio">
                     Inicio
                   </Button>
                 </Link>
                 <Button 
                   variant="ghost" 
-                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" 
+                  size="sm"
+                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium text-xs px-3 py-1.5 h-auto" 
                   data-testid="link-noticias"
                   onClick={handleNoticiasClick}
                 >
@@ -121,20 +122,22 @@ export default function Header() {
                 </Button>
                 <Button 
                   variant="ghost" 
-                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" 
+                  size="sm"
+                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium text-xs px-3 py-1.5 h-auto" 
                   data-testid="link-rankings"
                   onClick={handleRankingsClick}
                 >
                   Rankings
                 </Button>
                 <Link href="/foro">
-                  <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-foro">
+                  <Button variant="ghost" size="sm" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium text-xs px-3 py-1.5 h-auto" data-testid="link-foro">
                     Foro
                   </Button>
                 </Link>
                 <Button 
                   variant="ghost" 
-                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" 
+                  size="sm"
+                  className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium text-xs px-3 py-1.5 h-auto" 
                   data-testid="link-descargar"
                   onClick={() => setDownloadOpen(true)}
                 >
@@ -142,27 +145,30 @@ export default function Header() {
                 </Button>
                 <Button 
                   variant="ghost" 
-                  className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 hover:from-green-600/30 hover:to-emerald-600/30 border border-green-500/30 rounded-full font-medium transition-all duration-300" 
+                  size="sm"
+                  className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 hover:from-green-600/30 hover:to-emerald-600/30 border border-green-500/30 rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                   data-testid="link-donacion"
                 >
-                  <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                  <DollarSign className="w-3 h-3 mr-1 text-green-400" />
                   Donación
                 </Button>
                 <Button 
                   variant="ghost" 
-                  className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 border border-purple-500/30 rounded-full font-medium transition-all duration-300" 
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 border border-purple-500/30 rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                   data-testid="link-tienda"
                 >
-                  <ShoppingBag className="w-4 h-4 mr-2 text-purple-400" />
+                  <ShoppingBag className="w-3 h-3 mr-1 text-purple-400" />
                   Tienda
                 </Button>
                 <Link href="/soporte">
                   <Button 
                     variant="ghost" 
-                    className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/30 rounded-full font-medium transition-all duration-300" 
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/30 rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                     data-testid="link-soporte"
                   >
-                    <HelpCircle className="w-4 h-4 mr-2 text-blue-400" />
+                    <HelpCircle className="w-3 h-3 mr-1 text-blue-400" />
                     Soporte
                   </Button>
                 </Link>
@@ -170,10 +176,11 @@ export default function Header() {
                   <Link href="/admin/tickets">
                     <Button 
                       variant="ghost" 
-                      className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 border border-red-500/30 rounded-full font-medium transition-all duration-300" 
+                      size="sm"
+                      className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 border border-red-500/30 rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                       data-testid="link-admin-tickets"
                     >
-                      <LifeBuoy className="w-4 h-4 mr-2 text-red-400" />
+                      <LifeBuoy className="w-3 h-3 mr-1 text-red-400" />
                       Gestión Tickets
                     </Button>
                   </Link>
@@ -182,23 +189,23 @@ export default function Header() {
             </nav>
 
             {/* Enhanced Action Buttons */}
-            <div className="flex items-center gap-4 ml-8">
+            <div className="flex items-center gap-2 shrink-0">
               {isAuthenticated ? (
                 <>
                   {/* Integrated Player Dashboard - Always Visible */}
-                  <div className="hidden xl:flex items-center gap-4">
+                  <div className="hidden xl:flex items-center gap-2">
                     {/* Player Info Section */}
-                    <div className="flex items-center gap-3 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-4 py-2 border border-gaming-gold/20 shadow-xl">
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-xl px-3 py-1.5 border border-gaming-gold/20 shadow-xl">
                       {/* User Avatar & Name */}
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gaming-gold to-yellow-400 flex items-center justify-center shadow-lg">
-                          <User className="w-4 h-4 text-black" />
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-r from-gaming-gold to-yellow-400 flex items-center justify-center shadow-lg">
+                          <User className="w-3.5 h-3.5 text-black" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-bold bg-gradient-to-r from-gaming-gold to-yellow-300 bg-clip-text text-transparent text-sm leading-tight">
+                          <span className="font-bold bg-gradient-to-r from-gaming-gold to-yellow-300 bg-clip-text text-transparent text-xs leading-tight">
                             {user?.username}
                           </span>
-                          <span className="text-xs text-gaming-gold/60 uppercase tracking-wide leading-tight">
+                          <span className="text-[10px] text-gaming-gold/60 uppercase tracking-wide leading-tight">
                             {user?.role === 'administrador' ? 'Admin' : 
                              user?.role?.includes('gm') ? 'GM' : 'Jugador'}
                           </span>
@@ -207,36 +214,36 @@ export default function Header() {
                     </div>
 
                     {/* Player Stats Cards */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       {/* Coins */}
-                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 border border-yellow-500/30 rounded-xl px-4 py-3 backdrop-blur-sm">
-                        <div className="flex items-center justify-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                            <span className="text-lg">💰</span>
+                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 border border-yellow-500/30 rounded-lg px-3 py-2 backdrop-blur-sm">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <span className="text-sm">💰</span>
                           </div>
                           <div className="flex flex-col items-center text-center">
-                            <span className="text-sm font-bold text-yellow-500 leading-tight" data-testid="text-coins">{user?.coins || 0}</span>
-                            <span className="text-xs text-yellow-300/80 leading-tight">Monedas</span>
+                            <span className="text-xs font-bold text-yellow-500 leading-tight" data-testid="text-coins">{user?.coins || 0}</span>
+                            <span className="text-[10px] text-yellow-300/80 leading-tight">Monedas</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Link href="/panel">
                         <Button 
                           size="sm" 
                           variant="default"
-                          className="bg-gradient-to-r from-gaming-gold/90 via-gaming-gold to-gaming-gold/90 hover:from-gaming-gold hover:via-yellow-400 hover:to-gaming-gold text-black border border-gaming-gold rounded-xl px-4 py-2.5 shadow-lg shadow-gaming-gold/30 transition-all duration-300 hover:scale-105 font-semibold" 
+                          className="bg-gradient-to-r from-gaming-gold/90 via-gaming-gold to-gaming-gold/90 hover:from-gaming-gold hover:via-yellow-400 hover:to-gaming-gold text-black border border-gaming-gold rounded-lg px-3 py-1.5 shadow-lg shadow-gaming-gold/30 transition-all duration-300 hover:scale-105 font-semibold text-xs h-auto" 
                           data-testid="button-player-panel"
                         >
-                          <User className="w-4 h-4 mr-2" />
-                          <span className="text-sm">Panel</span>
+                          <User className="w-3 h-3 mr-1" />
+                          <span>Panel</span>
                         </Button>
                       </Link>
-                      <Button size="sm" variant="ghost" onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-full px-2 py-2" data-testid="button-logout">
-                        <LogOut className="w-4 h-4 text-red-500" />
+                      <Button size="sm" variant="ghost" onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-full px-1.5 py-1.5 h-auto" data-testid="button-logout">
+                        <LogOut className="w-3.5 h-3.5 text-red-500" />
                       </Button>
                     </div>
                   </div>
@@ -301,9 +308,9 @@ export default function Header() {
                     size="sm" 
                     onClick={() => setRealmistOpen(true)}
                     data-testid="button-play"
-                    className="bg-gradient-to-r from-gaming-gold via-yellow-400 to-gaming-gold hover:from-yellow-400 hover:via-gaming-gold hover:to-yellow-400 text-black font-bold rounded-full px-6 py-3 shadow-xl shadow-gaming-gold/30 transform hover:scale-105 transition-all duration-300"
+                    className="bg-gradient-to-r from-gaming-gold via-yellow-400 to-gaming-gold hover:from-yellow-400 hover:via-gaming-gold hover:to-yellow-400 text-black font-bold rounded-full px-4 py-2 shadow-xl shadow-gaming-gold/30 transform hover:scale-105 transition-all duration-300 text-xs h-auto whitespace-nowrap"
                   >
-                    <Gamepad2 className="w-5 h-5 mr-2" />
+                    <Gamepad2 className="w-4 h-4 mr-1.5" />
                     ¡JUGAR AHORA!
                   </Button>
                 </>
@@ -312,30 +319,30 @@ export default function Header() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="hidden sm:flex bg-white/5 hover:bg-white/10 border border-white/20 rounded-full font-medium transition-all duration-300" 
+                    className="hidden sm:flex bg-white/5 hover:bg-white/10 border border-white/20 rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                     onClick={() => setLoginOpen(true)}
                     data-testid="button-login"
                   >
-                    <LogIn className="w-4 h-4 mr-2" />
+                    <LogIn className="w-3 h-3 mr-1" />
                     Iniciar Sesión
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="hidden sm:flex bg-gaming-gold/10 hover:bg-gaming-gold/20 border-gaming-gold/30 text-gaming-gold hover:text-gaming-gold rounded-full font-medium transition-all duration-300" 
+                    className="hidden sm:flex bg-gaming-gold/10 hover:bg-gaming-gold/20 border-gaming-gold/30 text-gaming-gold hover:text-gaming-gold rounded-full font-medium transition-all duration-300 text-xs px-3 py-1.5 h-auto" 
                     onClick={() => setRegistrationOpen(true)}
                     data-testid="button-registro"
                   >
-                    <Shield className="w-4 h-4 mr-2" />
+                    <Shield className="w-3 h-3 mr-1" />
                     Registro
                   </Button>
                   <Button 
                     size="sm" 
                     onClick={() => setRealmistOpen(true)}
                     data-testid="button-play"
-                    className="bg-gradient-to-r from-gaming-gold via-yellow-400 to-gaming-gold hover:from-yellow-400 hover:via-gaming-gold hover:to-yellow-400 text-black font-bold rounded-full px-6 py-3 shadow-xl shadow-gaming-gold/30 transform hover:scale-105 transition-all duration-300"
+                    className="bg-gradient-to-r from-gaming-gold via-yellow-400 to-gaming-gold hover:from-yellow-400 hover:via-gaming-gold hover:to-yellow-400 text-black font-bold rounded-full px-4 py-2 shadow-xl shadow-gaming-gold/30 transform hover:scale-105 transition-all duration-300 text-xs h-auto whitespace-nowrap"
                   >
-                    <Gamepad2 className="w-5 h-5 mr-2" />
+                    <Gamepad2 className="w-4 h-4 mr-1.5" />
                     ¡JUGAR AHORA!
                   </Button>
                 </>
