@@ -108,12 +108,9 @@ export default function SoportePage() {
     }
   });
 
-  // Check if user is GM (any level)
-  const isGM = user?.role !== USER_ROLES.PLAYER;
-
-  // Fetch tickets - GMs see all tickets, players see only their tickets
+  // Fetch only user's own tickets
   const { data: tickets, isLoading } = useQuery({
-    queryKey: isGM ? ['/api/admin/tickets'] : ['/api/tickets'],
+    queryKey: ['/api/tickets'],
     enabled: isAuthenticated
   });
 
@@ -221,11 +218,9 @@ export default function SoportePage() {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h2 className="text-3xl font-bold text-blue-400">
-                    {isGM ? "Todos los Tickets de Soporte" : "Mis Tickets de Soporte"}
+                    Mis Tickets de Soporte
                   </h2>
-                  {isGM && (
-                    <p className="text-sm text-gray-400 mt-1">Vista de administrador - Mostrando todos los tickets de jugadores</p>
-                  )}
+                  <p className="text-sm text-gray-400 mt-1">Gestiona tus solicitudes de ayuda y soporte</p>
                 </div>
                 <Dialog open={createTicketOpen} onOpenChange={setCreateTicketOpen}>
                   <DialogTrigger asChild>
@@ -402,11 +397,6 @@ export default function SoportePage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="text-white text-lg font-semibold truncate">{ticket.title}</h3>
-                              {isGM && (
-                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                  ID Usuario: {ticket.userId.slice(0, 8)}
-                                </Badge>
-                              )}
                             </div>
                             <div className="flex flex-wrap gap-3 items-center">
                               <div className="flex items-center gap-1.5">
@@ -427,14 +417,6 @@ export default function SoportePage() {
                                   {categoryLabels[ticket.category as keyof typeof categoryLabels]}
                                 </Badge>
                               </div>
-                              {isGM && ticket.assignedTo && (
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs text-gray-400 font-medium">Asignado a:</span>
-                                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
-                                    {ticket.assignedTo.slice(0, 8)}
-                                  </Badge>
-                                </div>
-                              )}
                             </div>
                             <div className="flex items-center gap-2 mt-3">
                               <span className="text-xs text-gray-500">📅</span>
@@ -463,10 +445,7 @@ export default function SoportePage() {
                         No hay tickets activos
                       </h3>
                       <p className="text-gray-400 mb-6">
-                        {isGM 
-                          ? "Los tickets abiertos o en progreso aparecerán aquí"
-                          : "No tienes tickets activos. Crea uno si necesitas ayuda"
-                        }
+                        No tienes tickets activos. Crea uno si necesitas ayuda
                       </p>
                     </div>
                   )}
@@ -488,11 +467,6 @@ export default function SoportePage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="text-white text-lg font-semibold truncate">{ticket.title}</h3>
-                              {isGM && (
-                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                  ID Usuario: {ticket.userId.slice(0, 8)}
-                                </Badge>
-                              )}
                             </div>
                             <div className="flex flex-wrap gap-3 items-center">
                               <div className="flex items-center gap-1.5">
@@ -513,14 +487,6 @@ export default function SoportePage() {
                                   {categoryLabels[ticket.category as keyof typeof categoryLabels]}
                                 </Badge>
                               </div>
-                              {isGM && ticket.assignedTo && (
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs text-gray-400 font-medium">Asignado a:</span>
-                                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
-                                    {ticket.assignedTo.slice(0, 8)}
-                                  </Badge>
-                                </div>
-                              )}
                             </div>
                             <div className="flex items-center gap-2 mt-3">
                               <span className="text-xs text-gray-500">📅</span>
@@ -549,10 +515,7 @@ export default function SoportePage() {
                         No hay tickets cerrados
                       </h3>
                       <p className="text-gray-400 mb-6">
-                        {isGM 
-                          ? "Los tickets resueltos o cerrados aparecerán aquí para revisión"
-                          : "Tus tickets cerrados aparecerán aquí cuando se resuelvan"
-                        }
+                        Tus tickets cerrados aparecerán aquí cuando se resuelvan
                       </p>
                     </div>
                   )}
