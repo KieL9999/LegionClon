@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Header from "@/components/Header";
 import { 
   Search, 
@@ -24,11 +25,13 @@ import {
   XCircle,
   Edit,
   Eye,
-  RefreshCw
+  RefreshCw,
+  Crown
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SupportTicket {
   id: string;
@@ -44,10 +47,17 @@ interface SupportTicket {
   updatedAt: string;
   creatorUsername?: string;
   creatorRole?: string;
+  creatorVipLevel?: number;
   assignedUserInfo?: {
     username: string;
     role: string;
   };
+}
+
+interface StaffMember {
+  id: string;
+  username: string;
+  role: string;
 }
 
 const statusConfig = {
@@ -88,17 +98,81 @@ const categoryConfig = {
   other: { label: "Otro", color: "text-gray-400" }
 };
 
+// VIP Level colors with neon effect
+const vipColors: Record<number, string> = {
+  0: "bg-gray-900/50 text-gray-400 border-gray-500/50 shadow-[0_0_10px_rgba(156,163,175,0.3)]",
+  1: "bg-emerald-900/50 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.5)]",
+  2: "bg-blue-900/50 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(96,165,250,0.5)]",
+  3: "bg-purple-900/50 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(192,132,252,0.5)]",
+  4: "bg-pink-900/50 text-pink-400 border-pink-500/50 shadow-[0_0_15px_rgba(244,114,182,0.5)]",
+  5: "bg-orange-900/50 text-orange-400 border-orange-500/50 shadow-[0_0_15px_rgba(251,146,60,0.5)]",
+  6: "bg-red-900/50 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(248,113,113,0.5)]",
+  7: "bg-amber-900/50 text-amber-400 border-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.6)]",
+  8: "bg-cyan-900/50 text-cyan-400 border-cyan-500/50 shadow-[0_0_20px_rgba(34,211,238,0.6)]",
+  9: "bg-yellow-900/50 text-yellow-400 border-yellow-500/50 shadow-[0_0_25px_rgba(250,204,21,0.7)]",
+  10: "bg-gradient-to-r from-purple-900/50 to-pink-900/50 text-transparent bg-clip-text border-purple-500/50 shadow-[0_0_30px_rgba(168,85,247,0.8)]"
+};
+
+const vipLabels: Record<number, string> = {
+  0: "VIP 0", 1: "VIP 1", 2: "VIP 2", 3: "VIP 3", 4: "VIP 4",
+  5: "VIP 5", 6: "VIP 6", 7: "VIP 7", 8: "VIP 8", 9: "VIP 9", 10: "VIP 10"
+};
+
 export default function TicketsAdminPage() {
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: ticketsData, isLoading } = useQuery<{ success: boolean; tickets: SupportTicket[] }>({
     queryKey: ['/api/admin/tickets'],
   });
 
+  // Fetch all staff members
+  const { data: staffData } = useQuery<{ success: boolean; staff: StaffMember[] }>({
+    queryKey: ['/api/admin/staff'],
+  });
+
   const tickets = ticketsData?.tickets || [];
+  const staffMembers = staffData?.staff || [];
+
+  // Mutation to assign ticket
+  const assignTicketMutation = useMutation({
+    mutationFn: async ({ ticketId, assignedTo }: { ticketId: string; assignedTo: string | null }) => {
+      const response = await fetch(`/api/tickets/${ticketId}/assign`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ assignedTo })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al asignar el ticket');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
+      toast({
+        title: "Ticket asignado",
+        description: "El ticket ha sido asignado exitosamente",
+      });
+      setDialogOpen(false);
+      setSelectedTicketId(null);
+      setSelectedAssignee("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al asignar el ticket",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -243,15 +317,27 @@ export default function TicketsAdminPage() {
             {filteredTickets.map((ticket) => {
               const StatusIcon = statusConfig[ticket.status as keyof typeof statusConfig]?.icon || AlertCircle;
               const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig];
+              const vipLevel = ticket.creatorVipLevel ?? 0;
               
               return (
                 <Card
                   key={ticket.id}
-                  className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 group cursor-pointer"
+                  className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 group cursor-pointer relative"
                   onClick={() => setLocation(`/ticket/${ticket.id}`)}
                   data-testid={`ticket-card-${ticket.id}`}
                 >
-                  <CardContent className="p-5">
+                  {/* VIP Badge - Top Right */}
+                  <div className="absolute top-3 right-3 z-10">
+                    <Badge 
+                      className={`${vipColors[vipLevel] || vipColors[0]} font-bold text-xs px-2 py-0.5 flex items-center gap-1`}
+                      data-testid={`ticket-vip-${ticket.id}`}
+                    >
+                      <Crown className="w-3 h-3" />
+                      {vipLabels[vipLevel] || "VIP 0"}
+                    </Badge>
+                  </div>
+
+                  <CardContent className="p-5 pr-20">
                     {/* Status Badge */}
                     <div className="flex items-center gap-2 mb-3">
                       <Badge className={`${statusInfo?.color} border px-2 py-1`}>
@@ -286,7 +372,9 @@ export default function TicketsAdminPage() {
 
                         <div className="flex items-center gap-2 text-slate-400">
                           <User className="w-4 h-4" />
-                          <span className="truncate">ID: {ticket.userId.slice(0, 8)}...</span>
+                          <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30">
+                            {ticket.creatorUsername || 'Desconocido'}
+                          </Badge>
                         </div>
 
                         <div className="flex items-center gap-2 text-slate-400">
@@ -297,7 +385,7 @@ export default function TicketsAdminPage() {
                         <div className="pt-2 border-t border-slate-700/50">
                           {ticket.assignedUserInfo ? (
                             <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold">
-                              Asignado: {ticket.assignedUserInfo.username}#{ticket.assignedTo?.slice(-4).toUpperCase()}
+                              Asignado: {ticket.assignedUserInfo.username}
                             </Badge>
                           ) : (
                             <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
@@ -329,7 +417,9 @@ export default function TicketsAdminPage() {
                         className="flex-1 bg-slate-800/50 border-slate-700 hover:bg-gaming-gold/10 hover:border-gaming-gold text-white"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setLocation(`/ticket/${ticket.id}`);
+                          setSelectedTicketId(ticket.id);
+                          setSelectedAssignee(ticket.assignedTo || "");
+                          setDialogOpen(true);
                         }}
                         data-testid={`button-edit-${ticket.id}`}
                       >
@@ -344,6 +434,62 @@ export default function TicketsAdminPage() {
           </div>
         )}
       </main>
+
+      {/* Assign Ticket Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-gaming-gold text-xl">Asignar Ticket a GM</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Selecciona un GM para asignar este ticket. Puedes remover la asignación seleccionando "Sin asignar".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+              <SelectTrigger className="bg-slate-800/50 border-slate-600">
+                <SelectValue placeholder="Seleccionar GM..." />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectItem value="none" className="text-gray-400">
+                  Sin asignar
+                </SelectItem>
+                {staffMembers.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.id}>
+                    {staff.username} - {staff.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDialogOpen(false);
+                  setSelectedTicketId(null);
+                  setSelectedAssignee("");
+                }}
+                className="bg-slate-800 hover:bg-slate-700 border-slate-600"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedTicketId) {
+                    assignTicketMutation.mutate({
+                      ticketId: selectedTicketId,
+                      assignedTo: selectedAssignee === "none" ? null : selectedAssignee || null
+                    });
+                  }
+                }}
+                disabled={assignTicketMutation.isPending}
+                className="bg-gaming-gold hover:bg-gaming-gold/90 text-black"
+              >
+                {assignTicketMutation.isPending ? "Asignando..." : "Asignar"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
