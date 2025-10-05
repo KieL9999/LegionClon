@@ -3,6 +3,26 @@
 ## Overview
 AetherWoW is a World of Warcraft Legion private server website serving as a central community hub. It aims to enhance player engagement and server promotion through features like user registration, server information, news management, player rankings, and interactive community functionalities. The project emphasizes a dark, Legion-themed gaming aesthetic, supports custom content, and includes a comprehensive support ticket system. It recently underwent a brand transformation from "Legion Plus" to "AetherWoW" with significant UI/UX improvements.
 
+## Current Status (October 5, 2025)
+- **Environment**: Successfully migrated to Replit with Node.js 20 runtime
+- **Database**: PostgreSQL (Neon) with Drizzle ORM
+- **Deployment**: Configured for autoscale deployment
+- **Active Development**: Admin ticket management UI improvements
+
+## Recent Changes
+
+### October 5, 2025 - Admin Ticket Management UI Redesign
+- **File Modified**: `client/src/pages/TicketsAdminPage.tsx`
+- **Changes**:
+  - Redesigned ticket card layout with centered VIP badges, status, and priority badges
+  - Added clear "TÍTULO" and "DESCRIPCIÓN" labels in gaming-gold color for better visual hierarchy
+  - Implemented perfectly symmetric metadata grid for Category, User, and Creation Date
+  - All three metadata elements now have identical container styling, padding, and alignment
+  - Improved spacing and visual balance throughout ticket cards
+  - Enhanced hover effects and click handlers for better UX
+- **Admin Setup**: User "kiel" granted level 7 administrator access
+- **Testing**: Test ticket data created for UI validation
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -18,6 +38,7 @@ The design features a dark gaming aesthetic with golden accents, consistent with
 - Elegant container design for narrative content in the hero section, with semi-transparent backgrounds and golden border frameworks.
 - Support system uses blue/cyan themes and professional layouts.
 - Admin management sections follow a unified design pattern with header sections, counter displays, responsive content grids, and consistent card designs.
+- **Admin Ticket Cards**: Symmetric layout with centered badges, labeled sections, and uniform metadata presentation with gaming-themed styling.
 
 ### Technical Implementations
 
@@ -35,6 +56,14 @@ Features secure user registration and login with PBKDF2 password hashing and ses
 
 #### Support Ticket System
 A comprehensive system allows users to create, track, and manage support requests with categorized tickets, priority levels, and status tracking (open, in_progress, resolved, closed). It includes role-based access for users and administrators. A real-time chat system for support tickets is implemented via a dedicated WebSocket server, using httpOnly session cookies for authentication, storing messages in the `ticket_messages` table, and providing a modern chat UI with message history and real-time updates. The system also includes a reorganized ticket management for users and admins, with separate views and functionalities.
+
+**Admin UI Features**:
+- VIP level badges (0-10) with neon glow effects displayed prominently on ticket cards
+- Status and priority indicators with color-coded badges
+- Labeled sections for title and description with gaming-gold headers
+- Symmetric metadata grid showing Category, User, and Creation Date with uniform styling
+- Staff assignment system with GM role filtering
+- Quick action buttons for viewing and editing tickets
 
 ### System Design Choices
 
@@ -56,3 +85,9 @@ Automatic MemStorage fallback when `DATABASE_URL` is unavailable, default admin 
 - **Build Tools**: Vite
 - **State Management/Data Fetching**: TanStack Query
 - **Routing**: Wouter
+
+## Important Files
+- `client/src/pages/TicketsAdminPage.tsx` - Admin ticket management interface (active component for `/admin/tickets` route)
+- `shared/schema.ts` - Database schema definitions with Drizzle ORM
+- `drizzle.config.ts` - Database configuration
+- `.local/state/replit/agent/progress_tracker.md` - Migration and development progress tracker
