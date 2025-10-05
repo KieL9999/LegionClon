@@ -20,6 +20,7 @@ import WebFeaturesManager from "@/components/WebFeaturesManager";
 import ServerNewsManager from "@/components/ServerNewsManager";
 import DownloadsManager from "@/components/DownloadsManager";
 import SiteSettingsManager from "@/components/SiteSettingsManager";
+import TicketsAdminManager from "@/components/TicketsAdminManager";
 import { Link, useLocation } from "wouter";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -951,6 +952,9 @@ export function PlayerPanel() {
                                 </Button>
                               </CardContent>
                             </Card>
+
+                            {/* Gestión de Tickets de Soporte */}
+                            <TicketsAdminManager />
                           </div>
                         </TabsContent>
 
