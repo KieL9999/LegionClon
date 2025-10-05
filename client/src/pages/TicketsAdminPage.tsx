@@ -23,10 +23,12 @@ import {
   CheckCircle2,
   XCircle,
   Edit,
-  Eye
+  Eye,
+  RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { queryClient } from "@/lib/queryClient";
 
 interface SupportTicket {
   id: string;
@@ -40,6 +42,12 @@ interface SupportTicket {
   assignedTo?: string;
   createdAt: string;
   updatedAt: string;
+  creatorUsername?: string;
+  creatorRole?: string;
+  assignedUserInfo?: {
+    username: string;
+    role: string;
+  };
 }
 
 const statusConfig = {
@@ -84,12 +92,19 @@ export default function TicketsAdminPage() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: ticketsData, isLoading } = useQuery<{ success: boolean; tickets: SupportTicket[] }>({
     queryKey: ['/api/admin/tickets'],
   });
 
   const tickets = ticketsData?.tickets || [];
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = !searchQuery.trim() || 
@@ -108,11 +123,22 @@ export default function TicketsAdminPage() {
       <main className="container mx-auto px-4 py-8 mt-20">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-br from-gaming-gold/20 to-gaming-gold/5 rounded-lg border border-gaming-gold/30">
-              <Tag className="w-6 h-6 text-gaming-gold" />
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-gaming-gold/20 to-gaming-gold/5 rounded-lg border border-gaming-gold/30">
+                <Tag className="w-6 h-6 text-gaming-gold" />
+              </div>
+              <h1 className="text-3xl font-bold text-white">Gestión de Tickets de Soporte</h1>
             </div>
-            <h1 className="text-3xl font-bold text-white">Gestión de Tickets de Soporte</h1>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="bg-gaming-gold hover:bg-gaming-gold/90 text-black font-semibold"
+              data-testid="button-refresh-tickets"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
           </div>
           <p className="text-slate-400 ml-14">
             Administra y gestiona todos los tickets de soporte del sistema
@@ -240,11 +266,15 @@ export default function TicketsAdminPage() {
                     {/* Ticket Info */}
                     <div className="space-y-3">
                       <h3 
-                        className="font-bold text-white text-lg line-clamp-2 min-h-[3.5rem] group-hover:text-gaming-gold transition-colors"
+                        className="font-bold text-white text-lg line-clamp-1 group-hover:text-gaming-gold transition-colors"
                         data-testid={`ticket-title-${ticket.id}`}
                       >
                         {ticket.title}
                       </h3>
+
+                      <p className="text-sm text-slate-400 line-clamp-2 min-h-[2.5rem]">
+                        {ticket.description}
+                      </p>
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2 text-slate-400">
@@ -263,6 +293,14 @@ export default function TicketsAdminPage() {
                           <Calendar className="w-4 h-4" />
                           <span>{format(new Date(ticket.createdAt), "dd MMM yyyy", { locale: es })}</span>
                         </div>
+
+                        {ticket.assignedUserInfo && (
+                          <div className="pt-2 border-t border-slate-700/50">
+                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold">
+                              Asignado: {ticket.assignedUserInfo.username}#{ticket.assignedTo?.slice(-4).toUpperCase()}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     </div>
 
