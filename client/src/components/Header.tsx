@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings, HelpCircle } from "lucide-react";
+import { Gamepad2, Shield, Users, LogIn, LogOut, User, DollarSign, ShoppingBag, Settings, HelpCircle, LifeBuoy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -166,6 +166,18 @@ export default function Header() {
                     Soporte
                   </Button>
                 </Link>
+                {isAuthenticated && (user?.role === 'administrador' || user?.role?.includes('gm')) && (
+                  <Link href="/admin/tickets">
+                    <Button 
+                      variant="ghost" 
+                      className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 border border-red-500/30 rounded-full font-medium transition-all duration-300" 
+                      data-testid="link-admin-tickets"
+                    >
+                      <LifeBuoy className="w-4 h-4 mr-2 text-red-400" />
+                      Gestión Tickets
+                    </Button>
+                  </Link>
+                )}
               </div>
             </nav>
 

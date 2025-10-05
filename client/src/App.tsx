@@ -9,6 +9,7 @@ import HomePage from "@/pages/HomePage";
 import ForoPage from "@/pages/ForoPage";
 import SoportePage from "@/pages/SoportePage";
 import TicketDetailPage from "@/pages/TicketDetailPage";
+import TicketsAdminPage from "@/pages/TicketsAdminPage";
 import { PlayerPanel } from "@/pages/PlayerPanel";
 import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/foro" component={ForoPage} />
       <Route path="/soporte" component={SoportePage} />
       <Route path="/ticket/:id" component={TicketDetailPage} />
+      <Route path="/admin/tickets" component={TicketsAdminPage} />
       <Route path="/panel" component={PlayerPanel} />
       <Route component={NotFound} />
     </Switch>
