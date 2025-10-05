@@ -366,36 +366,40 @@ export default function TicketsAdminPage() {
                       </p>
                     </div>
 
-                    {/* Metadata Grid - Better organized */}
-                    <div className="grid grid-cols-3 gap-2 mb-3 pt-3 border-t border-slate-700/30">
+                    {/* Metadata Grid - Perfectly Symmetric */}
+                    <div className="grid grid-cols-3 gap-3 mb-3 pt-3 border-t border-slate-700/30">
                       {/* Category */}
-                      <div>
-                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Categoría</div>
-                        <div className="flex items-center justify-center gap-1 text-xs">
-                          <Tag className="w-3 h-3" />
-                          <span className={categoryConfig[ticket.category as keyof typeof categoryConfig]?.color}>
-                            {categoryConfig[ticket.category as keyof typeof categoryConfig]?.label}
-                          </span>
+                      <div className="flex flex-col items-center">
+                        <div className="text-xs text-slate-500 font-medium mb-2 text-center">Categoría</div>
+                        <div className="w-full flex justify-center">
+                          <div className="flex items-center gap-1 text-xs bg-slate-800/50 border border-slate-700/50 rounded px-3 py-1.5 min-w-[80px] justify-center">
+                            <Tag className="w-3 h-3 flex-shrink-0" />
+                            <span className={`${categoryConfig[ticket.category as keyof typeof categoryConfig]?.color} font-medium`}>
+                              {categoryConfig[ticket.category as keyof typeof categoryConfig]?.label}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
                       {/* User */}
-                      <div>
-                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Usuario</div>
-                        <div className="flex justify-center">
-                          <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 text-xs px-2 py-0.5">
-                            <User className="w-3 h-3 mr-1" />
-                            {ticket.creatorUsername || 'N/A'}
-                          </Badge>
+                      <div className="flex flex-col items-center">
+                        <div className="text-xs text-slate-500 font-medium mb-2 text-center">Usuario</div>
+                        <div className="w-full flex justify-center">
+                          <div className="flex items-center gap-1 text-xs bg-gaming-gold/20 text-gaming-gold border border-gaming-gold/30 rounded px-3 py-1.5 min-w-[80px] justify-center">
+                            <User className="w-3 h-3 flex-shrink-0" />
+                            <span className="font-medium">{ticket.creatorUsername || 'N/A'}</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Date */}
-                      <div>
-                        <div className="text-xs text-slate-500 font-medium mb-1 text-center">Fecha de creación</div>
-                        <div className="flex items-center justify-center gap-1 text-xs text-slate-300 bg-slate-800/50 border border-slate-700/50 rounded px-2 py-1">
-                          <Calendar className="w-3 h-3 text-gaming-gold" />
-                          <span className="font-medium">{format(new Date(ticket.createdAt), "dd/MM/yy", { locale: es })}</span>
+                      <div className="flex flex-col items-center">
+                        <div className="text-xs text-slate-500 font-medium mb-2 text-center">Fecha de creación</div>
+                        <div className="w-full flex justify-center">
+                          <div className="flex items-center gap-1 text-xs bg-slate-800/50 border border-slate-700/50 rounded px-3 py-1.5 min-w-[80px] justify-center">
+                            <Calendar className="w-3 h-3 text-gaming-gold flex-shrink-0" />
+                            <span className="font-medium text-slate-300">{format(new Date(ticket.createdAt), "dd/MM/yy", { locale: es })}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
