@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LifeBuoy, Search, User, Calendar, AlertCircle, CheckCircle2, Clock, XCircle, RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LifeBuoy, Search, User, Calendar, AlertCircle, CheckCircle2, Clock, XCircle, RefreshCw, Edit, Eye, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SupportTicket {
   id: string;
@@ -26,10 +29,17 @@ interface SupportTicket {
   updatedAt: string;
   creatorUsername?: string;
   creatorRole?: string;
+  creatorVipLevel?: number;
   assignedUserInfo?: {
     username: string;
     role: string;
   };
+}
+
+interface StaffMember {
+  id: string;
+  username: string;
+  role: string;
 }
 
 const statusColors = {
@@ -83,16 +93,89 @@ const categoryLabels = {
   other: "Otro"
 };
 
+// VIP Level colors with neon effect
+const vipColors: Record<number, string> = {
+  0: "bg-gray-900/50 text-gray-400 border-gray-500/50 shadow-[0_0_10px_rgba(156,163,175,0.3)]",
+  1: "bg-emerald-900/50 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.5)]",
+  2: "bg-blue-900/50 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(96,165,250,0.5)]",
+  3: "bg-purple-900/50 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(192,132,252,0.5)]",
+  4: "bg-pink-900/50 text-pink-400 border-pink-500/50 shadow-[0_0_15px_rgba(244,114,182,0.5)]",
+  5: "bg-orange-900/50 text-orange-400 border-orange-500/50 shadow-[0_0_15px_rgba(251,146,60,0.5)]",
+  6: "bg-red-900/50 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(248,113,113,0.5)]",
+  7: "bg-amber-900/50 text-amber-400 border-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.6)]",
+  8: "bg-cyan-900/50 text-cyan-400 border-cyan-500/50 shadow-[0_0_20px_rgba(34,211,238,0.6)]",
+  9: "bg-yellow-900/50 text-yellow-400 border-yellow-500/50 shadow-[0_0_25px_rgba(250,204,21,0.7)]",
+  10: "bg-gradient-to-r from-purple-900/50 to-pink-900/50 text-transparent bg-clip-text border-purple-500/50 shadow-[0_0_30px_rgba(168,85,247,0.8)]"
+};
+
+const vipLabels: Record<number, string> = {
+  0: "VIP 0",
+  1: "VIP 1",
+  2: "VIP 2",
+  3: "VIP 3",
+  4: "VIP 4",
+  5: "VIP 5",
+  6: "VIP 6",
+  7: "VIP 7",
+  8: "VIP 8",
+  9: "VIP 9",
+  10: "VIP 10"
+};
+
 export default function TicketsAdminManager() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Fetch all tickets for admin
   const { data: ticketsData, isLoading } = useQuery<{ success: boolean; tickets: SupportTicket[] }>({
     queryKey: ['/api/admin/tickets'],
   });
 
+  // Fetch all staff members
+  const { data: staffData } = useQuery<{ success: boolean; staff: StaffMember[] }>({
+    queryKey: ['/api/admin/staff'],
+  });
+
   const tickets = ticketsData?.tickets || [];
+  const staffMembers = staffData?.staff || [];
+
+  // Mutation to assign ticket
+  const assignTicketMutation = useMutation({
+    mutationFn: async ({ ticketId, assignedTo }: { ticketId: string; assignedTo: string | null }) => {
+      const response = await fetch(`/api/tickets/${ticketId}/assign`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ assignedTo })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al asignar el ticket');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
+      toast({
+        title: "Ticket asignado",
+        description: "El ticket ha sido asignado exitosamente",
+      });
+      setDialogOpen(false);
+      setSelectedTicketId(null);
+      setSelectedAssignee("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al asignar el ticket",
+        variant: "destructive"
+      });
+    }
+  });
   
   // Refresh tickets function
   const handleRefresh = async () => {
@@ -115,14 +198,26 @@ export default function TicketsAdminManager() {
 
   const renderTicketCard = (ticket: SupportTicket) => {
     const StatusIcon = statusIcons[ticket.status as keyof typeof statusIcons];
+    const vipLevel = ticket.creatorVipLevel ?? 0;
     
     return (
       <Card 
         key={ticket.id} 
-        className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300"
+        className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-gaming-gold/50 transition-all duration-300 relative"
         data-testid={`admin-ticket-card-${ticket.id}`}
       >
-        <CardContent className="p-6">
+        {/* VIP Badge - Top Right */}
+        <div className="absolute top-4 right-4 z-10">
+          <Badge 
+            className={`${vipColors[vipLevel] || vipColors[0]} font-bold text-sm px-3 py-1 flex items-center gap-1.5`}
+            data-testid={`ticket-vip-${ticket.id}`}
+          >
+            <Crown className="w-4 h-4" />
+            {vipLabels[vipLevel] || "VIP 0"}
+          </Badge>
+        </div>
+
+        <CardContent className="p-6 pr-24">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-3">
               {/* Header with title and status icon */}
@@ -147,21 +242,21 @@ export default function TicketsAdminManager() {
                   className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 font-semibold"
                   data-testid={`ticket-user-${ticket.id}`}
                 >
-                  Creado por: {ticket.creatorUsername || 'Desconocido'}#{ticket.userId.slice(-4).toUpperCase()}
+                  {ticket.creatorUsername || 'Desconocido'}
                 </Badge>
                 {ticket.assignedUserInfo ? (
                   <Badge 
                     className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold"
                     data-testid={`ticket-assigned-user-${ticket.id}`}
                   >
-                    Asignado a: {ticket.assignedUserInfo.username}#{ticket.assignedTo?.slice(-4).toUpperCase()}
+                    Asignado a: {ticket.assignedUserInfo.username}
                   </Badge>
                 ) : (
                   <Badge 
                     className="bg-gray-500/20 text-gray-400 border-gray-500/30"
                     data-testid={`ticket-unassigned-${ticket.id}`}
                   >
-                    Sin asignar
+                    Sin Asignar
                   </Badge>
                 )}
               </div>
@@ -197,15 +292,30 @@ export default function TicketsAdminManager() {
               </div>
             </div>
 
-            {/* Action button */}
-            <Link href={`/ticket/${ticket.id}`}>
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2 shrink-0">
+              <Link href={`/ticket/${ticket.id}`}>
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full"
+                  data-testid={`button-view-ticket-${ticket.id}`}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Ver
+                </Button>
+              </Link>
               <Button
-                className="bg-gaming-gold hover:bg-gaming-gold/90 text-black font-semibold shrink-0"
-                data-testid={`button-view-admin-ticket-${ticket.id}`}
+                onClick={() => {
+                  setSelectedTicketId(ticket.id);
+                  setSelectedAssignee(ticket.assignedTo || "");
+                  setDialogOpen(true);
+                }}
+                className="bg-gaming-gold hover:bg-gaming-gold/90 text-black font-semibold"
+                data-testid={`button-edit-ticket-${ticket.id}`}
               >
-                Ver Ticket
+                <Edit className="w-4 h-4 mr-2" />
+                Editar
               </Button>
-            </Link>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -351,6 +461,62 @@ export default function TicketsAdminManager() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
+
+      {/* Assign Ticket Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-gaming-gold text-xl">Asignar Ticket a GM</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Selecciona un GM para asignar este ticket. Puedes remover la asignación seleccionando "Sin asignar".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+              <SelectTrigger className="bg-slate-800/50 border-slate-600">
+                <SelectValue placeholder="Seleccionar GM..." />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectItem value="none" className="text-gray-400">
+                  Sin asignar
+                </SelectItem>
+                {staffMembers.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.id}>
+                    {staff.username} - {staff.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDialogOpen(false);
+                  setSelectedTicketId(null);
+                  setSelectedAssignee("");
+                }}
+                className="bg-slate-800 hover:bg-slate-700 border-slate-600"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedTicketId) {
+                    assignTicketMutation.mutate({
+                      ticketId: selectedTicketId,
+                      assignedTo: selectedAssignee === "none" ? null : selectedAssignee || null
+                    });
+                  }
+                }}
+                disabled={assignTicketMutation.isPending}
+                className="bg-gaming-gold hover:bg-gaming-gold/90 text-black"
+              >
+                {assignTicketMutation.isPending ? "Asignando..." : "Asignar"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

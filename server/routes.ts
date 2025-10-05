@@ -2041,6 +2041,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Assign ticket to specific GMs (admin/GM only)
+  app.patch('/api/tickets/:id/assign', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid session',
+          message: 'Sesión inválida'
+        });
+      }
+
+      // Only staff can assign tickets
+      const isStaff = user.role !== 'player';
+      if (!isStaff) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Solo el personal de soporte puede asignar tickets'
+        });
+      }
+
+      const ticketId = req.params.id;
+      const { assignedTo } = req.body;
+      
+      // Validate that assignedTo is a valid user ID if provided
+      if (assignedTo) {
+        const assignedUser = await storage.getUser(assignedTo);
+        if (!assignedUser || assignedUser.role === 'player') {
+          return res.status(400).json({
+            error: 'Invalid user',
+            message: 'El usuario asignado debe ser un GM o administrador'
+          });
+        }
+      }
+      
+      // Update ticket assignment
+      const updatedTicket = await storage.updateSupportTicket(ticketId, {
+        assignedTo: assignedTo || null,
+        status: assignedTo ? 'in_progress' : 'open'
+      });
+      
+      if (!updatedTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: assignedTo ? 'Ticket asignado exitosamente' : 'Asignación removida exitosamente',
+        ticket: updatedTicket
+      });
+      
+    } catch (error) {
+      console.error('Assign ticket error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
   // Close ticket (staff only)
   app.patch('/api/tickets/:id/close', async (req, res) => {
     try {
@@ -2100,6 +2170,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all staff members (GMs and admins) for ticket assignment
+  app.get('/api/admin/staff', async (req, res) => {
+    try {
+      const sessionId = req.cookies.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Debes iniciar sesión'
+        });
+      }
+
+      const user = await storage.getUserBySession(sessionId);
+      if (!user || user.role === 'player') {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'No tienes permisos'
+        });
+      }
+
+      // Get all users who are not players
+      const allUsers = await storage.getAllUsers();
+      const staffMembers = allUsers
+        .filter(u => u.role !== 'player')
+        .map(({ password, ...staff }) => staff);
+
+      res.status(200).json({
+        success: true,
+        staff: staffMembers
+      });
+      
+    } catch (error) {
+      console.error('Get staff error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Error interno del servidor'
+      });
+    }
+  });
+
   // Get all tickets (admin/GM only)
   app.get('/api/admin/tickets', async (req, res) => {
     try {
@@ -2134,7 +2243,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: supportTickets.createdAt,
           updatedAt: supportTickets.updatedAt,
           creatorUsername: users.username,
-          creatorRole: users.role
+          creatorRole: users.role,
+          creatorVipLevel: users.vipLevel
         })
         .from(supportTickets)
         .leftJoin(users, eq(supportTickets.userId, users.id))
