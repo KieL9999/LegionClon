@@ -294,13 +294,17 @@ export default function TicketsAdminPage() {
                           <span>{format(new Date(ticket.createdAt), "dd MMM yyyy", { locale: es })}</span>
                         </div>
 
-                        {ticket.assignedUserInfo && (
-                          <div className="pt-2 border-t border-slate-700/50">
+                        <div className="pt-2 border-t border-slate-700/50">
+                          {ticket.assignedUserInfo ? (
                             <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold">
                               Asignado: {ticket.assignedUserInfo.username}#{ticket.assignedTo?.slice(-4).toUpperCase()}
                             </Badge>
-                          </div>
-                        )}
+                          ) : (
+                            <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                              Sin Asignar
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
 
