@@ -6,8 +6,10 @@ import path from "path";
 import fs from "fs";
 import { WebSocket, WebSocketServer } from "ws";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, insertTicketMessageSchema, USER_ROLES } from "@shared/schema";
+import { insertUserSchema, loginSchema, changePasswordSchema, changeEmailSchema, changeRoleSchema, insertWebFeatureSchema, updateWebFeatureSchema, insertServerNewsSchema, updateServerNewsSchema, insertDownloadSchema, updateDownloadSchema, insertSiteSettingSchema, updateSiteSettingSchema, insertSupportTicketSchema, updateSupportTicketSchema, uploadDownloadFileSchema, insertTicketMessageSchema, USER_ROLES, supportTickets, users } from "@shared/schema";
 import { z } from "zod";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint
@@ -2103,11 +2105,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const tickets = await storage.getAllSupportTickets();
+      // Fetch tickets with user information using joins
+      const ticketsWithUsers = await db!
+        .select({
+          id: supportTickets.id,
+          userId: supportTickets.userId,
+          title: supportTickets.title,
+          description: supportTickets.description,
+          status: supportTickets.status,
+          priority: supportTickets.priority,
+          category: supportTickets.category,
+          assignedTo: supportTickets.assignedTo,
+          imageUrl: supportTickets.imageUrl,
+          createdAt: supportTickets.createdAt,
+          updatedAt: supportTickets.updatedAt,
+          creatorUsername: users.username,
+          creatorRole: users.role
+        })
+        .from(supportTickets)
+        .leftJoin(users, eq(supportTickets.userId, users.id))
+        .orderBy(desc(supportTickets.createdAt));
+      
+      // Transform the result to include assigned user info
+      const ticketsWithAssignedInfo = await Promise.all(
+        ticketsWithUsers.map(async (ticket) => {
+          let assignedUserInfo = null;
+          
+          if (ticket.assignedTo) {
+            const assignedUser = await storage.getUser(ticket.assignedTo);
+            if (assignedUser) {
+              assignedUserInfo = {
+                username: assignedUser.username,
+                role: assignedUser.role
+              };
+            }
+          }
+          
+          return {
+            ...ticket,
+            assignedUserInfo
+          };
+        })
+      );
       
       res.status(200).json({
         success: true,
-        tickets
+        tickets: ticketsWithAssignedInfo
       });
       
     } catch (error) {

@@ -75,11 +75,11 @@ export default function Header() {
         <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             {/* Enhanced Server Status Panel */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center mr-4">
               <div className="relative group">
                 {/* Background with subtle gradient and glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-gaming-gold/5 via-gaming-gold/10 to-gaming-gold/5 rounded-2xl blur-sm group-hover:blur-md transition-all duration-300"></div>
-                <div className="relative flex items-center gap-4 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-8 py-4 border border-gaming-gold/20 shadow-xl">
+                <div className="relative flex items-center gap-4 bg-gradient-to-r from-black/40 via-black/60 to-black/40 backdrop-blur-lg rounded-2xl px-6 py-3 border border-gaming-gold/20 shadow-xl">
                   {/* Icon with enhanced styling */}
                   <div className="relative">
                     <div className="absolute inset-0 bg-gaming-gold/30 rounded-full blur-md"></div>
@@ -104,7 +104,7 @@ export default function Header() {
             </div>
 
             {/* Clean Symmetric Navigation */}
-            <nav className="hidden lg:flex items-center gap-2 ml-8">
+            <nav className="hidden lg:flex items-center gap-2 ml-2">
               <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2 border border-white/10">
                 <Link href="/">
                   <Button variant="ghost" className="rounded-full hover:bg-gaming-gold/20 hover:text-gaming-gold transition-all duration-300 font-medium" data-testid="link-inicio">

@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LifeBuoy, Search, User, Calendar, AlertCircle, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { LifeBuoy, Search, User, Calendar, AlertCircle, CheckCircle2, Clock, XCircle, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { queryClient } from "@/lib/queryClient";
 
 interface SupportTicket {
   id: string;
@@ -23,6 +24,12 @@ interface SupportTicket {
   assignedTo?: string;
   createdAt: string;
   updatedAt: string;
+  creatorUsername?: string;
+  creatorRole?: string;
+  assignedUserInfo?: {
+    username: string;
+    role: string;
+  };
 }
 
 const statusColors = {
@@ -78,6 +85,7 @@ const categoryLabels = {
 
 export default function TicketsAdminManager() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch all tickets for admin
   const { data: ticketsData, isLoading } = useQuery<{ success: boolean; tickets: SupportTicket[] }>({
@@ -85,6 +93,13 @@ export default function TicketsAdminManager() {
   });
 
   const tickets = ticketsData?.tickets || [];
+  
+  // Refresh tickets function
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   // Filter tickets by search query (username/userId)
   const filteredTickets = tickets.filter(ticket => {
@@ -125,15 +140,29 @@ export default function TicketsAdminManager() {
                 </div>
               </div>
 
-              {/* User ID Badge */}
-              <div className="flex items-center gap-2">
+              {/* User Info */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <User className="w-4 h-4 text-gaming-gold" />
                 <Badge 
-                  className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 font-mono"
+                  className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30"
                   data-testid={`ticket-user-${ticket.id}`}
                 >
-                  {ticket.userId.slice(0, 8)}...
+                  Usuario: {ticket.creatorUsername || 'Desconocido'}
                 </Badge>
+                <Badge 
+                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-mono text-xs"
+                  data-testid={`ticket-user-id-${ticket.id}`}
+                >
+                  ID: {ticket.userId.slice(0, 8)}...
+                </Badge>
+                {ticket.assignedUserInfo && (
+                  <Badge 
+                    className="bg-purple-500/20 text-purple-400 border-purple-500/30"
+                    data-testid={`ticket-assigned-user-${ticket.id}`}
+                  >
+                    Asignado a: {ticket.assignedUserInfo.username} • Código {ticket.assignedTo?.slice(0, 8)}
+                  </Badge>
+                )}
               </div>
 
               {/* Metadata badges */}
@@ -158,17 +187,12 @@ export default function TicketsAdminManager() {
                 </Badge>
               </div>
 
-              {/* Date and assignment */}
+              {/* Date */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />
                   <span>{format(new Date(ticket.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}</span>
                 </div>
-                {ticket.assignedTo && (
-                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 font-mono text-xs">
-                    Asignado: {ticket.assignedTo.slice(0, 8)}
-                  </Badge>
-                )}
               </div>
             </div>
 
@@ -204,9 +228,21 @@ export default function TicketsAdminManager() {
                 Administra todos los tickets de soporte de los usuarios
               </CardDescription>
             </div>
-            <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 text-lg px-4 py-2">
-              {tickets.length} Total
-            </Badge>
+            <div className="flex items-center gap-3">
+              <Badge className="bg-gaming-gold/20 text-gaming-gold border-gaming-gold/30 text-lg px-4 py-2">
+                {tickets.length} Total
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-400"
+                data-testid="button-refresh-tickets"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>
