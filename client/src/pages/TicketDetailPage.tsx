@@ -31,6 +31,8 @@ interface TicketMessage {
   ticketId: string;
   senderId: string;
   message: string;
+  imageUrl?: string;
+  isSystemMessage?: boolean;
   senderName: string;
   isStaff: boolean;
   createdAt: string;
@@ -45,6 +47,10 @@ interface Ticket {
   priority: string;
   category: string;
   assignedTo?: string;
+  assignedUserInfo?: {
+    username: string;
+    role: string;
+  };
   imageUrl?: string;
   createdAt: string;
 }
@@ -85,6 +91,9 @@ export default function TicketDetailPage() {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<MessageData>({
     resolver: zodResolver(messageSchema),
@@ -172,9 +181,46 @@ export default function TicketDetailPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Handle file upload
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/upload-ticket-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+
+      const data = await response.json();
+      setUploadedImageUrl(data.url);
+      toast({
+        title: "Imagen subida",
+        description: "La imagen se ha subido exitosamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Error al subir la imagen",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (data: MessageData) => {
+    mutationFn: async (data: MessageData & { imageUrl?: string }) => {
       const response = await fetch(`/api/tickets/${id}/messages`, {
         method: 'POST',
         headers: {
@@ -191,6 +237,7 @@ export default function TicketDetailPage() {
     },
     onSuccess: () => {
       form.reset();
+      setUploadedImageUrl(null);
       queryClient.invalidateQueries({ queryKey: ['/api/tickets', id] });
     },
     onError: (error: any) => {
@@ -203,7 +250,18 @@ export default function TicketDetailPage() {
   });
 
   const onSubmit = (data: MessageData) => {
-    sendMessageMutation.mutate(data);
+    sendMessageMutation.mutate({
+      ...data,
+      imageUrl: uploadedImageUrl || undefined
+    });
+  };
+
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.handleSubmit(onSubmit)();
+    }
   };
 
   const ticket = ticketData?.ticket as Ticket;
@@ -344,6 +402,29 @@ export default function TicketDetailPage() {
                 </div>
               </Card>
 
+              {/* Support Assigned Indicator (visible to players only) */}
+              {!isStaff && (
+                <Card className="bg-gradient-to-r from-purple-900/20 via-purple-800/10 to-purple-900/20 backdrop-blur-lg border-purple-500/20 p-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs text-purple-300/70 font-medium">Atendido por</span>
+                      {ticket.assignedTo && ticket.assignedUserInfo ? (
+                        <p className="text-purple-200 font-semibold">
+                          Soporte #{ticket.assignedTo.slice(-4).toUpperCase()}
+                        </p>
+                      ) : (
+                        <p className="text-purple-300/50 text-sm italic">
+                          Esperando asignación de soporte...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
+
               {/* Chat Messages */}
               <div className="flex-1 bg-gradient-to-br from-gray-900/50 via-black/40 to-gray-900/50 backdrop-blur-xl border border-cyan-500/10 rounded-2xl overflow-hidden mb-6 flex flex-col" data-testid="chat-messages-container">
                 {/* Messages Area */}
@@ -358,6 +439,26 @@ export default function TicketDetailPage() {
                     </div>
                   ) : (
                     messages.map((msg) => {
+                      // System message styling
+                      if (msg.isSystemMessage) {
+                        return (
+                          <div
+                            key={msg.id}
+                            className="flex justify-center animate-in fade-in duration-300"
+                            data-testid={`message-${msg.id}`}
+                          >
+                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 max-w-[85%]">
+                              <p className="text-yellow-300 text-sm text-center font-medium">
+                                {msg.message}
+                              </p>
+                              <span className="text-[10px] text-yellow-500/60 block text-center mt-1">
+                                {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       const isCurrentUser = msg.senderId === user?.id;
                       const isTicketOwner = msg.senderId === ticket.userId;
                       
@@ -426,6 +527,22 @@ export default function TicketDetailPage() {
                               <p className="text-white text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                                 {msg.message}
                               </p>
+                              {msg.imageUrl && (
+                                <div className="mt-2">
+                                  {msg.imageUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                                    <video controls className="max-w-full rounded-lg">
+                                      <source src={msg.imageUrl} />
+                                    </video>
+                                  ) : (
+                                    <img
+                                      src={msg.imageUrl}
+                                      alt="Adjunto"
+                                      className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                      onClick={() => window.open(msg.imageUrl, '_blank')}
+                                    />
+                                  )}
+                                </div>
+                              )}
                             </div>
                             
                             {/* Timestamp */}
@@ -444,42 +561,81 @@ export default function TicketDetailPage() {
               {/* Message Input */}
               <Card className="bg-gradient-to-br from-gray-900/60 via-black/50 to-gray-900/60 backdrop-blur-xl border border-cyan-500/10 p-5 shadow-2xl">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3 items-end">
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Textarea
-                              placeholder="Escribe tu mensaje..."
-                              className="bg-gray-800/60 border-gray-600/50 text-white resize-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl transition-all"
-                              rows={2}
-                              data-testid="textarea-message"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/60 text-gray-300 h-10 w-10 p-0 rounded-xl"
-                      data-testid="button-attach-image"
-                      title="Adjuntar imagen"
-                    >
-                      <Paperclip className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={sendMessageMutation.isPending}
-                      className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg hover:shadow-cyan-500/20 transition-all duration-200"
-                      data-testid="button-send-message"
-                    >
-                      <Send className="h-5 w-5" />
-                    </Button>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                    {/* Image Preview */}
+                    {uploadedImageUrl && (
+                      <div className="relative inline-block">
+                        {uploadedImageUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                          <video controls className="max-h-32 rounded-lg border border-cyan-500/30">
+                            <source src={uploadedImageUrl} />
+                          </video>
+                        ) : (
+                          <img
+                            src={uploadedImageUrl}
+                            alt="Preview"
+                            className="max-h-32 rounded-lg border border-cyan-500/30"
+                          />
+                        )}
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={() => setUploadedImageUrl(null)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-3 items-end">
+                      <FormField
+                        control={form.control}
+                        name="message"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Textarea
+                                placeholder="Escribe tu mensaje... (Enter para enviar, Shift+Enter para nueva línea)"
+                                className="bg-gray-800/60 border-gray-600/50 text-white resize-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl transition-all"
+                                rows={2}
+                                data-testid="textarea-message"
+                                onKeyDown={handleKeyDown}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*,video/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        data-testid="input-file"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/60 text-gray-300 h-10 w-10 p-0 rounded-xl"
+                        data-testid="button-attach-image"
+                        title="Adjuntar imagen o video"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                      >
+                        <Paperclip className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={sendMessageMutation.isPending}
+                        className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg hover:shadow-cyan-500/20 transition-all duration-200"
+                        data-testid="button-send-message"
+                      >
+                        <Send className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </form>
                 </Form>
               </Card>

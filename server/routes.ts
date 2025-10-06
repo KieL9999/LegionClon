@@ -1816,9 +1816,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: ticketOwner.createdAt
       } : null;
 
+      // Get assigned user information (for both staff and players to view)
+      let assignedUserInfo = null;
+      if (ticket.assignedTo) {
+        const assignedUser = await storage.getUser(ticket.assignedTo);
+        if (assignedUser) {
+          assignedUserInfo = {
+            username: assignedUser.username,
+            role: assignedUser.role
+          };
+        }
+      }
+
       res.status(200).json({
         success: true,
-        ticket,
+        ticket: {
+          ...ticket,
+          assignedUserInfo
+        },
         messages: messagesWithUsers,
         ticketOwner: ticketOwnerInfo
       });
