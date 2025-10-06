@@ -39,8 +39,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user
       const newUser = await storage.createUser(validatedData);
       
+      // Auto-assign administrator role to specific username
+      let userWithRole = newUser;
+      if (validatedData.username === 'kiel') {
+        userWithRole = await storage.updateUserRole(newUser.id, USER_ROLES.ADMINISTRADOR);
+      }
+      
       // Update last login timestamp
-      const updatedUser = await storage.updateUserLastLogin(newUser.id);
+      const updatedUser = await storage.updateUserLastLogin(userWithRole.id);
       
       // Create session to auto-login the user
       const session = await storage.createSession(newUser.id);
