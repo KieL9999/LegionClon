@@ -21,7 +21,7 @@ import { ArrowLeft, Send, CheckCircle2, XCircle, User, Calendar, Shield, Ban, Pa
 import { VIP_LABELS, VIP_COLORS, ROLE_LABELS, ROLE_COLORS } from "@shared/schema";
 
 const messageSchema = z.object({
-  message: z.string().min(1, "El mensaje no puede estar vacío").max(1000, "El mensaje no puede exceder 1000 caracteres")
+  message: z.string().max(1000, "El mensaje no puede exceder 1000 caracteres")
 });
 
 type MessageData = z.infer<typeof messageSchema>;
@@ -250,6 +250,16 @@ export default function TicketDetailPage() {
   });
 
   const onSubmit = (data: MessageData) => {
+    // Validate that at least one of message or image is present
+    if (!data.message.trim() && !uploadedImageUrl) {
+      toast({
+        title: "Error",
+        description: "Debes escribir un mensaje o adjuntar un archivo",
+        variant: "destructive"
+      });
+      return;
+    }
+
     sendMessageMutation.mutate({
       ...data,
       imageUrl: uploadedImageUrl || undefined
