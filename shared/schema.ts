@@ -105,6 +105,8 @@ export const ticketMessages = pgTable("ticket_messages", {
   ticketId: uuid("ticket_id").notNull(),
   senderId: uuid("sender_id").notNull(),
   message: text("message").notNull(),
+  imageUrl: varchar("image_url", { length: 500 }),
+  isSystemMessage: boolean("is_system_message").notNull().default(false),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
