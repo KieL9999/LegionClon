@@ -1066,14 +1066,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const upload = multer({
     storage: storage_multer,
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB limit
+      fileSize: 20 * 1024 * 1024, // 20MB limit for images and videos
     },
     fileFilter: (req, file, cb) => {
-      // Only allow image files
-      if (file.mimetype.startsWith('image/')) {
+      // Allow image and video files
+      if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
         cb(null, true);
       } else {
-        const error = new Error('Solo se permiten archivos de imagen') as any;
+        const error = new Error('Solo se permiten archivos de imagen o video') as any;
         error.code = 'LIMIT_FILE_TYPE';
         cb(error);
       }
@@ -1874,7 +1874,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTicketMessageSchema.parse({
         ticketId,
         senderId: user.id,
-        message: req.body.message
+        message: req.body.message,
+        imageUrl: req.body.imageUrl || null
       });
 
       // Create message
@@ -2019,6 +2020,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const ticketId = req.params.id;
       
+      // Get current ticket to check if there was a previous assignment
+      const currentTicket = await storage.getSupportTicketById(ticketId);
+      if (!currentTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
       // Update ticket to assign it to current user and change status to in_progress
       const updatedTicket = await storage.updateSupportTicket(ticketId, {
         assignedTo: user.id,
@@ -2030,6 +2040,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: 'Ticket not found',
           message: 'Ticket no encontrado'
         });
+      }
+      
+      // Create system message to notify about support assignment
+      const anonymousCode = user.id.slice(-4).toUpperCase();
+      const systemMessage = await storage.createTicketMessage({
+        ticketId,
+        senderId: user.id,
+        message: `El Soporte #${anonymousCode} tomó el ticket y serás atendido por él.`,
+        isSystemMessage: true
+      });
+      
+      // Broadcast system message to WebSocket subscribers
+      if (typeof (app as any).broadcastTicketMessage === 'function') {
+        const messageData = {
+          ...systemMessage,
+          senderName: 'Sistema',
+          isStaff: true
+        };
+        (app as any).broadcastTicketMessage(ticketId, messageData);
       }
       
       res.status(200).json({
@@ -2078,9 +2107,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ticketId = req.params.id;
       const { assignedTo } = req.body;
       
+      // Get current ticket to check previous assignment
+      const currentTicket = await storage.getSupportTicketById(ticketId);
+      if (!currentTicket) {
+        return res.status(404).json({
+          error: 'Ticket not found',
+          message: 'Ticket no encontrado'
+        });
+      }
+      
       // Validate that assignedTo is a valid user ID if provided
+      let assignedUser = null;
       if (assignedTo) {
-        const assignedUser = await storage.getUser(assignedTo);
+        assignedUser = await storage.getUser(assignedTo);
         if (!assignedUser || assignedUser.role === 'player') {
           return res.status(400).json({
             error: 'Invalid user',
@@ -2100,6 +2139,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: 'Ticket not found',
           message: 'Ticket no encontrado'
         });
+      }
+      
+      // Create system message if assignment changed
+      if (currentTicket.assignedTo !== assignedTo) {
+        let systemMessageText = '';
+        
+        if (assignedTo && assignedUser) {
+          const anonymousCode = assignedUser.id.slice(-4).toUpperCase();
+          if (currentTicket.assignedTo) {
+            systemMessageText = `El Soporte #${anonymousCode} ha tomado el ticket. Ahora serás atendido por él.`;
+          } else {
+            systemMessageText = `El Soporte #${anonymousCode} tomó el ticket y serás atendido por él.`;
+          }
+        } else if (!assignedTo && currentTicket.assignedTo) {
+          systemMessageText = 'El ticket ha sido liberado y está esperando ser asignado a un soporte.';
+        }
+        
+        if (systemMessageText) {
+          const systemMessage = await storage.createTicketMessage({
+            ticketId,
+            senderId: user.id,
+            message: systemMessageText,
+            isSystemMessage: true
+          });
+          
+          // Broadcast system message to WebSocket subscribers
+          if (typeof (app as any).broadcastTicketMessage === 'function') {
+            const messageData = {
+              ...systemMessage,
+              senderName: 'Sistema',
+              isStaff: true
+            };
+            (app as any).broadcastTicketMessage(ticketId, messageData);
+          }
+        }
       }
       
       res.status(200).json({
